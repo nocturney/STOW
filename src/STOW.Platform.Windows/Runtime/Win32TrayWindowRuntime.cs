@@ -13,15 +13,15 @@ internal sealed class Win32TrayWindowRuntime : ITrayWindowRuntime
     [return: MarshalAs(UnmanagedType.Bool)]
     private static extern bool EnumWindows(EnumWindowsProc callback, nint lParam);
 
-    [DllImport("user32.dll")]
+    [DllImport("user32.dll", EntryPoint = "IsWindow")]
     [return: MarshalAs(UnmanagedType.Bool)]
     private static extern bool IsWindowNative(nint hWnd);
 
-    [DllImport("user32.dll")]
+    [DllImport("user32.dll", EntryPoint = "IsWindowVisible")]
     [return: MarshalAs(UnmanagedType.Bool)]
     private static extern bool IsWindowVisibleNative(nint hWnd);
 
-    [DllImport("user32.dll")]
+    [DllImport("user32.dll", EntryPoint = "IsIconic")]
     [return: MarshalAs(UnmanagedType.Bool)]
     private static extern bool IsIconicNative(nint hWnd);
 
