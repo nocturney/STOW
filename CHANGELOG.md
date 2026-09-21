@@ -2,6 +2,34 @@
 
 All notable changes to Trayify are documented here.
 
+## [0.2.0] - 2026-09-21
+
+### Added
+- Secure in-app Download & Install self-update flow.
+- SHA-256 verification of downloaded updates before replacement.
+- Executable-version verification against the GitHub Release tag.
+- Rollback protection if an update cannot be applied.
+- MIT open-source license.
+- Privacy policy and security policy.
+- Third-party notices.
+- Contributing, support, and code-of-conduct documentation.
+- Bug-report and feature-request issue forms.
+- Pull-request template.
+- Windows CI workflow.
+- Automated tagged-release workflow.
+- Uninstall command.
+- Help-menu links for License, Privacy, and Security Policy.
+
+### Changed
+- Automatic table refresh now preserves selected row, current cell, and scroll position.
+- Build/release packaging is driven by the VERSION file.
+- Release packages now include license, privacy, security, third-party notices, installer, uninstaller, and checksums.
+
+### Security
+- Update replacement occurs only after checksum and version validation.
+- Private vulnerability reporting is the preferred security-reporting path.
+- Current releases remain unsigned; Authenticode code signing is documented as a future distribution-hardening step.
+
 ## [0.1.0] - 2026-09-21
 
 ### Added

@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading;
 using System.Windows.Forms;
 using System.Reflection;
+using System.Security.Cryptography;
 using System.Text.RegularExpressions;
 using System.Net;
 using Microsoft.Win32;
@@ -15,8 +16,8 @@ using Microsoft.Win32;
 [assembly: AssemblyTitle("Trayify")]
 [assembly: AssemblyDescription("Minimize Windows applications to the system tray")]
 [assembly: AssemblyProduct("Trayify")]
-[assembly: AssemblyVersion("0.1.0.0")]
-[assembly: AssemblyFileVersion("0.1.0.0")]
+[assembly: AssemblyVersion("0.2.0.0")]
+[assembly: AssemblyFileVersion("0.2.0.0")]
 
 internal static class NativeMethods
 {
@@ -91,11 +92,14 @@ internal sealed class WindowInfo
 
 internal sealed class TrayifyContext : ApplicationContext
 {
-    public const string VersionString = "0.1.0";
+    public const string VersionString = "0.2.0";
     public const string RepoUrl = "https://github.com/nocturney/trayify";
     public const string ReleasesUrl = "https://github.com/nocturney/trayify/releases";
     public const string LatestReleaseApi = "https://api.github.com/repos/nocturney/trayify/releases/latest";
     public const string ChangelogUrl = "https://github.com/nocturney/trayify/blob/main/CHANGELOG.md";
+    public const string LicenseUrl = "https://github.com/nocturney/trayify/blob/main/LICENSE";
+    public const string PrivacyUrl = "https://github.com/nocturney/trayify/blob/main/PRIVACY.md";
+    public const string SecurityUrl = "https://github.com/nocturney/trayify/security/policy";
     private readonly string appDir;
     private readonly string configPath;
     private readonly string exePath;
@@ -706,6 +710,181 @@ internal sealed class TrayifyContext : ApplicationContext
         return result;
     }
 
+    private string ReleaseAssetUrl(string tag, string fileName)
+    {
+        return RepoUrl + "/releases/download/" + tag + "/" + fileName;
+    }
+
+    private string ComputeSha256(string path)
+    {
+        using (SHA256 sha = SHA256.Create())
+        using (FileStream stream = File.OpenRead(path))
+        {
+            byte[] hash = sha.ComputeHash(stream);
+            StringBuilder sb = new StringBuilder(hash.Length * 2);
+            foreach (byte b in hash) sb.Append(b.ToString("x2"));
+            return sb.ToString();
+        }
+    }
+
+    private string ParseExpectedHash(string sumsText)
+    {
+        foreach (string raw in sumsText.Replace("\r", "").Split('\n'))
+        {
+            string line = raw.Trim();
+            if (line.Length == 0) continue;
+            string[] parts = Regex.Split(line, "\\s+");
+            if (parts.Length < 2) continue;
+
+            string a = parts[0].Trim().TrimStart('*');
+            string b = parts[1].Trim().TrimStart('*');
+
+            if (Regex.IsMatch(a, "^[0-9a-fA-F]{64}$") &&
+                String.Equals(Path.GetFileName(b), "Trayify.exe", StringComparison.OrdinalIgnoreCase))
+                return a.ToLowerInvariant();
+
+            if (String.Equals(Path.GetFileName(a), "Trayify.exe", StringComparison.OrdinalIgnoreCase) &&
+                Regex.IsMatch(b, "^[0-9a-fA-F]{64}$"))
+                return b.ToLowerInvariant();
+        }
+        throw new Exception("SHA256SUMS.txt does not contain a checksum for Trayify.exe.");
+    }
+
+    private bool CanUpdateCurrentLocation()
+    {
+        try
+        {
+            string dir = Path.GetDirectoryName(exePath);
+            string probe = Path.Combine(dir, ".trayify-write-test-" + Guid.NewGuid().ToString("N") + ".tmp");
+            File.WriteAllText(probe, "test", Encoding.ASCII);
+            File.Delete(probe);
+            return true;
+        }
+        catch { return false; }
+    }
+
+    private void DownloadAndInstallUpdate(string tag)
+    {
+        if (!CanUpdateCurrentLocation())
+        {
+            DialogResult open = MessageBox.Show(
+                "Trayify cannot write to its current installation folder.\n\n" +
+                "Open the release page to update manually?",
+                "Trayify Update", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+            if (open == DialogResult.Yes) OpenUrl(ReleasesUrl + "/latest");
+            return;
+        }
+
+        string updateRoot = Path.Combine(Path.GetTempPath(), "Trayify", "updates", tag);
+        Directory.CreateDirectory(updateRoot);
+
+        string newExe = Path.Combine(updateRoot, "Trayify.exe");
+        string sumsFile = Path.Combine(updateRoot, "SHA256SUMS.txt");
+        string updaterScript = Path.Combine(updateRoot, "apply-update.ps1");
+
+        string exeUrl = ReleaseAssetUrl(tag, "Trayify.exe");
+        string sumsUrl = ReleaseAssetUrl(tag, "SHA256SUMS.txt");
+
+        using (WebClient wc = new WebClient())
+        {
+            wc.Headers["User-Agent"] = "Trayify/" + VersionString;
+            wc.DownloadFile(exeUrl, newExe);
+        }
+
+        using (WebClient wc = new WebClient())
+        {
+            wc.Headers["User-Agent"] = "Trayify/" + VersionString;
+            wc.DownloadFile(sumsUrl, sumsFile);
+        }
+
+        string expected = ParseExpectedHash(File.ReadAllText(sumsFile, Encoding.UTF8));
+        string actual = ComputeSha256(newExe);
+        if (!String.Equals(expected, actual, StringComparison.OrdinalIgnoreCase))
+            throw new Exception("The downloaded update failed SHA-256 verification. The update was not installed.");
+
+        FileVersionInfo vi = FileVersionInfo.GetVersionInfo(newExe);
+        Version downloadedVersion = ParseReleaseVersion(vi.FileVersion);
+        Version releaseVersion = ParseReleaseVersion(tag);
+        if (downloadedVersion != releaseVersion)
+            throw new Exception("The downloaded executable version does not match the GitHub release tag.");
+
+        string ps = @"param(
+    [int]$ProcessId,
+    [string]$NewExe,
+    [string]$TargetExe,
+    [string]$ExpectedHash
+)
+$ErrorActionPreference = 'Stop'
+$log = Join-Path (Split-Path -Parent $NewExe) 'update.log'
+$backup = $TargetExe + '.bak'
+$staged = $TargetExe + '.update'
+try {
+    Add-Content -LiteralPath $log -Value ('Update started ' + (Get-Date -Format o))
+    Wait-Process -Id $ProcessId -ErrorAction SilentlyContinue
+    Start-Sleep -Milliseconds 400
+
+    Copy-Item -LiteralPath $NewExe -Destination $staged -Force
+    $actual = (Get-FileHash -LiteralPath $staged -Algorithm SHA256).Hash.ToLowerInvariant()
+    if ($actual -ne $ExpectedHash.ToLowerInvariant()) {
+        throw 'Staged update checksum verification failed.'
+    }
+
+    if (Test-Path -LiteralPath $backup) { Remove-Item -LiteralPath $backup -Force }
+    if (Test-Path -LiteralPath $TargetExe) { Move-Item -LiteralPath $TargetExe -Destination $backup -Force }
+
+    try {
+        Move-Item -LiteralPath $staged -Destination $TargetExe -Force
+        Start-Process -FilePath $TargetExe -ArgumentList '--background'
+        Start-Sleep -Seconds 2
+        if (Test-Path -LiteralPath $backup) { Remove-Item -LiteralPath $backup -Force }
+        Add-Content -LiteralPath $log -Value ('Update completed ' + (Get-Date -Format o))
+    }
+    catch {
+        if (Test-Path -LiteralPath $TargetExe) { Remove-Item -LiteralPath $TargetExe -Force -ErrorAction SilentlyContinue }
+        if (Test-Path -LiteralPath $backup) { Move-Item -LiteralPath $backup -Destination $TargetExe -Force }
+        throw
+    }
+}
+catch {
+    Add-Content -LiteralPath $log -Value ('Update failed: ' + $_.Exception.Message)
+    try {
+        Add-Type -AssemblyName System.Windows.Forms
+        [System.Windows.Forms.MessageBox]::Show(
+            'Trayify could not install the update.' + [Environment]::NewLine + [Environment]::NewLine + $_.Exception.Message,
+            'Trayify Update',
+            [System.Windows.Forms.MessageBoxButtons]::OK,
+            [System.Windows.Forms.MessageBoxIcon]::Error
+        ) | Out-Null
+    } catch {}
+    if (Test-Path -LiteralPath $TargetExe) {
+        try { Start-Process -FilePath $TargetExe -ArgumentList '--background' } catch {}
+    }
+    exit 1
+}
+";
+        File.WriteAllText(updaterScript, ps, new UTF8Encoding(false));
+
+        ProcessStartInfo psi = new ProcessStartInfo();
+        psi.FileName = "powershell.exe";
+        psi.Arguments =
+            "-NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File \"" + updaterScript +
+            "\" -ProcessId " + Process.GetCurrentProcess().Id.ToString() +
+            " -NewExe \"" + newExe +
+            "\" -TargetExe \"" + exePath +
+            "\" -ExpectedHash \"" + expected + "\"";
+        psi.UseShellExecute = false;
+        psi.CreateNoWindow = true;
+
+        Process.Start(psi);
+
+        MessageBox.Show(
+            "Trayify " + tag + " was downloaded and verified successfully.\n\n" +
+            "Trayify will now restart to finish the update.",
+            "Trayify Update", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+        ExitTrayify();
+    }
+
     public void CheckForUpdates()
     {
         try
@@ -732,11 +911,11 @@ internal sealed class TrayifyContext : ApplicationContext
                     "A newer version of Trayify is available.\n\n" +
                     "Installed: v" + VersionString + "\n" +
                     "Latest: " + tag + "\n\n" +
-                    "Open the release page?",
+                    "Download, verify, and install it now?",
                     "Trayify Update", MessageBoxButtons.YesNo, MessageBoxIcon.Information);
 
                 if (answer == DialogResult.Yes)
-                    OpenUrl(ReleasesUrl + "/latest");
+                    DownloadAndInstallUpdate(tag);
             }
             else
             {
@@ -746,18 +925,24 @@ internal sealed class TrayifyContext : ApplicationContext
         }
         catch (WebException ex)
         {
-            MessageBox.Show("Could not check GitHub for updates.\n\n" + ex.Message,
-                            "Trayify Update", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            DialogResult open = MessageBox.Show(
+                "Could not check or download the update from GitHub.\n\n" +
+                ex.Message + "\n\nOpen the releases page instead?",
+                "Trayify Update", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+            if (open == DialogResult.Yes) OpenUrl(ReleasesUrl);
         }
         catch (Exception ex)
         {
-            MessageBox.Show("Update check failed.\n\n" + ex.Message,
+            MessageBox.Show("Update failed safely; the installed version was not replaced.\n\n" + ex.Message,
                             "Trayify Update", MessageBoxButtons.OK, MessageBoxIcon.Warning);
         }
     }
 
     public void OpenRepository() { OpenUrl(RepoUrl); }
     public void OpenChangelog() { OpenUrl(ChangelogUrl); }
+    public void OpenLicense() { OpenUrl(LicenseUrl); }
+    public void OpenPrivacy() { OpenUrl(PrivacyUrl); }
+    public void OpenSecurity() { OpenUrl(SecurityUrl); }
 
     public void ShowAbout()
     {
@@ -765,6 +950,9 @@ internal sealed class TrayifyContext : ApplicationContext
             "Trayify v" + VersionString + "\n\n" +
             "A lightweight Windows utility that adds minimize-to-tray behavior " +
             "to applications that do not provide it themselves.\n\n" +
+            "License: MIT\n" +
+            "Telemetry: None\n" +
+            "Update source: GitHub Releases\n\n" +
             "Repository:\n" + RepoUrl,
             "About Trayify", MessageBoxButtons.OK, MessageBoxIcon.Information);
     }
@@ -845,11 +1033,21 @@ internal sealed class MainForm : Form
         changelogMenu.Click += delegate { ctx.OpenChangelog(); };
         ToolStripMenuItem repoMenu = new ToolStripMenuItem("GitHub &Repository");
         repoMenu.Click += delegate { ctx.OpenRepository(); };
+        ToolStripMenuItem licenseMenu = new ToolStripMenuItem("&License");
+        licenseMenu.Click += delegate { ctx.OpenLicense(); };
+        ToolStripMenuItem privacyMenu = new ToolStripMenuItem("&Privacy");
+        privacyMenu.Click += delegate { ctx.OpenPrivacy(); };
+        ToolStripMenuItem securityMenu = new ToolStripMenuItem("&Security Policy");
+        securityMenu.Click += delegate { ctx.OpenSecurity(); };
         ToolStripMenuItem aboutMenu = new ToolStripMenuItem("&About Trayify");
         aboutMenu.Click += delegate { ctx.ShowAbout(); };
         helpMenu.DropDownItems.Add(updateMenu);
         helpMenu.DropDownItems.Add(changelogMenu);
         helpMenu.DropDownItems.Add(repoMenu);
+        helpMenu.DropDownItems.Add(new ToolStripSeparator());
+        helpMenu.DropDownItems.Add(licenseMenu);
+        helpMenu.DropDownItems.Add(privacyMenu);
+        helpMenu.DropDownItems.Add(securityMenu);
         helpMenu.DropDownItems.Add(new ToolStripSeparator());
         helpMenu.DropDownItems.Add(aboutMenu);
 
