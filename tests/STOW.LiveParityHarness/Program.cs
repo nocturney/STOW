@@ -19,6 +19,10 @@ internal static class Program
     {
         string resultPath = ValueAfter(args, "--result") ??
             Path.Combine(AppContext.BaseDirectory, "live-parity-harness.log");
+        string? probeProcess = ValueAfter(args, "--probe-process");
+        if (!string.IsNullOrWhiteSpace(probeProcess))
+            return ProbeProcess(probeProcess, resultPath);
+
         var log = new List<string> { $"STOW live parity {DateTimeOffset.Now:O}" };
         int failures = 0;
 
@@ -30,6 +34,25 @@ internal static class Program
         Directory.CreateDirectory(Path.GetDirectoryName(resultPath) ?? ".");
         File.WriteAllLines(resultPath, log);
         return failures == 0 ? 0 : 1;
+    }
+
+    private static int ProbeProcess(string processName, string resultPath)
+    {
+        var runtime = new Win32TrayWindowRuntime();
+        int[] pids = Process.GetProcessesByName(processName).Select(process => process.Id).ToArray();
+        var lines = new List<string> { $"PROBE {processName} {DateTimeOffset.Now:O}", $"PIDS={string.Join(',', pids)}" };
+
+        foreach (nint handle in runtime.EnumerateTopLevelWindows())
+        {
+            int pid = runtime.GetProcessId(handle);
+            if (!pids.Contains(pid))
+                continue;
+            lines.Add($"HWND={handle.ToInt64()} PID={pid} VISIBLE={runtime.IsWindowVisible(handle)} ICONIC={runtime.IsIconic(handle)} TITLE={runtime.GetTitle(handle)} CLASS={runtime.GetClassName(handle)}");
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(resultPath) ?? ".");
+        File.WriteAllLines(resultPath, lines);
+        return 0;
     }
 
     private static int RunScenario(string name, Action action, List<string> log)

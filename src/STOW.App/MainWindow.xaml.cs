@@ -19,7 +19,7 @@ public partial class MainWindow : Window
     private ITrayEngineRuntime? trayEngine;
     private string? engineUnavailableReason;
     private Button? activeButton;
-    private bool safeCloseCompleted;
+    private bool applicationExitRequested;
 
     public MainWindow()
     {
@@ -131,23 +131,37 @@ public partial class MainWindow : Window
 
     private void MainWindow_Closing(object? sender, CancelEventArgs e)
     {
-        if (safeCloseCompleted || trayEngine is null || !trayEngine.IsRunning)
+        if (applicationExitRequested)
             return;
 
-        EngineCommandResult result = trayEngine.Shutdown();
-        if (!result.Succeeded)
+        e.Cancel = true;
+        Hide();
+    }
+
+    public bool RequestApplicationExit()
+    {
+        if (applicationExitRequested)
+            return true;
+
+        if (trayEngine is not null && trayEngine.IsRunning)
         {
-            e.Cancel = true;
-            MessageBox.Show(
-                result.Message ?? "STOW could not safely restore every hidden application, so it will stay running.",
-                "STOW",
-                MessageBoxButton.OK,
-                MessageBoxImage.Warning);
-            return;
+            EngineCommandResult result = trayEngine.Shutdown();
+            if (!result.Succeeded)
+            {
+                MessageBox.Show(
+                    result.Message ?? "STOW could not safely restore every hidden application, so it will stay running.",
+                    "STOW",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning);
+                return false;
+            }
         }
 
-        safeCloseCompleted = true;
-        trayEngine.Dispose();
+        applicationExitRequested = true;
+        trayEngine?.Dispose();
+        trayEngine = null;
+        Close();
+        return true;
     }
 
     private static string? MigrationBlockReason(TrayifyMigrationResult result) => result.Status switch

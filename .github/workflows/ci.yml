@@ -27,6 +27,25 @@ jobs:
       - name: Run regression tests
         run: dotnet test STOW.slnx -c Release --no-build
 
+      - name: Build self-contained STOW preview
+        shell: powershell
+        run: ./scripts/build-stow.ps1
+
+      - name: Verify STOW preview package
+        shell: powershell
+        run: |
+          $version = (Get-Content ./STOW_VERSION -Raw).Trim()
+          $required = @(
+            './dist-stow/STOW.exe',
+            "./dist-stow/STOW-$version-win-x64.zip",
+            './dist-stow/SHA256SUMS.txt',
+            './dist-stow/DOTNET_RUNTIME_LICENSE.txt',
+            './dist-stow/DOTNET_RUNTIME_THIRD_PARTY_NOTICES.txt',
+            './dist-stow/DOTNET_WINDOWS_DESKTOP_LICENSE.txt',
+            './dist-stow/DOTNET_WINDOWS_DESKTOP_THIRD_PARTY_NOTICES.txt'
+          )
+          foreach ($path in $required) { if (-not (Test-Path $path)) { throw "Missing STOW artifact: $path" } }
+
   trayify-baseline:
     name: Trayify v0.3.3 compatibility baseline
     runs-on: windows-latest

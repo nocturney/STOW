@@ -9,6 +9,7 @@ public sealed class LegacyCompatibleTrayEngine : ITrayEngineRuntime
     private readonly IManagedAppStore store;
     private readonly ITrayWindowRuntime runtime;
     private readonly ITrayIconRegistry trayIcons;
+    private readonly IStartupRegistration startupRegistration;
     private readonly bool useTimer;
     private readonly Dictionary<string, ManagedAppDefinition> managed = new(StringComparer.OrdinalIgnoreCase);
     private readonly Dictionary<string, HashSet<nint>> hiddenHandles = new(StringComparer.OrdinalIgnoreCase);
@@ -22,7 +23,12 @@ public sealed class LegacyCompatibleTrayEngine : ITrayEngineRuntime
     private bool exiting;
 
     public LegacyCompatibleTrayEngine(IManagedAppStore store)
-        : this(store, new Win32TrayWindowRuntime(), new WinFormsTrayIconRegistry(), useTimer: true)
+        : this(
+            store,
+            new Win32TrayWindowRuntime(),
+            new WinFormsTrayIconRegistry(),
+            useTimer: true,
+            startupRegistration: new WindowsStartupRegistration())
     {
     }
 
@@ -30,13 +36,16 @@ public sealed class LegacyCompatibleTrayEngine : ITrayEngineRuntime
         IManagedAppStore store,
         ITrayWindowRuntime runtime,
         ITrayIconRegistry trayIcons,
-        bool useTimer = true)
+        bool useTimer = true,
+        IStartupRegistration? startupRegistration = null)
     {
         this.store = store;
         this.runtime = runtime;
         this.trayIcons = trayIcons;
+        this.startupRegistration = startupRegistration ?? new NoOpStartupRegistration();
         this.useTimer = useTimer;
         ReloadManaged();
+        UpdateStartupRegistration();
     }
 
     public bool IsRunning
@@ -418,7 +427,16 @@ public sealed class LegacyCompatibleTrayEngine : ITrayEngineRuntime
             managed[app.Key] = app;
     }
 
-    private void SaveManaged() => store.Save(managed.Values.ToArray());
+    private void SaveManaged()
+    {
+        store.Save(managed.Values.ToArray());
+        UpdateStartupRegistration();
+    }
+
+    private void UpdateStartupRegistration()
+    {
+        startupRegistration.Update(managed.Values.Any(app => app.Enabled));
+    }
 
     private static EngineCommandResult RestoreUnavailable(ManagedAppDefinition app) => new(
         EngineCommandStatus.RestoreTargetUnavailable,

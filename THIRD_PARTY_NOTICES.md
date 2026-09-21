@@ -1,9 +1,20 @@
 # Third-party notices
 
-Trayify v0.2.0 does **not bundle third-party libraries, frameworks, fonts, icons, or other third-party assets**.
+## STOW
 
-The application is built against Windows/.NET Framework system APIs and Win32 APIs that are provided by the operating system; those system components are not redistributed by Trayify.
+STOW is built with modern .NET and WPF. Self-contained Windows builds redistribute .NET runtime and Windows Desktop runtime components.
 
-The Trayify application icon was created specifically for this project.
+Each self-contained STOW distribution includes the license and notice files copied from the exact runtime packs used by the build:
 
-If a future release adds bundled third-party code or assets, this file must be updated before that release is published.
+- `DOTNET_RUNTIME_LICENSE.txt`
+- `DOTNET_RUNTIME_THIRD_PARTY_NOTICES.txt`
+- `DOTNET_WINDOWS_DESKTOP_LICENSE.txt`
+- `DOTNET_WINDOWS_DESKTOP_THIRD_PARTY_NOTICES.txt`
+
+STOW does not currently bundle external font files. The UI requests Inter when available and falls back to Windows-provided Segoe UI fonts.
+
+## Trayify v0.3.3 compatibility baseline
+
+The preserved Trayify v0.3.3 application binary does not bundle third-party libraries, frameworks, fonts, icons, or other third-party assets. It uses Windows/.NET Framework system APIs and Win32 APIs supplied by the operating system.
+
+Any new bundled dependency or asset must be reviewed and reflected here before publication.

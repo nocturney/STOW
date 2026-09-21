@@ -151,6 +151,26 @@ public sealed class LegacyCompatibleTrayEngineTests
     }
 
     [Fact]
+    public void Startup_registration_tracks_whether_any_managed_app_is_enabled()
+    {
+        var store = new FakeStore(Grok);
+        var runtime = new FakeRuntime(Window(101, 42, iconic: false));
+        var icons = new FakeTrayIcons();
+        var startup = new FakeStartupRegistration();
+        using var engine = NewEngine(store, runtime, icons, startup);
+
+        Assert.Equal(new[] { true }, startup.Updates);
+
+        EngineCommandResult disabled = engine.SetEnabled(Grok.Key, false);
+        Assert.True(disabled.Succeeded);
+        Assert.Equal(new[] { true, false }, startup.Updates);
+
+        EngineCommandResult enabled = engine.SetEnabled(Grok.Key, true);
+        Assert.True(enabled.Succeeded);
+        Assert.Equal(new[] { true, false, true }, startup.Updates);
+    }
+
+    [Fact]
     public void Exited_hidden_process_is_removed_from_tracking_on_next_full_scan()
     {
         var store = new FakeStore(Grok);
@@ -170,7 +190,9 @@ public sealed class LegacyCompatibleTrayEngineTests
     private static LegacyCompatibleTrayEngine NewEngine(
         FakeStore store,
         FakeRuntime runtime,
-        FakeTrayIcons icons) => new(store, runtime, icons, useTimer: false);
+        FakeTrayIcons icons,
+        IStartupRegistration? startupRegistration = null) =>
+        new(store, runtime, icons, useTimer: false, startupRegistration: startupRegistration);
 
     private static void TickFullScan(LegacyCompatibleTrayEngine engine)
     {
@@ -210,6 +232,12 @@ public sealed class LegacyCompatibleTrayEngineTests
                 throw new IOException("simulated save failure");
             Apps = apps.ToList();
         }
+    }
+
+    private sealed class FakeStartupRegistration : IStartupRegistration
+    {
+        public List<bool> Updates { get; } = new();
+        public void Update(bool shouldStartWithWindows) => Updates.Add(shouldStartWithWindows);
     }
 
     private sealed class FakeTrayIcons : ITrayIconRegistry
