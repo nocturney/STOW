@@ -13,7 +13,7 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Build
         shell: powershell
@@ -23,4 +23,6 @@ jobs:
         shell: powershell
         run: |
           if (-not (Test-Path ./dist/Trayify.exe)) { throw "Trayify.exe was not produced" }
+          if (-not (Test-Path ./dist/TrayifySetup.exe)) { throw "TrayifySetup.exe was not produced" }
           Get-FileHash ./dist/Trayify.exe -Algorithm SHA256
+          Get-FileHash ./dist/TrayifySetup.exe -Algorithm SHA256
