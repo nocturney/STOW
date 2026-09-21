@@ -22,6 +22,7 @@
     <ProjectReference Include="..\..\src\STOW.Engine\STOW.Engine.csproj" />
     <ProjectReference Include="..\..\src\STOW.Platform.Windows\STOW.Platform.Windows.csproj" />
     <ProjectReference Include="..\..\src\STOW.Infrastructure\STOW.Infrastructure.csproj" />
+    <ProjectReference Include="..\STOW.WindowTestTarget\STOW.WindowTestTarget.csproj" />
   </ItemGroup>
 
 </Project>

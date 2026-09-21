@@ -8,5 +8,7 @@
   <Folder Name="/tests/">
     <Project Path="tests/STOW.Engine.Tests/STOW.Engine.Tests.csproj" />
     <Project Path="tests/STOW.IntegrationTests/STOW.IntegrationTests.csproj" />
+    <Project Path="tests/STOW.LiveParityHarness/STOW.LiveParityHarness.csproj" />
+    <Project Path="tests/STOW.WindowTestTarget/STOW.WindowTestTarget.csproj" />
   </Folder>
 </Solution>
