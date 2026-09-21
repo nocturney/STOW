@@ -1,4 +1,4 @@
-﻿# Trayify
+# Trayify
 
 Trayify is a lightweight Windows utility that adds **minimize-to-tray** behavior to desktop applications that do not provide it themselves.
 
@@ -31,7 +31,7 @@ It provides:
 - Optional Pin-to-Start assistance.
 - Proper Windows **Settings > Apps > Installed apps** registration.
 - Graphical uninstall with an option to keep or remove Trayify settings.
-- Silent install/uninstall modes for package managers.
+- Silent install/uninstall modes for automation.
 
 ### Silent install
 
@@ -53,15 +53,31 @@ Trayify Setup therefore creates the normal Start menu shortcut and can open Wind
 
 Trayify includes WinGet manifest metadata using WinGet's supported portable package model. WinGet manages the standalone `Trayify.exe`, while the graphical setup remains the recommended interactive installer.
 
-Once the package is accepted into the Microsoft community catalog, installation is:
+Submission to the Microsoft community catalog is tracked in [winget-pkgs PR #438417](https://github.com/microsoft/winget-pkgs/pull/438417).
+
+After the package is accepted, installation is:
 
 `winget install ChristianVelvet.Trayify`
 
 ### Scoop
 
-A Scoop manifest is maintained under `packaging/scoop/trayify.json`.
+Trayify has an official Scoop bucket:
 
-It installs the standalone executable in portable mode. Portable copies use Scoop for upgrades rather than Trayify's installer-based self-update.
+```powershell
+scoop bucket add trayify https://github.com/nocturney/scoop-trayify
+scoop install trayify
+```
+
+To update later:
+
+```powershell
+scoop update
+scoop update trayify
+```
+
+Scoop installs the standalone executable in portable mode. Portable copies should be upgraded through Scoop rather than Trayify's installer-based self-update.
+
+The same manifest is mirrored in this repository under `packaging/scoop/trayify.json`.
 
 ## Updating
 
@@ -112,9 +128,6 @@ The build produces:
 - `VERSION` is the source release number.
 - CI builds pushes and pull requests on Windows.
 - A matching `vX.Y.Z` tag creates a GitHub Release automatically.
-- WinGet and Scoop metadata are updated against the immutable versioned release URLs.
+- WinGet and Scoop metadata are updated against immutable versioned release URLs.
 
 See [CHANGELOG.md](CHANGELOG.md).
-
-
-
