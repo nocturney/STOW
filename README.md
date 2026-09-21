@@ -1,134 +1,56 @@
-﻿# Trayify
+# STOW
 
-Trayify is a lightweight Windows utility that adds **minimize-to-tray** behavior to desktop applications that do not provide it themselves.
+**A calmer desktop starts here.**
 
-Current version: **v0.3.3**
+STOW is a Windows desktop utility for keeping running applications quietly out of the way without closing them.
+It is the successor to Trayify and is currently in a controlled migration from the proven Trayify v0.3.3 runtime.
 
-## Highlights
+## Current state
 
-- Clean list of user-facing/taskbar applications rather than every background process.
-- Per-application minimize-to-tray toggle.
-- Persistent local configuration.
-- Per-app tray icons with restore/disable actions.
-- Electron/Chromium handling for apps that re-show their windows.
-- Automatic startup while at least one managed app is enabled.
-- Built-in update checks and verified installer-based self-updates.
-- No telemetry, analytics, advertising, or tracking.
-- Native WinForms/Win32 implementation with no bundled UI framework.
+- Product name and visual direction: **STOW**.
+- Approved navigation: Apps, Rules, Focus, Insights, Settings; About is separate at the bottom.
+- New UI target: **WPF on modern .NET**; Electron is not used for UI.
+- Existing minimize-to-tray engine: Trayify v0.3.3 behavior is the protected compatibility baseline.
+- Technical rename, installer migration and package-manager transition are not complete yet.
 
-## Installer
+The baseline source commit is `c4ab75082d1f7ecbeee32270cc01eea457a93276`.
+See [`docs/architecture/BASELINE_CONTRACT.md`](docs/architecture/BASELINE_CONTRACT.md) before changing window-management behavior.
 
-The recommended download is **TrayifySetup.exe** from GitHub Releases.
+## Repository layout
 
-The installer is per-user and does not require administrator rights. It installs Trayify to:
+- `src/STOW.App` — new WPF presentation shell.
+- `src/STOW.Engine` — future extracted product engine.
+- `src/STOW.Platform.Windows` — Win32/window/tray implementation boundary.
+- `src/STOW.Infrastructure` — config, migration, updates, diagnostics and logging.
+- `tests` — regression and integration test projects plus the required test plan.
+- `src/Trayify.cs` / `src/TrayifySetup.cs` — current v0.3.3 compatibility baseline during migration.
 
-`%LOCALAPPDATA%\Trayify\Trayify.exe`
+## Design direction
 
-It provides:
-
-- Optional Desktop shortcut.
-- Optional Start menu shortcut.
-- Optional Pin-to-Start assistance.
-- Proper Windows **Settings > Apps > Installed apps** registration.
-- Graphical uninstall with an option to keep or remove Trayify settings.
-- Silent install/uninstall modes for automation.
-
-### Silent install
-
-`TrayifySetup.exe /VERYSILENT /NOLAUNCH`
-
-### Silent uninstall
-
-`%LOCALAPPDATA%\Trayify\Uninstall.exe /UNINSTALL /VERYSILENT`
-
-## Pin to Start
-
-Windows 11 does not expose a supported ordinary-installer API to silently pin a desktop application to Start.
-
-Trayify Setup therefore creates the normal Start menu shortcut and can open Windows' application surface with instructions for the user to choose **Pin to Start**. It does not modify undocumented Start-menu databases.
-
-## Package managers
-
-### WinGet
-
-Trayify includes WinGet manifest metadata using WinGet's supported portable package model. WinGet manages the standalone `Trayify.exe`, while the graphical setup remains the recommended interactive installer.
-
-Submission to the Microsoft community catalog is tracked in [winget-pkgs PR #438417](https://github.com/microsoft/winget-pkgs/pull/438417).
-
-After the package is accepted, installation is:
-
-`winget install ChristianVelvet.Trayify`
-
-### Scoop
-
-Trayify has an official Scoop bucket:
-
-```powershell
-scoop bucket add trayify https://github.com/nocturney/scoop-trayify
-scoop install trayify
-```
-
-To update later:
-
-```powershell
-scoop update
-scoop update trayify
-```
-
-Scoop installs the standalone executable in portable mode. Portable copies should be upgraded through Scoop rather than Trayify's installer-based self-update.
-
-The same manifest is mirrored in this repository under `packaging/scoop/trayify.json`.
-
-## Updating
-
-For a normal installed copy, choose **Help > Check for Updates**.
-
-Trayify downloads the new official installer and `SHA256SUMS.txt`, verifies the installer checksum and file version, and only then starts the installer.
-
-Portable/package-manager copies should normally be upgraded through their package manager.
-
-## Privacy
-
-Trayify works locally and has no telemetry. See [PRIVACY.md](PRIVACY.md).
-
-## Security
-
-See [SECURITY.md](SECURITY.md).
-
-Current binaries are not Authenticode-signed, so Windows SmartScreen may warn on a newly downloaded release. Published SHA-256 checksums verify integrity, but they are not a substitute for publisher code signing.
-
-## License
-
-Trayify is open source under the [MIT License](LICENSE).
-
-No third-party code or assets are bundled in the current release. See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+STOW uses a calm navy/blue system with restrained teal accents, Light + Dark themes and Windows 11-inspired spacing/surfaces.
+The approved handoff images remain the visual source of truth.
+See [`docs/design-system/DESIGN_SYSTEM_V1.md`](docs/design-system/DESIGN_SYSTEM_V1.md).
 
 ## Build
 
-Requirements:
+New STOW foundation:
 
-- Windows
-- Windows PowerShell
-- .NET Framework C# compiler included with Windows
+```powershell
+dotnet build STOW.slnx -c Release
+```
 
-Build with:
+Untouched Trayify v0.3.3 compatibility baseline:
 
-`powershell -ExecutionPolicy Bypass -File scripts\build.ps1`
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts\build.ps1
+```
 
-The build produces:
+## Migration rule
 
-- `Trayify.exe`
-- `TrayifySetup.exe`
-- `Trayify-vX.Y.Z-win.zip`
-- `SHA256SUMS.txt`
-- release notes
+Do not rewrite the working minimize-to-tray engine merely to fit the new UI architecture.
+Extract behind interfaces, prove regression parity, then refactor only when a test demonstrates preserved behavior.
+See [`docs/migration/TRAYIFY_TO_STOW.md`](docs/migration/TRAYIFY_TO_STOW.md).
 
-## Release process
+## License
 
-- `VERSION` is the source release number.
-- CI builds pushes and pull requests on Windows.
-- A matching `vX.Y.Z` tag creates a GitHub Release automatically.
-- WinGet and Scoop metadata are updated against immutable versioned release URLs.
-
-See [CHANGELOG.md](CHANGELOG.md).
-
+MIT. See [`LICENSE`](LICENSE).

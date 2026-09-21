@@ -1,0 +1,12 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/STOW.App/STOW.App.csproj" />
+    <Project Path="src/STOW.Engine/STOW.Engine.csproj" />
+    <Project Path="src/STOW.Infrastructure/STOW.Infrastructure.csproj" />
+    <Project Path="src/STOW.Platform.Windows/STOW.Platform.Windows.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/STOW.Engine.Tests/STOW.Engine.Tests.csproj" />
+    <Project Path="tests/STOW.IntegrationTests/STOW.IntegrationTests.csproj" />
+  </Folder>
+</Solution>

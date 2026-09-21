@@ -1,0 +1,71 @@
+<Window x:Class="STOW.App.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="STOW"
+        Width="1180" Height="760"
+        MinWidth="960" MinHeight="640"
+        WindowStartupLocation="CenterScreen"
+        Background="{DynamicResource CanvasBrush}">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="232" />
+            <ColumnDefinition Width="1" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <Border Grid.Column="0" Background="{DynamicResource SurfaceBrush}">
+            <Grid Margin="10,12">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <StackPanel Margin="14,10,14,24">
+                    <TextBlock Text="STOW" FontSize="22" FontWeight="SemiBold" />
+                    <TextBlock Text="A calmer desktop starts here." Margin="0,5,0,0"
+                               FontSize="11.5" Foreground="{DynamicResource TextSecondaryBrush}" />
+                </StackPanel>
+                <StackPanel Grid.Row="1">
+                    <Button x:Name="AppsNavButton" Style="{StaticResource NavButton}" Content="Apps" Tag="Apps" Click="Navigate_Click"
+                            Background="{DynamicResource SelectionBrush}" Foreground="{DynamicResource TextPrimaryBrush}" />
+                    <Button Style="{StaticResource NavButton}" Content="Rules" Tag="Rules" Click="Navigate_Click" />
+                    <Button Style="{StaticResource NavButton}" Content="Focus" Tag="Focus" Click="Navigate_Click" />
+                    <Button Style="{StaticResource NavButton}" Content="Insights" Tag="Insights" Click="Navigate_Click" />
+                    <Button Style="{StaticResource NavButton}" Content="Settings" Tag="Settings" Click="Navigate_Click" />
+                </StackPanel>
+
+                <Button Grid.Row="3" Style="{StaticResource NavButton}" Content="About" Tag="About"
+                        Click="Navigate_Click" Margin="8,8,8,2" />
+            </Grid>
+        </Border>
+
+        <Border Grid.Column="1" Background="{DynamicResource BorderBrush}" />
+
+        <Grid Grid.Column="2" Margin="40,34,44,40">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="28" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <StackPanel>
+                <TextBlock x:Name="PageTitleText" Text="Apps" Style="{StaticResource PageTitle}" />
+                <TextBlock x:Name="PageSubtitleText" Text="Choose what STOW keeps quietly out of your way."
+                           Style="{StaticResource PageSubtitle}" />
+            </StackPanel>
+
+            <Border Grid.Row="2" Style="{StaticResource CardBorder}" VerticalAlignment="Top">
+                <StackPanel>
+                    <TextBlock x:Name="BodyTitleText" Text="STOW foundation shell" FontSize="17" FontWeight="SemiBold" />
+                    <TextBlock x:Name="BodyText"
+                               Text="The approved screen composition will replace this scaffold. No Trayify engine behavior is connected or changed here yet."
+                               Margin="0,8,0,0" FontSize="13" TextWrapping="Wrap"
+                               Foreground="{DynamicResource TextSecondaryBrush}" MaxWidth="720"
+                               HorizontalAlignment="Left" />
+                </StackPanel>
+            </Border>
+        </Grid>
+    </Grid>
+</Window>

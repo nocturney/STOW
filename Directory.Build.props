@@ -1,0 +1,9 @@
+<Project>
+  <PropertyGroup>
+    <Company>Christian Velvet</Company>
+    <Authors>Christian Velvet</Authors>
+    <Product>STOW</Product>
+    <Copyright>Copyright (c) 2026 Christian Velvet</Copyright>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+</Project>
