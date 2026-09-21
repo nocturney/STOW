@@ -1,7 +1,16 @@
-# Changelog
+﻿# Changelog
 
 All notable changes to Trayify are documented here.
 
+## [0.3.1] - 2026-09-21
+
+### Changed
+- WinGet packaging now uses the supported portable installer model instead of executing the unsigned graphical installer unattended.
+- Windows startup uses WinGet's stable command link when Trayify is installed by WinGet, so upgrades do not leave a version-specific startup path behind.
+
+### Packaging
+- WinGet and Scoop package metadata target the standalone Trayify executable.
+- The graphical TrayifySetup.exe remains the recommended interactive installer.
 ## [0.3.0] - 2026-09-21
 
 ### Added
@@ -72,3 +81,4 @@ All notable changes to Trayify are documented here.
 - About dialog.
 - GitHub repository and changelog shortcuts.
 - Manual update check against GitHub Releases.
+

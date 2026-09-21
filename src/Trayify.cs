@@ -18,8 +18,8 @@ using Microsoft.Win32;
 [assembly: AssemblyProduct("Trayify")]
 [assembly: AssemblyCompany("Christian Velvet")]
 [assembly: AssemblyCopyright("Copyright (c) 2026 Christian Velvet")]
-[assembly: AssemblyVersion("0.3.0.0")]
-[assembly: AssemblyFileVersion("0.3.0.0")]
+[assembly: AssemblyVersion("0.3.1.0")]
+[assembly: AssemblyFileVersion("0.3.1.0")]
 
 internal static class NativeMethods
 {
@@ -94,7 +94,7 @@ internal sealed class WindowInfo
 
 internal sealed class TrayifyContext : ApplicationContext
 {
-    public const string VersionString = "0.3.0";
+    public const string VersionString = "0.3.1";
     public const string RepoUrl = "https://github.com/nocturney/trayify";
     public const string ReleasesUrl = "https://github.com/nocturney/trayify/releases";
     public const string LatestReleaseApi = "https://api.github.com/repos/nocturney/trayify/releases/latest";
@@ -231,7 +231,23 @@ internal sealed class TrayifyContext : ApplicationContext
                 @"Software\Microsoft\Windows\CurrentVersion\Run", true))
             {
                 if (key == null) return;
-                if (any) key.SetValue(runKeyName, "\"" + exePath + "\" --background");
+                if (any)
+                {
+                    string startupExe = exePath;
+                    string wingetPackages = Path.Combine(
+                        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                        "Microsoft", "WinGet", "Packages");
+
+                    if (exePath.StartsWith(wingetPackages, StringComparison.OrdinalIgnoreCase))
+                    {
+                        string wingetLink = Path.Combine(
+                            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                            "Microsoft", "WinGet", "Links", "Trayify.exe");
+                        if (File.Exists(wingetLink)) startupExe = wingetLink;
+                    }
+
+                    key.SetValue(runKeyName, "\"" + startupExe + "\" --background");
+                }
                 else key.DeleteValue(runKeyName, false);
             }
         }

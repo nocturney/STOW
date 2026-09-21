@@ -1,8 +1,8 @@
-# Trayify
+﻿# Trayify
 
 Trayify is a lightweight Windows utility that adds **minimize-to-tray** behavior to desktop applications that do not provide it themselves.
 
-Current version: **v0.3.0**
+Current version: **v0.3.1**
 
 ## Highlights
 
@@ -51,7 +51,7 @@ Trayify Setup therefore creates the normal Start menu shortcut and can open Wind
 
 ### WinGet
 
-Trayify includes WinGet manifest metadata and uses `TrayifySetup.exe` as a per-user EXE installer.
+Trayify includes WinGet manifest metadata using WinGet's supported portable package model. WinGet manages the standalone `Trayify.exe`, while the graphical setup remains the recommended interactive installer.
 
 Once the package is accepted into the Microsoft community catalog, installation is:
 
@@ -115,3 +115,4 @@ The build produces:
 - WinGet and Scoop metadata are updated against the immutable versioned release URLs.
 
 See [CHANGELOG.md](CHANGELOG.md).
+
