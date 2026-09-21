@@ -20,6 +20,12 @@ Migration must preserve user configuration and the proven runtime behavior while
 - Repository: `nocturney/STOW`
 
 Package-manager identifiers are changed only when corresponding manifests and upgrade behavior are ready.
+## Implementation status
+
+The first migration slice is implemented in `STOW.Infrastructure.Migration.TrayifyConfigMigrator`.
+It migrates only the legacy configuration file, validates records, writes atomically, preserves the Trayify source and is idempotent.
+Registry/startup, installed-app identity and package-manager migration remain intentionally separate until their rollback behavior is covered by tests.
+
 ## One-time migration algorithm
 
 1. Detect an existing STOW configuration. Never overwrite newer STOW data with legacy data.
