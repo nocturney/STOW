@@ -1,64 +1,247 @@
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Threading;
 using STOW.Engine.Contracts;
 
 namespace STOW.App.Views;
 
 public partial class AppsView : UserControl
 {
-    private IReadOnlyList<ManagedAppDefinition> managedApps = Array.Empty<ManagedAppDefinition>();
-    private IReadOnlyList<DiscoveredAppSnapshot> availableApps = Array.Empty<DiscoveredAppSnapshot>();
+    private readonly ITrayEngine? engine;
+    private readonly IManagedAppStore fallbackStore;
+    private readonly IAppDiscovery appDiscovery;
+    private readonly DispatcherTimer refreshTimer;
+    private IReadOnlyList<DiscoveredAppSnapshot> lastDiscoveredApps = Array.Empty<DiscoveredAppSnapshot>();
+    private string? runtimeUnavailableReason;
+    private bool runtimeHealthy;
 
-    public AppsView()
-    {
-        InitializeComponent();
-        ApplyFilter();
-    }
+    private sealed record ManagedRow(
+        string Key,
+        string Name,
+        string ProcessName,
+        bool Enabled,
+        string StatusText,
+        bool CanManage,
+        bool CanRestore);
+
+    private sealed record AvailableRow(
+        string Key,
+        string DisplayName,
+        string WindowTitle,
+        string ProcessName,
+        bool CanAdd);
 
     public AppsView(
-        IEnumerable<ManagedAppDefinition> managed,
-        IEnumerable<DiscoveredAppSnapshot> available)
+        ITrayEngine? engine,
+        IManagedAppStore fallbackStore,
+        IAppDiscovery appDiscovery,
+        string? runtimeUnavailableReason = null)
     {
+        this.engine = engine;
+        this.fallbackStore = fallbackStore;
+        this.appDiscovery = appDiscovery;
+        this.runtimeUnavailableReason = runtimeUnavailableReason;
+        runtimeHealthy = engine is not null;
         InitializeComponent();
-        managedApps = managed.OrderBy(app => app.Name, StringComparer.CurrentCultureIgnoreCase).ToArray();
-        var managedKeys = managedApps.Select(app => app.Key).ToHashSet(StringComparer.OrdinalIgnoreCase);
-        availableApps = available
-            .Where(app => !managedKeys.Contains(app.Key))
-            .OrderBy(app => app.DisplayName, StringComparer.CurrentCultureIgnoreCase)
-            .ToArray();
-        ApplyFilter();
+
+        refreshTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(1500) };
+        refreshTimer.Tick += (_, _) => RefreshData();
+        Loaded += (_, _) => refreshTimer.Start();
+        Unloaded += (_, _) => refreshTimer.Stop();
+        RefreshData();
     }
 
-    private void SearchBox_TextChanged(object sender, TextChangedEventArgs e) => ApplyFilter();
+    private void SearchBox_TextChanged(object sender, TextChangedEventArgs e) => RefreshData();
 
-    private void ApplyFilter()
+    private void RefreshData()
     {
         if (ManagedAppsList is null || AvailableAppsList is null ||
-            NoManagedApps is null || NoAvailableApps is null || AvailableSummaryText is null)
+            NoManagedApps is null || NoAvailableApps is null ||
+            ManagedSummaryText is null || AvailableSummaryText is null)
             return;
 
+        IReadOnlyList<ManagedRow> managedRows;
+        HashSet<string> managedKeys;
+
+        if (engine is not null && runtimeHealthy)
+        {
+            try
+            {
+                EngineSnapshot snapshot = engine.GetSnapshot();
+                managedRows = snapshot.ManagedApps.Select(ToManagedRow).ToArray();
+                managedKeys = snapshot.ManagedApps.Select(app => app.Key)
+                    .ToHashSet(StringComparer.OrdinalIgnoreCase);
+            }
+            catch (Exception ex)
+            {
+                runtimeHealthy = false;
+                runtimeUnavailableReason = "STOW runtime is unavailable: " + ex.Message;
+                (managedRows, managedKeys) = CreateFallbackManagedRows();
+            }
+        }
+        else
+        {
+            (managedRows, managedKeys) = CreateFallbackManagedRows();
+        }
+
+        bool canManage = engine is not null && runtimeHealthy;
+        try
+        {
+            lastDiscoveredApps = appDiscovery.DiscoverUserFacingApps();
+        }
+        catch
+        {
+            lastDiscoveredApps = Array.Empty<DiscoveredAppSnapshot>();
+        }
+
+        var availableRows = lastDiscoveredApps
+            .Where(app => !managedKeys.Contains(app.Key))
+            .Select(app => new AvailableRow(
+                app.Key,
+                app.DisplayName,
+                app.WindowTitle,
+                app.ProcessName,
+                canManage))
+            .OrderBy(app => app.DisplayName, StringComparer.CurrentCultureIgnoreCase)
+            .ToArray();
+
         string filter = SearchBox?.Text?.Trim() ?? string.Empty;
-        IReadOnlyList<ManagedAppDefinition> visibleManaged = string.IsNullOrEmpty(filter)
-            ? managedApps
-            : managedApps.Where(app => Matches(filter, app.Name, app.ProcessName, app.TitleHint)).ToArray();
-        IReadOnlyList<DiscoveredAppSnapshot> visibleAvailable = string.IsNullOrEmpty(filter)
-            ? availableApps
-            : availableApps.Where(app => Matches(filter, app.DisplayName, app.WindowTitle, app.ProcessName)).ToArray();
+        IReadOnlyList<ManagedRow> visibleManaged = string.IsNullOrEmpty(filter)
+            ? managedRows
+            : managedRows.Where(row => Matches(filter, row.Name, row.ProcessName, row.StatusText)).ToArray();
+        IReadOnlyList<AvailableRow> visibleAvailable = string.IsNullOrEmpty(filter)
+            ? availableRows
+            : availableRows.Where(row => Matches(filter, row.DisplayName, row.WindowTitle, row.ProcessName)).ToArray();
 
         ManagedAppsList.ItemsSource = visibleManaged;
         AvailableAppsList.ItemsSource = visibleAvailable;
-        NoManagedApps.Visibility = managedApps.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+        NoManagedApps.Visibility = managedRows.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
         NoAvailableApps.Visibility = visibleAvailable.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+        ManagedSummaryText.Text = managedRows.Count == 1 ? "1 managed app" : $"{managedRows.Count} managed apps";
         AvailableSummaryText.Text = visibleAvailable.Count == 1
             ? "1 running desktop app"
             : $"{visibleAvailable.Count} running desktop apps";
+
+        bool showBanner = !canManage && !string.IsNullOrWhiteSpace(runtimeUnavailableReason);
+        EngineStatusBanner.Visibility = showBanner ? Visibility.Visible : Visibility.Collapsed;
+        EngineStatusText.Text = runtimeUnavailableReason ?? string.Empty;
+    }
+
+    private void AddApp_Click(object sender, RoutedEventArgs e)
+    {
+        if (!TryGetKey(sender, out string key) || engine is null || !runtimeHealthy)
+            return;
+
+        DiscoveredAppSnapshot? app = lastDiscoveredApps.FirstOrDefault(
+            candidate => candidate.Key.Equals(key, StringComparison.OrdinalIgnoreCase));
+        if (app is null)
+            return;
+
+        HandleResult(engine.AddManagedApp(app));
+    }
+
+    private void ManagedEnabled_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is not CheckBox checkBox ||
+            !TryGetKey(sender, out string key) ||
+            engine is null || !runtimeHealthy)
+            return;
+
+        HandleResult(engine.SetEnabled(key, checkBox.IsChecked == true));
+    }
+
+    private void Restore_Click(object sender, RoutedEventArgs e)
+    {
+        if (!TryGetKey(sender, out string key) || engine is null || !runtimeHealthy)
+            return;
+
+        HandleResult(engine.Restore(key));
+    }
+
+    private void Remove_Click(object sender, RoutedEventArgs e)
+    {
+        if (!TryGetKey(sender, out string key) || engine is null || !runtimeHealthy)
+            return;
+
+        HandleResult(engine.RemoveManagedApp(key));
+    }
+
+    private void HandleResult(EngineCommandResult result)
+    {
+        if (!result.Succeeded && result.Status != EngineCommandStatus.AlreadyExists)
+        {
+            MessageBox.Show(
+                result.Message ?? "STOW could not complete the requested action.",
+                "STOW",
+                MessageBoxButton.OK,
+                MessageBoxImage.Warning);
+        }
+
+        RefreshData();
+    }
+
+    private (IReadOnlyList<ManagedRow> rows, HashSet<string> keys) CreateFallbackManagedRows()
+    {
+        string enabledStatus = runtimeUnavailableReason?.Contains("Trayify", StringComparison.OrdinalIgnoreCase) == true
+            ? "Managed by Trayify"
+            : "Configured";
+
+        IReadOnlyList<ManagedAppDefinition> fallbackManaged;
+        try
+        {
+            fallbackManaged = fallbackStore.Load();
+        }
+        catch
+        {
+            fallbackManaged = Array.Empty<ManagedAppDefinition>();
+        }
+
+        ManagedRow[] rows = fallbackManaged
+            .OrderBy(app => app.Name, StringComparer.CurrentCultureIgnoreCase)
+            .Select(app => new ManagedRow(
+                app.Key,
+                app.Name,
+                app.ProcessName,
+                app.Enabled,
+                app.Enabled ? enabledStatus : "Off",
+                CanManage: false,
+                CanRestore: false))
+            .ToArray();
+
+        return (rows, rows.Select(row => row.Key).ToHashSet(StringComparer.OrdinalIgnoreCase));
+    }
+
+    private ManagedRow ToManagedRow(ManagedAppSnapshot app) => new(
+        app.Key,
+        app.DisplayName,
+        app.ProcessName,
+        app.Enabled,
+        app.State switch
+        {
+            ManagedAppRuntimeState.Disabled => "Off",
+            ManagedAppRuntimeState.NotRunning => "Not running",
+            ManagedAppRuntimeState.Visible => "On",
+            ManagedAppRuntimeState.Stowed => "Stowed",
+            _ => "Unknown"
+        },
+        CanManage: runtimeHealthy,
+        CanRestore: runtimeHealthy && app.State == ManagedAppRuntimeState.Stowed);
+
+    private static bool TryGetKey(object sender, out string key)
+    {
+        key = string.Empty;
+        if (sender is not FrameworkElement { Tag: string value } || string.IsNullOrWhiteSpace(value))
+            return false;
+        key = value;
+        return true;
     }
 
     private static bool Matches(string filter, params string[] values)
     {
         foreach (string value in values)
         {
-            if (!string.IsNullOrEmpty(value) && value.Contains(filter, StringComparison.CurrentCultureIgnoreCase))
+            if (!string.IsNullOrEmpty(value) &&
+                value.Contains(filter, StringComparison.CurrentCultureIgnoreCase))
                 return true;
         }
         return false;

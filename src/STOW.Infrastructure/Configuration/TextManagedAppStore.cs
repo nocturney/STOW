@@ -18,6 +18,12 @@ public sealed class TextManagedAppStore : IManagedAppStore
         return new TextManagedAppStore(Path.Combine(roaming, "STOW", "config.txt"));
     }
 
+    public static TextManagedAppStore ForLegacyTrayifyCurrentUser()
+    {
+        string roaming = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+        return new TextManagedAppStore(Path.Combine(roaming, "Trayify", "config.txt"));
+    }
+
     public IReadOnlyList<ManagedAppDefinition> Load()
     {
         if (!File.Exists(configPath))
