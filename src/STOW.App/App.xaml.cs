@@ -43,6 +43,12 @@ public partial class App : Application
             showSignalTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(250) };
             showSignalTimer.Tick += (_, _) =>
             {
+                if (singleInstance?.ConsumeExitRequest() == true)
+                {
+                    RequestExit();
+                    return;
+                }
+
                 if (singleInstance?.ConsumeShowRequest() == true)
                     ShowManager();
             };

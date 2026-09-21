@@ -7,19 +7,24 @@ public sealed class SingleInstanceCoordinator : IDisposable
 {
     public const string DefaultMutexName = @"Local\STOWSingleInstance";
     public const string DefaultShowEventName = @"Local\STOWShowManager";
+    public const string DefaultExitEventName = @"Local\STOWRequestExit";
 
     private readonly string mutexName;
     private readonly string showEventName;
+    private readonly string exitEventName;
     private Mutex? mutex;
     private EventWaitHandle? showEvent;
+    private EventWaitHandle? exitEvent;
     private bool ownsMutex;
 
     public SingleInstanceCoordinator(
         string mutexName = DefaultMutexName,
-        string showEventName = DefaultShowEventName)
+        string showEventName = DefaultShowEventName,
+        string exitEventName = DefaultExitEventName)
     {
         this.mutexName = mutexName;
         this.showEventName = showEventName;
+        this.exitEventName = exitEventName;
     }
 
     public bool TryAcquire()
@@ -30,7 +35,10 @@ public sealed class SingleInstanceCoordinator : IDisposable
         mutex = new Mutex(true, mutexName, out bool createdNew);
         ownsMutex = createdNew;
         if (createdNew)
+        {
             showEvent = new EventWaitHandle(false, EventResetMode.AutoReset, showEventName, out _);
+            exitEvent = new EventWaitHandle(false, EventResetMode.AutoReset, exitEventName, out _);
+        }
         return createdNew;
     }
 
@@ -56,10 +64,34 @@ public sealed class SingleInstanceCoordinator : IDisposable
         return ownsMutex && showEvent?.WaitOne(0) == true;
     }
 
+    public bool SignalExitExisting()
+    {
+        try
+        {
+            using EventWaitHandle existing = EventWaitHandle.OpenExisting(exitEventName);
+            return existing.Set();
+        }
+        catch (WaitHandleCannotBeOpenedException)
+        {
+            return false;
+        }
+        catch (UnauthorizedAccessException)
+        {
+            return false;
+        }
+    }
+
+    public bool ConsumeExitRequest()
+    {
+        return ownsMutex && exitEvent?.WaitOne(0) == true;
+    }
+
     public void Dispose()
     {
         showEvent?.Dispose();
         showEvent = null;
+        exitEvent?.Dispose();
+        exitEvent = null;
 
         if (ownsMutex && mutex is not null)
         {
