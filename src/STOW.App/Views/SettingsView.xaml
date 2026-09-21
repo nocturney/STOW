@@ -20,9 +20,9 @@
                     <TextBlock Text="Appearance" Style="{StaticResource SectionTitle}" />
                     <TextBlock Text="Theme" Margin="0,14,0,8" Foreground="{DynamicResource TextSecondaryBrush}" />
                     <StackPanel Orientation="Horizontal">
-                        <RadioButton GroupName="Theme" Content="Light" Margin="0,0,20,0" />
-                        <RadioButton GroupName="Theme" Content="Dark" Margin="0,0,20,0" />
-                        <RadioButton GroupName="Theme" Content="System" IsChecked="True" />
+                        <RadioButton GroupName="Theme" Content="Light" Tag="Light" Margin="0,0,20,0" Click="Theme_Click" />
+                        <RadioButton GroupName="Theme" Content="Dark" Tag="Dark" Margin="0,0,20,0" Click="Theme_Click" />
+                        <RadioButton GroupName="Theme" Content="System" Tag="System" IsChecked="True" Click="Theme_Click" />
                     </StackPanel>
                     <TextBlock Text="Accent" Margin="0,16,0,8" Foreground="{DynamicResource TextSecondaryBrush}" />
                     <StackPanel Orientation="Horizontal">

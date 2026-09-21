@@ -20,6 +20,15 @@ Electron is explicitly excluded as a UI dependency.
 
 The App must not contain raw Win32 restore logic.
 The Platform project must not know about pages such as Apps, Rules or Focus.
+## Engine boundary
+
+The first product-facing contracts now live under `STOW.Engine.Contracts`:
+- `ITrayEngine` exposes snapshots, enable/disable and restore commands.
+- `EngineSnapshot` separates managed apps from available desktop apps.
+- Restore failure is represented explicitly as `RestoreTargetUnavailable`; the UI does not manipulate HWND/PID state itself.
+
+No Win32 implementation has been moved behind this contract yet. That extraction remains mechanical and is gated by the v0.3.3 integrity and regression checks.
+
 ## Compatibility boundary
 
 During migration, the original v0.3.3 implementation remains available under `legacy/` or a dedicated compatibility adapter until parity tests pass.
