@@ -18,8 +18,8 @@ using Microsoft.Win32;
 [assembly: AssemblyProduct("Trayify")]
 [assembly: AssemblyCompany("Christian Velvet")]
 [assembly: AssemblyCopyright("Copyright (c) 2026 Christian Velvet")]
-[assembly: AssemblyVersion("0.3.1.0")]
-[assembly: AssemblyFileVersion("0.3.1.0")]
+[assembly: AssemblyVersion("0.3.2.0")]
+[assembly: AssemblyFileVersion("0.3.2.0")]
 
 internal static class NativeMethods
 {
@@ -94,7 +94,7 @@ internal sealed class WindowInfo
 
 internal sealed class TrayifyContext : ApplicationContext
 {
-    public const string VersionString = "0.3.1";
+    public const string VersionString = "0.3.2";
     public const string RepoUrl = "https://github.com/nocturney/trayify";
     public const string ReleasesUrl = "https://github.com/nocturney/trayify/releases";
     public const string LatestReleaseApi = "https://api.github.com/repos/nocturney/trayify/releases/latest";
@@ -233,20 +233,32 @@ internal sealed class TrayifyContext : ApplicationContext
                 if (key == null) return;
                 if (any)
                 {
-                    string startupExe = exePath;
-                    string wingetPackages = Path.Combine(
-                        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                        "Microsoft", "WinGet", "Packages");
+                    string local = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+                    string wingetPackages = Path.Combine(local, "Microsoft", "WinGet", "Packages");
+                    string scoopMarker = Path.DirectorySeparatorChar + "scoop" + Path.DirectorySeparatorChar +
+                                         "apps" + Path.DirectorySeparatorChar + "trayify" + Path.DirectorySeparatorChar;
 
-                    if (exePath.StartsWith(wingetPackages, StringComparison.OrdinalIgnoreCase))
+                    bool packageManaged =
+                        exePath.StartsWith(wingetPackages, StringComparison.OrdinalIgnoreCase) ||
+                        exePath.IndexOf(scoopMarker, StringComparison.OrdinalIgnoreCase) >= 0;
+
+                    if (packageManaged)
                     {
-                        string wingetLink = Path.Combine(
-                            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                            "Microsoft", "WinGet", "Links", "Trayify.exe");
-                        if (File.Exists(wingetLink)) startupExe = wingetLink;
-                    }
+                        string comspec = Environment.GetEnvironmentVariable("ComSpec");
+                        if (String.IsNullOrEmpty(comspec)) comspec = @"C:\Windows\System32\cmd.exe";
 
-                    key.SetValue(runKeyName, "\"" + startupExe + "\" --background");
+                        string selfHealing =
+                            "\"" + comspec + "\" /d /c \"" +
+                            "where Trayify.exe >nul 2>&1 && start \"\" Trayify.exe --background " +
+                            "|| reg delete HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run " +
+                            "/v Trayify /f >nul 2>&1\"";
+
+                        key.SetValue(runKeyName, selfHealing);
+                    }
+                    else
+                    {
+                        key.SetValue(runKeyName, "\"" + exePath + "\" --background");
+                    }
                 }
                 else key.DeleteValue(runKeyName, false);
             }

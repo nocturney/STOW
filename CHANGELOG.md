@@ -2,6 +2,15 @@
 
 All notable changes to Trayify are documented here.
 
+## [0.3.2] - 2026-09-21
+
+### Changed
+- Package-manager installations now use a self-healing Windows startup command.
+- WinGet/Scoop startup resolves Trayify through the package-manager command path instead of pinning a version-specific executable path.
+- If a package-managed Trayify copy is removed while a startup entry remains, the stale startup entry removes itself on the next sign-in.
+
+### Packaging
+- v0.3.2 is the package-manager submission release for WinGet and Scoop metadata.
 ## [0.3.1] - 2026-09-21
 
 ### Changed
@@ -81,4 +90,5 @@ All notable changes to Trayify are documented here.
 - About dialog.
 - GitHub repository and changelog shortcuts.
 - Manual update check against GitHub Releases.
+
 
