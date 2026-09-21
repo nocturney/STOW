@@ -1,42 +1,36 @@
-name: Release
+name: STOW Release Gate
 
 on:
-  push:
-    tags:
-      - "v*"
+  workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  release:
+  gate:
+    name: Validate release readiness
     runs-on: windows-latest
     steps:
       - name: Check out repository
         uses: actions/checkout@v5
 
-      - name: Verify tag matches VERSION
-        shell: powershell
-        run: |
-          $version = (Get-Content ./VERSION -Raw).Trim()
-          if ("v$version" -ne "${{ github.ref_name }}") {
-            throw "Tag ${{ github.ref_name }} does not match VERSION=$version"
-          }
+      - name: Set up .NET 10
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.x
 
-      - name: Build release
+      - name: Build STOW
+        run: dotnet build STOW.slnx -c Release
+
+      - name: Run STOW tests
+        run: dotnet test STOW.slnx -c Release --no-build
+
+      - name: Verify Trayify compatibility baseline still builds
         shell: powershell
         run: ./scripts/build.ps1
 
-      - name: Publish GitHub Release
+      - name: Publishing status
         shell: powershell
-        env:
-          GH_TOKEN: ${{ github.token }}
         run: |
-          $version = (Get-Content ./VERSION -Raw).Trim()
-          gh release create "v$version" `
-            "./dist/TrayifySetup.exe#TrayifySetup.exe" `
-            "./dist/Trayify.exe#Trayify.exe" `
-            "./dist/Trayify-v$version-win.zip#Trayify-v$version-win.zip" `
-            "./dist/SHA256SUMS.txt#SHA256SUMS.txt" `
-            --title "Trayify v$version" `
-            --notes-file "./dist/release-notes.md"
+          Write-Host "STOW publishing is intentionally disabled."
+          Write-Host "Enable artifact publication only after STOW.exe, STOWSetup.exe, migration, signing and release validation are complete."

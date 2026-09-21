@@ -1,4 +1,4 @@
-name: CI
+name: STOW CI
 
 on:
   push:
@@ -9,17 +9,36 @@ permissions:
   contents: read
 
 jobs:
-  build:
+  stow:
+    name: STOW build and tests
     runs-on: windows-latest
     steps:
       - name: Check out repository
         uses: actions/checkout@v5
 
-      - name: Build
+      - name: Set up .NET 10
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Build STOW
+        run: dotnet build STOW.slnx -c Release
+
+      - name: Run regression tests
+        run: dotnet test STOW.slnx -c Release --no-build
+
+  trayify-baseline:
+    name: Trayify v0.3.3 compatibility baseline
+    runs-on: windows-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+
+      - name: Build untouched Trayify baseline
         shell: powershell
         run: ./scripts/build.ps1
 
-      - name: Verify output
+      - name: Verify baseline artifacts
         shell: powershell
         run: |
           if (-not (Test-Path ./dist/Trayify.exe)) { throw "Trayify.exe was not produced" }
