@@ -5,7 +5,8 @@ public sealed record DiscoveredAppSnapshot(
     string DisplayName,
     string ExecutablePath,
     string ProcessName,
-    string WindowTitle);
+    string WindowTitle,
+    string WindowClass);
 
 public interface IAppDiscovery
 {
