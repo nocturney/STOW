@@ -23,8 +23,21 @@ Reports will be reviewed and handled through GitHub Security Advisories when app
 
 ## Update integrity
 
-Trayify downloads updates only from this repository's GitHub Releases. Before replacing the installed executable, it verifies the downloaded `Trayify.exe` against the SHA-256 value published with that release.
+Standard installed copies of Trayify update through the official `TrayifySetup.exe` published in this repository's versioned GitHub Releases.
+
+Before launching a downloaded update, Trayify verifies:
+
+- the installer SHA-256 against the release's `SHA256SUMS.txt`;
+- the installer FileVersion against the GitHub release tag.
+
+The installer separately verifies the embedded Trayify payload version before replacing the installed application.
+
+## Installation model
+
+The official installer is per-user and installs under `%LOCALAPPDATA%\Trayify`, so normal installation does not require elevation.
+
+Trayify does not use undocumented Start-menu database modifications to force pins.
 
 ## Code signing
 
-Current releases are not Authenticode-signed. SHA-256 verification protects the Trayify update process against accidental corruption or mismatched release files, but it is not a substitute for publisher code signing.
+Current releases are not Authenticode-signed. SHA-256 verification protects update integrity, but it is not a substitute for publisher code signing.

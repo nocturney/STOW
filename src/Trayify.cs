@@ -16,8 +16,10 @@ using Microsoft.Win32;
 [assembly: AssemblyTitle("Trayify")]
 [assembly: AssemblyDescription("Minimize Windows applications to the system tray")]
 [assembly: AssemblyProduct("Trayify")]
-[assembly: AssemblyVersion("0.2.0.0")]
-[assembly: AssemblyFileVersion("0.2.0.0")]
+[assembly: AssemblyCompany("Christian Velvet")]
+[assembly: AssemblyCopyright("Copyright (c) 2026 Christian Velvet")]
+[assembly: AssemblyVersion("0.3.0.0")]
+[assembly: AssemblyFileVersion("0.3.0.0")]
 
 internal static class NativeMethods
 {
@@ -92,7 +94,7 @@ internal sealed class WindowInfo
 
 internal sealed class TrayifyContext : ApplicationContext
 {
-    public const string VersionString = "0.2.0";
+    public const string VersionString = "0.3.0";
     public const string RepoUrl = "https://github.com/nocturney/trayify";
     public const string ReleasesUrl = "https://github.com/nocturney/trayify/releases";
     public const string LatestReleaseApi = "https://api.github.com/repos/nocturney/trayify/releases/latest";
@@ -727,7 +729,7 @@ internal sealed class TrayifyContext : ApplicationContext
         }
     }
 
-    private string ParseExpectedHash(string sumsText)
+    private string ParseExpectedHash(string sumsText, string fileName)
     {
         foreach (string raw in sumsText.Replace("\r", "").Split('\n'))
         {
@@ -740,147 +742,75 @@ internal sealed class TrayifyContext : ApplicationContext
             string b = parts[1].Trim().TrimStart('*');
 
             if (Regex.IsMatch(a, "^[0-9a-fA-F]{64}$") &&
-                String.Equals(Path.GetFileName(b), "Trayify.exe", StringComparison.OrdinalIgnoreCase))
+                String.Equals(Path.GetFileName(b), fileName, StringComparison.OrdinalIgnoreCase))
                 return a.ToLowerInvariant();
 
-            if (String.Equals(Path.GetFileName(a), "Trayify.exe", StringComparison.OrdinalIgnoreCase) &&
+            if (String.Equals(Path.GetFileName(a), fileName, StringComparison.OrdinalIgnoreCase) &&
                 Regex.IsMatch(b, "^[0-9a-fA-F]{64}$"))
                 return b.ToLowerInvariant();
         }
-        throw new Exception("SHA256SUMS.txt does not contain a checksum for Trayify.exe.");
+        throw new Exception("SHA256SUMS.txt does not contain a checksum for " + fileName + ".");
     }
 
-    private bool CanUpdateCurrentLocation()
+    private bool IsStandardInstalledLocation()
     {
-        try
-        {
-            string dir = Path.GetDirectoryName(exePath);
-            string probe = Path.Combine(dir, ".trayify-write-test-" + Guid.NewGuid().ToString("N") + ".tmp");
-            File.WriteAllText(probe, "test", Encoding.ASCII);
-            File.Delete(probe);
-            return true;
-        }
-        catch { return false; }
+        string expected = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            "Trayify", "Trayify.exe");
+        return String.Equals(
+            Path.GetFullPath(exePath),
+            Path.GetFullPath(expected),
+            StringComparison.OrdinalIgnoreCase);
     }
 
     private void DownloadAndInstallUpdate(string tag)
     {
-        if (!CanUpdateCurrentLocation())
+        if (!IsStandardInstalledLocation())
         {
-            DialogResult open = MessageBox.Show(
-                "Trayify cannot write to its current installation folder.\n\n" +
-                "Open the release page to update manually?",
-                "Trayify Update", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
-            if (open == DialogResult.Yes) OpenUrl(ReleasesUrl + "/latest");
+            DialogResult openPortable = MessageBox.Show(
+                "This copy of Trayify is running in portable mode.\\n\\n" +
+                "Automatic installation updates are available for the standard installed version. " +
+                "Open the latest release page?",
+                "Trayify Update", MessageBoxButtons.YesNo, MessageBoxIcon.Information);
+            if (openPortable == DialogResult.Yes) OpenUrl(ReleasesUrl + "/latest");
             return;
         }
 
         string updateRoot = Path.Combine(Path.GetTempPath(), "Trayify", "updates", tag);
         Directory.CreateDirectory(updateRoot);
 
-        string newExe = Path.Combine(updateRoot, "Trayify.exe");
+        string setupName = "TrayifySetup.exe";
+        string setupPath = Path.Combine(updateRoot, setupName);
         string sumsFile = Path.Combine(updateRoot, "SHA256SUMS.txt");
-        string updaterScript = Path.Combine(updateRoot, "apply-update.ps1");
-
-        string exeUrl = ReleaseAssetUrl(tag, "Trayify.exe");
-        string sumsUrl = ReleaseAssetUrl(tag, "SHA256SUMS.txt");
 
         using (WebClient wc = new WebClient())
         {
             wc.Headers["User-Agent"] = "Trayify/" + VersionString;
-            wc.DownloadFile(exeUrl, newExe);
+            wc.DownloadFile(ReleaseAssetUrl(tag, setupName), setupPath);
         }
 
         using (WebClient wc = new WebClient())
         {
             wc.Headers["User-Agent"] = "Trayify/" + VersionString;
-            wc.DownloadFile(sumsUrl, sumsFile);
+            wc.DownloadFile(ReleaseAssetUrl(tag, "SHA256SUMS.txt"), sumsFile);
         }
 
-        string expected = ParseExpectedHash(File.ReadAllText(sumsFile, Encoding.UTF8));
-        string actual = ComputeSha256(newExe);
+        string expected = ParseExpectedHash(File.ReadAllText(sumsFile, Encoding.UTF8), setupName);
+        string actual = ComputeSha256(setupPath);
         if (!String.Equals(expected, actual, StringComparison.OrdinalIgnoreCase))
-            throw new Exception("The downloaded update failed SHA-256 verification. The update was not installed.");
+            throw new Exception("The downloaded installer failed SHA-256 verification. Nothing was installed.");
 
-        FileVersionInfo vi = FileVersionInfo.GetVersionInfo(newExe);
+        FileVersionInfo vi = FileVersionInfo.GetVersionInfo(setupPath);
         Version downloadedVersion = ParseReleaseVersion(vi.FileVersion);
         Version releaseVersion = ParseReleaseVersion(tag);
         if (downloadedVersion != releaseVersion)
-            throw new Exception("The downloaded executable version does not match the GitHub release tag.");
-
-        string ps = @"param(
-    [int]$ProcessId,
-    [string]$NewExe,
-    [string]$TargetExe,
-    [string]$ExpectedHash
-)
-$ErrorActionPreference = 'Stop'
-$log = Join-Path (Split-Path -Parent $NewExe) 'update.log'
-$backup = $TargetExe + '.bak'
-$staged = $TargetExe + '.update'
-try {
-    Add-Content -LiteralPath $log -Value ('Update started ' + (Get-Date -Format o))
-    Wait-Process -Id $ProcessId -ErrorAction SilentlyContinue
-    Start-Sleep -Milliseconds 400
-
-    Copy-Item -LiteralPath $NewExe -Destination $staged -Force
-    $actual = (Get-FileHash -LiteralPath $staged -Algorithm SHA256).Hash.ToLowerInvariant()
-    if ($actual -ne $ExpectedHash.ToLowerInvariant()) {
-        throw 'Staged update checksum verification failed.'
-    }
-
-    if (Test-Path -LiteralPath $backup) { Remove-Item -LiteralPath $backup -Force }
-    if (Test-Path -LiteralPath $TargetExe) { Move-Item -LiteralPath $TargetExe -Destination $backup -Force }
-
-    try {
-        Move-Item -LiteralPath $staged -Destination $TargetExe -Force
-        Start-Process -FilePath $TargetExe -ArgumentList '--background'
-        Start-Sleep -Seconds 2
-        if (Test-Path -LiteralPath $backup) { Remove-Item -LiteralPath $backup -Force }
-        Add-Content -LiteralPath $log -Value ('Update completed ' + (Get-Date -Format o))
-    }
-    catch {
-        if (Test-Path -LiteralPath $TargetExe) { Remove-Item -LiteralPath $TargetExe -Force -ErrorAction SilentlyContinue }
-        if (Test-Path -LiteralPath $backup) { Move-Item -LiteralPath $backup -Destination $TargetExe -Force }
-        throw
-    }
-}
-catch {
-    Add-Content -LiteralPath $log -Value ('Update failed: ' + $_.Exception.Message)
-    try {
-        Add-Type -AssemblyName System.Windows.Forms
-        [System.Windows.Forms.MessageBox]::Show(
-            'Trayify could not install the update.' + [Environment]::NewLine + [Environment]::NewLine + $_.Exception.Message,
-            'Trayify Update',
-            [System.Windows.Forms.MessageBoxButtons]::OK,
-            [System.Windows.Forms.MessageBoxIcon]::Error
-        ) | Out-Null
-    } catch {}
-    if (Test-Path -LiteralPath $TargetExe) {
-        try { Start-Process -FilePath $TargetExe -ArgumentList '--background' } catch {}
-    }
-    exit 1
-}
-";
-        File.WriteAllText(updaterScript, ps, new UTF8Encoding(false));
+            throw new Exception("The downloaded installer version does not match the GitHub release tag.");
 
         ProcessStartInfo psi = new ProcessStartInfo();
-        psi.FileName = "powershell.exe";
-        psi.Arguments =
-            "-NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File \"" + updaterScript +
-            "\" -ProcessId " + Process.GetCurrentProcess().Id.ToString() +
-            " -NewExe \"" + newExe +
-            "\" -TargetExe \"" + exePath +
-            "\" -ExpectedHash \"" + expected + "\"";
-        psi.UseShellExecute = false;
-        psi.CreateNoWindow = true;
-
+        psi.FileName = setupPath;
+        psi.Arguments = "/VERYSILENT /LAUNCH";
+        psi.UseShellExecute = true;
         Process.Start(psi);
-
-        MessageBox.Show(
-            "Trayify " + tag + " was downloaded and verified successfully.\n\n" +
-            "Trayify will now restart to finish the update.",
-            "Trayify Update", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
         ExitTrayify();
     }
@@ -1004,18 +934,30 @@ internal sealed class MainForm : Form
     private readonly DataGridView grid;
     private readonly Button refreshButton;
     private readonly Label hint;
+    private readonly TextBox searchBox;
+    private readonly Label summaryLabel;
     private bool loading = false;
 
     public MainForm(TrayifyContext context)
     {
         ctx = context;
-        Text = "Trayify - Minimize to Tray Manager";
-        Width = 900;
-        Height = 560;
-        MinimumSize = new Size(700, 420);
+
+        Font = new Font("Segoe UI", 9.5f);
+        Text = "Trayify";
+        ClientSize = new Size(980, 640);
+        MinimumSize = new Size(780, 520);
         StartPosition = FormStartPosition.CenterScreen;
+        BackColor = Color.FromArgb(246, 247, 249);
+        AutoScaleMode = AutoScaleMode.Dpi;
         Icon = Icon.ExtractAssociatedIcon(Application.ExecutablePath) ?? SystemIcons.Application;
+
         MenuStrip menuStrip = new MenuStrip();
+        menuStrip.Dock = DockStyle.Top;
+        menuStrip.BackColor = Color.White;
+        menuStrip.ForeColor = Color.FromArgb(40, 42, 46);
+        menuStrip.Font = new Font("Segoe UI", 9.25f);
+        menuStrip.Padding = new Padding(12, 4, 0, 4);
+
         ToolStripMenuItem fileMenu = new ToolStripMenuItem("&File");
         ToolStripMenuItem refreshMenu = new ToolStripMenuItem("&Refresh");
         refreshMenu.ShortcutKeys = Keys.F5;
@@ -1055,6 +997,80 @@ internal sealed class MainForm : Form
         menuStrip.Items.Add(helpMenu);
         MainMenuStrip = menuStrip;
 
+        Panel header = new Panel();
+        header.Dock = DockStyle.Top;
+        header.Height = 106;
+        header.BackColor = Color.White;
+        header.Padding = new Padding(22, 18, 22, 12);
+
+        PictureBox logo = new PictureBox();
+        logo.Image = Icon.ToBitmap();
+        logo.SizeMode = PictureBoxSizeMode.Zoom;
+        logo.SetBounds(22, 20, 58, 58);
+        header.Controls.Add(logo);
+
+        Label titleLabel = new Label();
+        titleLabel.Text = "Trayify";
+        titleLabel.Font = new Font("Segoe UI", 19f, FontStyle.Bold);
+        titleLabel.ForeColor = Color.FromArgb(30, 32, 36);
+        titleLabel.AutoSize = true;
+        titleLabel.Location = new Point(98, 18);
+        header.Controls.Add(titleLabel);
+
+        hint = new Label();
+        hint.Text = "Choose which apps should disappear into the system tray when minimized.";
+        hint.Font = new Font("Segoe UI", 10f);
+        hint.ForeColor = Color.FromArgb(92, 96, 105);
+        hint.AutoSize = true;
+        hint.Location = new Point(101, 58);
+        header.Controls.Add(hint);
+
+        Label version = new Label();
+        version.Text = "v" + TrayifyContext.VersionString;
+        version.ForeColor = Color.FromArgb(112, 116, 124);
+        version.AutoSize = true;
+        version.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+        version.Location = new Point(ClientSize.Width - 74, 25);
+        header.Controls.Add(version);
+
+        Panel toolbar = new Panel();
+        toolbar.Dock = DockStyle.Top;
+        toolbar.Height = 62;
+        toolbar.BackColor = Color.FromArgb(246, 247, 249);
+
+        Label filterLabel = new Label();
+        filterLabel.Text = "Filter";
+        filterLabel.AutoSize = true;
+        filterLabel.ForeColor = Color.FromArgb(82, 86, 94);
+        filterLabel.Location = new Point(22, 22);
+        toolbar.Controls.Add(filterLabel);
+
+        searchBox = new TextBox();
+        searchBox.Font = new Font("Segoe UI", 9.5f);
+        searchBox.BorderStyle = BorderStyle.FixedSingle;
+        searchBox.BackColor = Color.White;
+        searchBox.SetBounds(68, 17, 330, 28);
+        searchBox.TextChanged += delegate { RefreshGrid(true); };
+        toolbar.Controls.Add(searchBox);
+
+        summaryLabel = new Label();
+        summaryLabel.Text = "";
+        summaryLabel.AutoSize = true;
+        summaryLabel.ForeColor = Color.FromArgb(105, 109, 118);
+        summaryLabel.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+        summaryLabel.Location = new Point(ClientSize.Width - 330, 22);
+        toolbar.Controls.Add(summaryLabel);
+
+        refreshButton = new Button();
+        refreshButton.Text = "Refresh";
+        refreshButton.FlatStyle = FlatStyle.Flat;
+        refreshButton.FlatAppearance.BorderColor = Color.FromArgb(208, 211, 218);
+        refreshButton.BackColor = Color.White;
+        refreshButton.ForeColor = Color.FromArgb(42, 45, 50);
+        refreshButton.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+        refreshButton.SetBounds(ClientSize.Width - 120, 13, 92, 34);
+        refreshButton.Click += delegate { RefreshGrid(true); };
+        toolbar.Controls.Add(refreshButton);
 
         grid = new DataGridView();
         grid.Dock = DockStyle.Fill;
@@ -1065,19 +1081,35 @@ internal sealed class MainForm : Form
         grid.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
         grid.MultiSelect = false;
         grid.AutoGenerateColumns = false;
-        grid.BackgroundColor = SystemColors.Window;
-        grid.BorderStyle = BorderStyle.FixedSingle;
+        grid.BackgroundColor = Color.White;
+        grid.BorderStyle = BorderStyle.None;
+        grid.CellBorderStyle = DataGridViewCellBorderStyle.SingleHorizontal;
+        grid.GridColor = Color.FromArgb(232, 234, 238);
+        grid.EnableHeadersVisualStyles = false;
+        grid.ColumnHeadersBorderStyle = DataGridViewHeaderBorderStyle.None;
+        grid.ColumnHeadersHeight = 38;
+        grid.RowTemplate.Height = 42;
+        grid.DefaultCellStyle.BackColor = Color.White;
+        grid.DefaultCellStyle.ForeColor = Color.FromArgb(38, 41, 46);
+        grid.DefaultCellStyle.SelectionBackColor = Color.FromArgb(230, 242, 255);
+        grid.DefaultCellStyle.SelectionForeColor = Color.FromArgb(30, 34, 40);
+        grid.DefaultCellStyle.Padding = new Padding(5, 0, 5, 0);
+        grid.ColumnHeadersDefaultCellStyle.BackColor = Color.FromArgb(244, 246, 249);
+        grid.ColumnHeadersDefaultCellStyle.ForeColor = Color.FromArgb(72, 76, 84);
+        grid.ColumnHeadersDefaultCellStyle.Font = new Font("Segoe UI", 9f, FontStyle.Bold);
+        grid.ColumnHeadersDefaultCellStyle.Padding = new Padding(5, 0, 5, 0);
 
         DataGridViewCheckBoxColumn enabled = new DataGridViewCheckBoxColumn();
         enabled.Name = "Enabled";
         enabled.HeaderText = "Tray";
-        enabled.Width = 55;
+        enabled.Width = 58;
+        enabled.FlatStyle = FlatStyle.Flat;
         grid.Columns.Add(enabled);
 
         DataGridViewTextBoxColumn app = new DataGridViewTextBoxColumn();
         app.Name = "App";
         app.HeaderText = "Application";
-        app.Width = 190;
+        app.Width = 220;
         app.ReadOnly = true;
         grid.Columns.Add(app);
 
@@ -1091,14 +1123,14 @@ internal sealed class MainForm : Form
         DataGridViewTextBoxColumn pid = new DataGridViewTextBoxColumn();
         pid.Name = "Pid";
         pid.HeaderText = "PID";
-        pid.Width = 70;
+        pid.Width = 72;
         pid.ReadOnly = true;
         grid.Columns.Add(pid);
 
         DataGridViewTextBoxColumn status = new DataGridViewTextBoxColumn();
         status.Name = "Status";
         status.HeaderText = "Status";
-        status.Width = 115;
+        status.Width = 125;
         status.ReadOnly = true;
         grid.Columns.Add(status);
 
@@ -1108,46 +1140,28 @@ internal sealed class MainForm : Form
         };
         grid.CellValueChanged += GridCellValueChanged;
 
-        Panel top = new Panel();
-        top.Dock = DockStyle.Top;
-        top.Height = 58;
-        top.Padding = new Padding(10);
-
-        Label titleLabel = new Label();
-        titleLabel.Text = "Choose which applications should minimize to the system tray";
-        titleLabel.AutoSize = true;
-        titleLabel.Font = new Font(Font.FontFamily, 10.5f, FontStyle.Bold);
-        titleLabel.Location = new Point(10, 8);
-        top.Controls.Add(titleLabel);
-
-        hint = new Label();
-        hint.Text = "Enabled apps are remembered. Minimize them normally and Trayify will hide them to the tray.";
-        hint.AutoSize = true;
-        hint.Location = new Point(10, 32);
-        top.Controls.Add(hint);
+        Panel gridHost = new Panel();
+        gridHost.Dock = DockStyle.Fill;
+        gridHost.Padding = new Padding(22, 0, 22, 0);
+        gridHost.BackColor = BackColor;
+        gridHost.Controls.Add(grid);
 
         Panel bottom = new Panel();
         bottom.Dock = DockStyle.Bottom;
-        bottom.Height = 52;
-        bottom.Padding = new Padding(10);
+        bottom.Height = 48;
+        bottom.BackColor = Color.FromArgb(246, 247, 249);
 
-        refreshButton = new Button();
-        refreshButton.Text = "Refresh";
-        refreshButton.Width = 95;
-        refreshButton.Height = 28;
-        refreshButton.Location = new Point(10, 10);
-        refreshButton.Click += delegate { RefreshGrid(true); };
-        bottom.Controls.Add(refreshButton);
+        Label local = new Label();
+        local.Text = "Runs locally  •  No telemetry  •  Startup follows enabled apps";
+        local.AutoSize = true;
+        local.ForeColor = Color.FromArgb(105, 109, 118);
+        local.Location = new Point(22, 15);
+        bottom.Controls.Add(local);
 
-        Label startup = new Label();
-        startup.Text = "Windows startup is automatic while at least one app is enabled.";
-        startup.AutoSize = true;
-        startup.Location = new Point(125, 16);
-        bottom.Controls.Add(startup);
-
-        Controls.Add(grid);
+        Controls.Add(gridHost);
         Controls.Add(bottom);
-        Controls.Add(top);
+        Controls.Add(toolbar);
+        Controls.Add(header);
         Controls.Add(menuStrip);
 
         FormClosing += delegate(object sender, FormClosingEventArgs e)
@@ -1161,6 +1175,7 @@ internal sealed class MainForm : Form
 
         Shown += delegate { RefreshGrid(true); };
     }
+
     private string TagKey(object tag)
     {
         WindowInfo w = tag as WindowInfo;
@@ -1195,6 +1210,7 @@ internal sealed class MainForm : Form
             catch { firstDisplayed = -1; }
         }
 
+        string filter = searchBox == null ? "" : searchBox.Text.Trim();
         List<WindowInfo> windows = ctx.EnumerateAppWindows();
         Dictionary<string, WindowInfo> unique = new Dictionary<string, WindowInfo>(StringComparer.OrdinalIgnoreCase);
         foreach (WindowInfo w in windows)
@@ -1211,6 +1227,11 @@ internal sealed class MainForm : Form
 
         foreach (WindowInfo w in unique.Values)
         {
+            if (filter.Length > 0)
+            {
+                string hay = (w.DisplayName + " " + w.Title + " " + w.ProcessName).ToLowerInvariant();
+                if (hay.IndexOf(filter.ToLowerInvariant()) < 0) continue;
+            }
             int idx = grid.Rows.Add(ctx.IsEnabled(w), w.DisplayName, w.Title, w.Pid.ToString(), ctx.GetStatus(w));
             DataGridViewRow row = grid.Rows[idx];
             row.Tag = w;
@@ -1223,6 +1244,11 @@ internal sealed class MainForm : Form
         foreach (ManagedApp a in ctx.ManagedApps)
         {
             if (shown.Contains(a.Key)) continue;
+            if (filter.Length > 0)
+            {
+                string hay = (a.Name + " " + a.TitleHint + " " + a.ProcessName).ToLowerInvariant();
+                if (hay.IndexOf(filter.ToLowerInvariant()) < 0) continue;
+            }
             int idx = grid.Rows.Add(a.Enabled, a.Name, a.TitleHint, "-", ctx.GetConfiguredStatus(a));
             DataGridViewRow row = grid.Rows[idx];
             row.Tag = a;
@@ -1251,6 +1277,13 @@ internal sealed class MainForm : Form
                 grid.FirstDisplayedScrollingRowIndex = Math.Min(firstDisplayed, max);
             }
             catch { }
+        }
+
+        if (summaryLabel != null)
+        {
+            int enabledCount = 0;
+            foreach (ManagedApp a in ctx.ManagedApps) if (a.Enabled) enabledCount++;
+            summaryLabel.Text = grid.Rows.Count + " apps  •  " + enabledCount + " managed";
         }
 
         loading = false;
@@ -1303,6 +1336,7 @@ internal static class Program
         }
     }
 }
+
 
 
 

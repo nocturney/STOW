@@ -2,6 +2,31 @@
 
 All notable changes to Trayify are documented here.
 
+## [0.3.0] - 2026-09-21
+
+### Added
+- Native Trayify installer and uninstaller with a clean Windows-style UI.
+- Per-user installation to %LOCALAPPDATA% without requiring administrator rights.
+- Optional desktop shortcut.
+- Optional Start menu shortcut.
+- Pin-to-Start assistance that uses Windows-supported surfaces instead of modifying Start internals.
+- Windows Apps & Features uninstall registration.
+- Silent install and uninstall switches for package managers.
+- Modernized Trayify interface with a cleaner header, filtering, spacing, typography, and status summary.
+- Official WinGet packaging metadata.
+- Scoop packaging metadata.
+
+### Changed
+- In-app updates now use the official Trayify installer so uninstall metadata and shortcuts stay synchronized.
+- Release builds now produce TrayifySetup.exe with Trayify embedded inside it.
+- SHA256SUMS.txt now covers both Trayify.exe and TrayifySetup.exe.
+- The ZIP package is centered around the graphical installer rather than command-file installation.
+
+### Security
+- Installer payload version is verified before installation.
+- In-app updates verify the installer SHA-256 and embedded file version before launching it.
+- Pin-to-Start is not implemented through undocumented Start-menu database modifications.
+
 ## [0.2.0] - 2026-09-21
 
 ### Added

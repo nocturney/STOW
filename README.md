@@ -1,110 +1,117 @@
 # Trayify
 
-**Trayify** is a lightweight Windows utility that adds **minimize-to-tray** behavior to desktop applications that do not provide it themselves.
+Trayify is a lightweight Windows utility that adds **minimize-to-tray** behavior to desktop applications that do not provide it themselves.
 
-Current version: **v0.2.0**
+Current version: **v0.3.0**
 
-## Features
+## Highlights
 
-- Shows user-facing/taskbar applications instead of every background process.
-- Keeps previously configured applications visible even when they are closed or hidden.
+- Clean list of user-facing/taskbar applications rather than every background process.
 - Per-application minimize-to-tray toggle.
-- Per-application tray icon with Restore and Disable actions.
 - Persistent local configuration.
-- Automatic Windows startup while at least one managed application is enabled.
-- Electron/Chromium handling for applications that re-show or recreate windows.
-- Built-in update checker and **Download & Install** self-update flow.
-- SHA-256 verification before an update replaces the installed executable.
-- Built-in links to the changelog, license, privacy policy, security policy, and repository.
+- Per-app tray icons with restore/disable actions.
+- Electron/Chromium handling for apps that re-show their windows.
+- Automatic startup while at least one managed app is enabled.
+- Built-in update checks and verified installer-based self-updates.
 - No telemetry, analytics, advertising, or tracking.
-- Small WinForms executable with no bundled third-party runtime.
+- Native WinForms/Win32 implementation with no bundled UI framework.
 
-## Requirements
+## Installer
 
-- Windows 10 or Windows 11
-- .NET Framework available with Windows
-- Internet access is **not** required for normal use; it is used only when the user explicitly checks for updates.
+The recommended download is **TrayifySetup.exe** from GitHub Releases.
 
-## Install
-
-### Recommended
-
-1. Download the latest `Trayify-vX.Y.Z-win.zip` from GitHub Releases.
-2. Extract it.
-3. Run `Install-Trayify.cmd`.
-
-Trayify is installed to:
+The installer is per-user and does not require administrator rights. It installs Trayify to:
 
 `%LOCALAPPDATA%\Trayify\Trayify.exe`
 
-User settings are stored separately under:
+It provides:
 
-`%APPDATA%\Trayify`
+- Optional Desktop shortcut.
+- Optional Start menu shortcut.
+- Optional Pin-to-Start assistance.
+- Proper Windows **Settings > Apps > Installed apps** registration.
+- Graphical uninstall with an option to keep or remove Trayify settings.
+- Silent install/uninstall modes for package managers.
 
-### Portable
+### Silent install
 
-`Trayify.exe` can also be run directly from any writable folder.
+`TrayifySetup.exe /VERYSILENT /NOLAUNCH`
 
-If at least one application is enabled, Trayify registers its current executable path under the current user's Windows startup settings.
+### Silent uninstall
+
+`%LOCALAPPDATA%\Trayify\Uninstall.exe /UNINSTALL /VERYSILENT`
+
+## Pin to Start
+
+Windows 11 does not expose a supported ordinary-installer API to silently pin a desktop application to Start.
+
+Trayify Setup therefore creates the normal Start menu shortcut and can open Windows' application surface with instructions for the user to choose **Pin to Start**. It does not modify undocumented Start-menu databases.
+
+## Package managers
+
+### WinGet
+
+Trayify includes WinGet manifest metadata and uses `TrayifySetup.exe` as a per-user EXE installer.
+
+Once the package is accepted into the Microsoft community catalog, installation is:
+
+`winget install ChristianVelvet.Trayify`
+
+### Scoop
+
+A Scoop manifest is maintained under `packaging/scoop/trayify.json`.
+
+It installs the standalone executable in portable mode. Portable copies use Scoop for upgrades rather than Trayify's installer-based self-update.
 
 ## Updating
 
-Choose **Help > Check for Updates**.
+For a normal installed copy, choose **Help > Check for Updates**.
 
-When a newer GitHub Release exists, Trayify can:
+Trayify downloads the new official installer and `SHA256SUMS.txt`, verifies the installer checksum and file version, and only then starts the installer.
 
-1. Download the new `Trayify.exe`.
-2. Download the release's `SHA256SUMS.txt`.
-3. Verify the executable checksum.
-4. Verify that the executable file version matches the release tag.
-5. Launch a temporary updater.
-6. Exit Trayify safely.
-7. Replace the old executable with rollback protection.
-8. Restart Trayify.
-
-If verification fails, the installed executable is not replaced.
-
-## Uninstall
-
-Run `Uninstall-Trayify.cmd` from the release package.
-
-The uninstaller removes Trayify and its Windows startup entry. User settings under `%APPDATA%\Trayify` are left in place so a later reinstall can reuse them.
+Portable/package-manager copies should normally be upgraded through their package manager.
 
 ## Privacy
 
-Trayify has no telemetry or tracking. See [PRIVACY.md](PRIVACY.md).
+Trayify works locally and has no telemetry. See [PRIVACY.md](PRIVACY.md).
 
 ## Security
 
 See [SECURITY.md](SECURITY.md).
 
-Current binaries are **not Authenticode-signed**, so Windows SmartScreen may warn on a newly downloaded release. Release checksums are published for integrity verification; checksum verification is not a substitute for publisher code signing.
+Current binaries are not Authenticode-signed, so Windows SmartScreen may warn on a newly downloaded release. Published SHA-256 checksums verify integrity, but they are not a substitute for publisher code signing.
 
-## Open-source license
+## License
 
-Trayify is released under the [MIT License](LICENSE).
+Trayify is open source under the [MIT License](LICENSE).
 
-Trayify currently bundles no third-party libraries or assets. See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
-
-## Contributing
-
-See [CONTRIBUTING.md](CONTRIBUTING.md). Bug reports and feature requests use the repository's issue templates.
+No third-party code or assets are bundled in the current release. See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
 ## Build
 
-Trayify is intentionally dependency-light and kept as a single-file WinForms application.
+Requirements:
 
-Run:
+- Windows
+- Windows PowerShell
+- .NET Framework C# compiler included with Windows
+
+Build with:
 
 `powershell -ExecutionPolicy Bypass -File scripts\build.ps1`
 
-The build creates release artifacts under `dist\`.
+The build produces:
+
+- `Trayify.exe`
+- `TrayifySetup.exe`
+- `Trayify-vX.Y.Z-win.zip`
+- `SHA256SUMS.txt`
+- release notes
 
 ## Release process
 
-- `VERSION` is the source of the release number.
-- The build verifies that `VERSION` matches the version embedded in the C# source.
-- CI builds every push to `main` and every pull request.
-- Pushing a matching `vX.Y.Z` tag triggers the release workflow.
+- `VERSION` is the source release number.
+- CI builds pushes and pull requests on Windows.
+- A matching `vX.Y.Z` tag creates a GitHub Release automatically.
+- WinGet and Scoop metadata are updated against the immutable versioned release URLs.
 
-See [CHANGELOG.md](CHANGELOG.md) for release history.
+See [CHANGELOG.md](CHANGELOG.md).
