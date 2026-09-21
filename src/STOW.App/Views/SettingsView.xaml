@@ -1,0 +1,76 @@
+<UserControl x:Class="STOW.App.Views.SettingsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel>
+            <Border Style="{StaticResource CardBorder}" Margin="0,0,0,12">
+                <Grid>
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                    <StackPanel>
+                        <TextBlock Text="General" Style="{StaticResource SectionTitle}" />
+                        <TextBlock Text="Core behavior for the STOW app." Margin="0,5,0,0"
+                                   Foreground="{DynamicResource TextSecondaryBrush}" />
+                    </StackPanel>
+                    <CheckBox Grid.Column="1" Content="Keep STOW running in the tray" IsChecked="True" VerticalAlignment="Center" />
+                </Grid>
+            </Border>
+
+            <Border Style="{StaticResource CardBorder}" Margin="0,0,0,12">
+                <StackPanel>
+                    <TextBlock Text="Appearance" Style="{StaticResource SectionTitle}" />
+                    <TextBlock Text="Theme" Margin="0,14,0,8" Foreground="{DynamicResource TextSecondaryBrush}" />
+                    <StackPanel Orientation="Horizontal">
+                        <RadioButton GroupName="Theme" Content="Light" Margin="0,0,20,0" />
+                        <RadioButton GroupName="Theme" Content="Dark" Margin="0,0,20,0" />
+                        <RadioButton GroupName="Theme" Content="System" IsChecked="True" />
+                    </StackPanel>
+                    <TextBlock Text="Accent" Margin="0,16,0,8" Foreground="{DynamicResource TextSecondaryBrush}" />
+                    <StackPanel Orientation="Horizontal">
+                        <Ellipse Width="20" Height="20" Fill="{DynamicResource AccentBlueBrush}" Margin="0,0,10,0" />
+                        <Ellipse Width="20" Height="20" Fill="{DynamicResource AccentTealBrush}" Margin="0,0,10,0" />
+                        <Ellipse Width="20" Height="20" Fill="{DynamicResource TextSecondaryBrush}" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <Border Style="{StaticResource CardBorder}" Margin="0,0,0,12">
+                <Grid>
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                    <StackPanel>
+                        <TextBlock Text="Startup" Style="{StaticResource SectionTitle}" />
+                        <TextBlock Text="Control when STOW starts with Windows." Margin="0,5,0,0"
+                                   Foreground="{DynamicResource TextSecondaryBrush}" />
+                    </StackPanel>
+                    <CheckBox Grid.Column="1" Content="Start STOW with Windows" IsChecked="True" VerticalAlignment="Center" />
+                </Grid>
+            </Border>
+
+            <Border Style="{StaticResource CardBorder}" Margin="0,0,0,12">
+                <Grid>
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                    <StackPanel>
+                        <TextBlock Text="Notifications" Style="{StaticResource SectionTitle}" />
+                        <TextBlock Text="Keep notifications quiet and useful." Margin="0,5,0,0"
+                                   Foreground="{DynamicResource TextSecondaryBrush}" />
+                    </StackPanel>
+                    <CheckBox Grid.Column="1" Content="Show restore notifications" IsChecked="True" VerticalAlignment="Center" />
+                </Grid>
+            </Border>
+
+            <Border Style="{StaticResource CardBorder}">
+                <Grid>
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                    <StackPanel>
+                        <TextBlock Text="Focus behavior" Style="{StaticResource SectionTitle}" />
+                        <TextBlock Text="Decide how STOW behaves when a Focus session ends." Margin="0,5,0,0"
+                                   Foreground="{DynamicResource TextSecondaryBrush}" />
+                    </StackPanel>
+                    <ComboBox Grid.Column="1" Width="190" Height="38" SelectedIndex="0" VerticalAlignment="Center">
+                        <ComboBoxItem Content="Restore previous desktop" />
+                        <ComboBoxItem Content="Keep apps stowed" />
+                    </ComboBox>
+                </Grid>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

@@ -1,6 +1,7 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using STOW.App.Views;
 
 namespace STOW.App;
 
@@ -12,6 +13,7 @@ public partial class MainWindow : Window
     {
         InitializeComponent();
         activeButton = AppsNavButton;
+        PageHost.Content = new AppsView();
     }
 
     private void Navigate_Click(object sender, RoutedEventArgs e)
@@ -40,8 +42,15 @@ public partial class MainWindow : Window
             _ => (destination, string.Empty)
         };
 
-        BodyTitleText.Text = destination == "About" ? "About is a standalone destination" : $"{destination} screen scaffold";
-        BodyText.Text = "The approved final composition will replace this scaffold. " +
-                        "The Trayify v0.3.3 minimize-to-tray engine remains untouched while the new UI is built independently.";
+        PageHost.Content = destination switch
+        {
+            "Apps" => new AppsView(),
+            "Rules" => new RulesView(),
+            "Focus" => new FocusView(),
+            "Insights" => new InsightsView(),
+            "Settings" => new SettingsView(),
+            "About" => new AboutView(),
+            _ => new AppsView()
+        };
     }
 }

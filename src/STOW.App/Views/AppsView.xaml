@@ -1,0 +1,93 @@
+<UserControl x:Class="STOW.App.Views.AppsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <StackPanel>
+            <Grid Margin="0,0,0,18">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <TextBox Grid.Column="0" Style="{StaticResource SearchBox}" MaxWidth="480"
+                         HorizontalAlignment="Left" Width="420" Text="Search apps" />
+                <Button Grid.Column="1" Style="{StaticResource PrimaryButton}" Content="Add app" Margin="12,0,0,0" />
+            </Grid>
+
+            <Grid Margin="0,0,0,10">
+                <TextBlock Text="Managed apps" Style="{StaticResource SectionTitle}" />
+                <TextBlock Text="Apps STOW is currently managing" HorizontalAlignment="Right"
+                           Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" />
+            </Grid>
+
+            <Border Style="{StaticResource CardBorder}" Padding="0" Margin="0,0,0,10">
+                <Grid Margin="18,14">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="44" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="84" />
+                    </Grid.ColumnDefinitions>
+                    <Border Width="34" Height="34" CornerRadius="8" Background="{DynamicResource SurfaceElevatedBrush}">
+                        <TextBlock Text="G" FontWeight="SemiBold" VerticalAlignment="Center" HorizontalAlignment="Center" />
+                    </Border>
+                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                        <TextBlock Text="GrokBot" FontWeight="SemiBold" FontSize="14" />
+                        <TextBlock Text="Running · managed by STOW" FontSize="12"
+                                   Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,3,0,0" />
+                    </StackPanel>
+                    <Border Grid.Column="2" Style="{StaticResource StatusChip}" Margin="12,0,18,0"
+                            VerticalAlignment="Center">
+                        <TextBlock Text="On" FontSize="12" Foreground="{DynamicResource AccentTealBrush}" />
+                    </Border>
+                    <CheckBox Grid.Column="3" Content="Enabled" IsChecked="True" VerticalAlignment="Center" />
+                </Grid>
+            </Border>
+
+            <Border Style="{StaticResource CardBorder}" Padding="0" Margin="0,0,0,20">
+                <Grid Margin="18,14">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="44" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="84" />
+                    </Grid.ColumnDefinitions>
+                    <Border Width="34" Height="34" CornerRadius="8" Background="{DynamicResource SurfaceElevatedBrush}">
+                        <TextBlock Text="D" FontWeight="SemiBold" VerticalAlignment="Center" HorizontalAlignment="Center" />
+                    </Border>
+                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                        <TextBlock Text="Discord" FontWeight="SemiBold" FontSize="14" />
+                        <TextBlock Text="Hidden in tray" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,3,0,0" />
+                    </StackPanel>
+                    <Border Grid.Column="2" Style="{StaticResource StatusChip}" Margin="12,0,18,0" VerticalAlignment="Center">
+                        <TextBlock Text="Stowed" FontSize="12" Foreground="{DynamicResource AccentBlueBrush}" />
+                    </Border>
+                    <CheckBox Grid.Column="3" Content="Enabled" IsChecked="True" VerticalAlignment="Center" />
+                </Grid>
+            </Border>
+
+            <Grid Margin="0,0,0,10">
+                <TextBlock Text="Available apps" Style="{StaticResource SectionTitle}" />
+                <TextBlock Text="Running desktop apps that can be added" HorizontalAlignment="Right"
+                           Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" />
+            </Grid>
+
+            <Border Style="{StaticResource CardBorder}" Padding="0">
+                <Grid Margin="18,14">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="44" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <Border Width="34" Height="34" CornerRadius="8" Background="{DynamicResource SurfaceElevatedBrush}">
+                        <TextBlock Text="A" FontWeight="SemiBold" VerticalAlignment="Center" HorizontalAlignment="Center" />
+                    </Border>
+                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                        <TextBlock Text="Desktop app" FontWeight="SemiBold" FontSize="14" />
+                        <TextBlock Text="Available to manage" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,3,0,0" />
+                    </StackPanel>
+                    <Button Grid.Column="2" Style="{StaticResource SecondaryButton}" Content="Add" MinWidth="82" />
+                </Grid>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

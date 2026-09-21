@@ -56,16 +56,7 @@
                            Style="{StaticResource PageSubtitle}" />
             </StackPanel>
 
-            <Border Grid.Row="2" Style="{StaticResource CardBorder}" VerticalAlignment="Top">
-                <StackPanel>
-                    <TextBlock x:Name="BodyTitleText" Text="STOW foundation shell" FontSize="17" FontWeight="SemiBold" />
-                    <TextBlock x:Name="BodyText"
-                               Text="The approved screen composition will replace this scaffold. No Trayify engine behavior is connected or changed here yet."
-                               Margin="0,8,0,0" FontSize="13" TextWrapping="Wrap"
-                               Foreground="{DynamicResource TextSecondaryBrush}" MaxWidth="720"
-                               HorizontalAlignment="Left" />
-                </StackPanel>
-            </Border>
+            <ContentControl x:Name="PageHost" Grid.Row="2" />
         </Grid>
     </Grid>
 </Window>
