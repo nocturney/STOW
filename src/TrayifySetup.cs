@@ -13,12 +13,12 @@ using Microsoft.Win32;
 [assembly: AssemblyCompany("Christian Velvet")]
 [assembly: AssemblyProduct("Trayify")]
 [assembly: AssemblyCopyright("Copyright (c) 2026 Christian Velvet")]
-[assembly: AssemblyVersion("0.3.2.0")]
-[assembly: AssemblyFileVersion("0.3.2.0")]
+[assembly: AssemblyVersion("0.3.3.0")]
+[assembly: AssemblyFileVersion("0.3.3.0")]
 
 internal static class SetupConstants
 {
-    public const string Version = "0.3.2";
+    public const string Version = "0.3.3";
     public const string Publisher = "Christian Velvet";
     public const string ProductName = "Trayify";
     public const string RepoUrl = "https://github.com/nocturney/trayify";

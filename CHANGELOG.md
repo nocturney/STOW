@@ -2,6 +2,17 @@
 
 All notable changes to Trayify are documented here.
 
+## [0.3.3] - 2026-09-21
+
+### Fixed
+- Restoring an app from its Trayify tray icon now finds hidden windows instead of searching only the visible/taskbar application list.
+- Electron/Chromium apps can be restored even if they recreate their main HWND while hidden.
+- Trayify no longer removes an app tray icon before a restore succeeds.
+- Disabling minimize-to-tray while an app is hidden no longer risks orphaning the hidden window.
+- Trayify refuses to exit if a hidden managed application cannot be safely restored.
+
+### Safety
+- Restore tracking is rolled back automatically if Windows does not make the target window visible.
 ## [0.3.2] - 2026-09-21
 
 ### Changed
@@ -90,5 +101,6 @@ All notable changes to Trayify are documented here.
 - About dialog.
 - GitHub repository and changelog shortcuts.
 - Manual update check against GitHub Releases.
+
 
 

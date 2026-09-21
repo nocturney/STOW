@@ -1,8 +1,8 @@
-# Trayify
+﻿# Trayify
 
 Trayify is a lightweight Windows utility that adds **minimize-to-tray** behavior to desktop applications that do not provide it themselves.
 
-Current version: **v0.3.2**
+Current version: **v0.3.3**
 
 ## Highlights
 
@@ -131,3 +131,4 @@ The build produces:
 - WinGet and Scoop metadata are updated against immutable versioned release URLs.
 
 See [CHANGELOG.md](CHANGELOG.md).
+

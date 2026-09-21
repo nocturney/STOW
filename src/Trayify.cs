@@ -18,8 +18,8 @@ using Microsoft.Win32;
 [assembly: AssemblyProduct("Trayify")]
 [assembly: AssemblyCompany("Christian Velvet")]
 [assembly: AssemblyCopyright("Copyright (c) 2026 Christian Velvet")]
-[assembly: AssemblyVersion("0.3.2.0")]
-[assembly: AssemblyFileVersion("0.3.2.0")]
+[assembly: AssemblyVersion("0.3.3.0")]
+[assembly: AssemblyFileVersion("0.3.3.0")]
 
 internal static class NativeMethods
 {
@@ -94,7 +94,7 @@ internal sealed class WindowInfo
 
 internal sealed class TrayifyContext : ApplicationContext
 {
-    public const string VersionString = "0.3.2";
+    public const string VersionString = "0.3.3";
     public const string RepoUrl = "https://github.com/nocturney/trayify";
     public const string ReleasesUrl = "https://github.com/nocturney/trayify/releases";
     public const string LatestReleaseApi = "https://api.github.com/repos/nocturney/trayify/releases/latest";
@@ -325,14 +325,25 @@ internal sealed class TrayifyContext : ApplicationContext
         }
         else
         {
-            a.Enabled = enabled;
             if (!String.IsNullOrEmpty(w.ExePath)) a.ExePath = w.ExePath;
             if (!String.IsNullOrEmpty(w.ProcessName)) a.ProcessName = w.ProcessName;
             if (!String.IsNullOrEmpty(w.DisplayName)) a.Name = w.DisplayName;
             if (!String.IsNullOrEmpty(w.ClassName)) a.ClassHint = w.ClassName;
+
+            if (!enabled && IsManagedHidden(a))
+            {
+                if (!RestoreManaged(a, true))
+                {
+                    a.Enabled = true;
+                    ShowRestoreFailure(a);
+                    SaveConfig();
+                    return;
+                }
+            }
+
+            a.Enabled = enabled;
         }
 
-        if (!enabled) RestoreManaged(a, true);
         SaveConfig();
     }
 
@@ -340,8 +351,19 @@ internal sealed class TrayifyContext : ApplicationContext
     {
         ManagedApp a;
         if (!managed.TryGetValue(key, out a)) return;
+
+        if (!enabled && IsManagedHidden(a))
+        {
+            if (!RestoreManaged(a, true))
+            {
+                a.Enabled = true;
+                ShowRestoreFailure(a);
+                SaveConfig();
+                return;
+            }
+        }
+
         a.Enabled = enabled;
-        if (!enabled) RestoreManaged(a, true);
         SaveConfig();
     }
     public List<WindowInfo> EnumerateAppWindows()
@@ -639,12 +661,20 @@ internal sealed class TrayifyContext : ApplicationContext
         ni.Icon = GetIconFor(a.ExePath);
         ContextMenuStrip menu = new ContextMenuStrip();
         ToolStripMenuItem open = new ToolStripMenuItem("Restore");
-        open.Click += delegate { RestoreManaged(a, true); };
+        open.Click += delegate
+        {
+            if (!RestoreManaged(a, true)) ShowRestoreFailure(a);
+        };
         ToolStripMenuItem disable = new ToolStripMenuItem("Disable minimize-to-tray");
         disable.Click += delegate
         {
+            if (IsManagedHidden(a) && !RestoreManaged(a, true))
+            {
+                ShowRestoreFailure(a);
+                return;
+            }
+
             a.Enabled = false;
-            RestoreManaged(a, true);
             SaveConfig();
             if (form != null && form.Visible) form.RefreshGrid(true);
         };
@@ -652,7 +682,10 @@ internal sealed class TrayifyContext : ApplicationContext
         menu.Items.Add(disable);
         ni.ContextMenuStrip = menu;
         ni.Visible = true;
-        ni.DoubleClick += delegate { RestoreManaged(a, true); };
+        ni.DoubleClick += delegate
+        {
+            if (!RestoreManaged(a, true)) ShowRestoreFailure(a);
+        };
         appTrayIcons[a.Key] = ni;
     }
 
@@ -679,25 +712,122 @@ internal sealed class TrayifyContext : ApplicationContext
         appTrayIcons.Remove(key);
     }
 
-    private void RestoreManaged(ManagedApp a, bool foreground)
+    private bool IsManagedHidden(ManagedApp a)
     {
-        // Remove tray enforcement first so restored windows are not immediately hidden again.
-        hiddenPids.Remove(a.Key);
-        hidden.Remove(a.Key);
-        DisposeAppTrayIcon(a.Key);
+        HashSet<int> pids;
+        if (hiddenPids.TryGetValue(a.Key, out pids) && pids.Count > 0) return true;
 
-        List<WindowInfo> windows = EnumerateAppWindows();
+        HashSet<IntPtr> handles;
+        if (hidden.TryGetValue(a.Key, out handles) && handles.Count > 0) return true;
+
+        return false;
+    }
+
+    private void ShowRestoreFailure(ManagedApp a)
+    {
+        MessageBox.Show(
+            "Trayify could not restore the hidden window for " + a.Name + ".\n\n" +
+            "The app is still running and remains managed by Trayify, so it has not been orphaned. " +
+            "Try Restore again, or open Trayify and disable minimize-to-tray after the window becomes available.",
+            "Trayify Restore",
+            MessageBoxButtons.OK,
+            MessageBoxIcon.Warning);
+    }
+
+    private bool RestoreManaged(ManagedApp a, bool foreground)
+    {
+        HashSet<IntPtr> remembered = null;
+        hidden.TryGetValue(a.Key, out remembered);
+
+        HashSet<int> trackedPids = null;
+        hiddenPids.TryGetValue(a.Key, out trackedPids);
+
         IntPtr target = IntPtr.Zero;
-        foreach (WindowInfo w in windows)
+
+        // The exact HWND that Trayify hid is always the safest restore target.
+        if (remembered != null)
         {
-            if (!MatchesIdentity(a, w)) continue;
-            NativeMethods.ShowWindow(w.Handle, NativeMethods.SW_RESTORE);
-            NativeMethods.ShowWindow(w.Handle, NativeMethods.SW_SHOW);
-            if (target == IntPtr.Zero) target = w.Handle;
+            foreach (IntPtr h in remembered)
+            {
+                if (!NativeMethods.IsWindow(h)) continue;
+                target = h;
+                break;
+            }
         }
 
-        if (foreground && target != IntPtr.Zero)
-            NativeMethods.SetForegroundWindow(target);
+        // Electron/Chromium can recreate its main HWND while hidden.
+        // If the remembered handle is gone, resolve a replacement from the PIDs
+        // that Trayify put into tray mode. Hidden windows must NOT go through
+        // EnumerateAppWindows(), because that list intentionally filters them out.
+        if (target == IntPtr.Zero && trackedPids != null && trackedPids.Count > 0)
+        {
+            IntPtr exact = IntPtr.Zero;
+            IntPtr fallback = IntPtr.Zero;
+
+            NativeMethods.EnumWindows(delegate(IntPtr h, IntPtr l)
+            {
+                uint pidRaw;
+                NativeMethods.GetWindowThreadProcessId(h, out pidRaw);
+                if (!trackedPids.Contains((int)pidRaw)) return true;
+
+                StringBuilder tb = new StringBuilder(1024);
+                StringBuilder cb = new StringBuilder(256);
+                NativeMethods.GetWindowText(h, tb, tb.Capacity);
+                NativeMethods.GetClassName(h, cb, cb.Capacity);
+
+                string title = tb.ToString();
+                string cls = cb.ToString();
+
+                bool classMatch =
+                    String.IsNullOrEmpty(a.ClassHint) ||
+                    String.Equals(a.ClassHint, cls, StringComparison.Ordinal);
+
+                bool titleMatch =
+                    !String.IsNullOrEmpty(a.TitleHint) &&
+                    String.Equals(a.TitleHint, title, StringComparison.OrdinalIgnoreCase);
+
+                if (titleMatch && classMatch)
+                {
+                    exact = h;
+                    return false;
+                }
+
+                if (fallback == IntPtr.Zero && classMatch && title.Length > 0)
+                    fallback = h;
+
+                return true;
+            }, IntPtr.Zero);
+
+            target = exact != IntPtr.Zero ? exact : fallback;
+        }
+
+        if (target == IntPtr.Zero)
+            return false;
+
+        // Stop tray enforcement only after we have a valid restore target.
+        // The UI-thread timer cannot re-hide the window while this handler is running.
+        HashSet<int> savedPids = trackedPids == null ? null : new HashSet<int>(trackedPids);
+        HashSet<IntPtr> savedHandles = remembered == null ? null : new HashSet<IntPtr>(remembered);
+
+        hiddenPids.Remove(a.Key);
+        hidden.Remove(a.Key);
+
+        NativeMethods.ShowWindow(target, NativeMethods.SW_RESTORE);
+        NativeMethods.ShowWindow(target, NativeMethods.SW_SHOW);
+        if (foreground) NativeMethods.SetForegroundWindow(target);
+
+        bool restored = NativeMethods.IsWindow(target) && NativeMethods.IsWindowVisible(target);
+        if (restored)
+        {
+            DisposeAppTrayIcon(a.Key);
+            return true;
+        }
+
+        // Never orphan a hidden app: restore Trayify's tracking and leave its tray icon.
+        if (savedPids != null && savedPids.Count > 0) hiddenPids[a.Key] = savedPids;
+        if (savedHandles != null && savedHandles.Count > 0) hidden[a.Key] = savedHandles;
+        EnsureAppTrayIcon(a);
+        return false;
     }
 
     public bool IsConfiguredRunning(ManagedApp a)
@@ -936,11 +1066,36 @@ internal sealed class TrayifyContext : ApplicationContext
 
     public void ExitTrayify()
     {
-        exiting = true;
+        if (exiting) return;
+
         engineTimer.Stop();
         uiTimer.Stop();
         signalTimer.Stop();
-        foreach (ManagedApp a in new List<ManagedApp>(managed.Values)) RestoreManaged(a, false);
+
+        List<string> failures = new List<string>();
+        foreach (ManagedApp a in new List<ManagedApp>(managed.Values))
+        {
+            if (IsManagedHidden(a) && !RestoreManaged(a, false))
+                failures.Add(a.Name);
+        }
+
+        if (failures.Count > 0)
+        {
+            engineTimer.Start();
+            uiTimer.Start();
+            signalTimer.Start();
+
+            MessageBox.Show(
+                "Trayify did not exit because it could not safely restore:\n\n" +
+                String.Join("\n", failures.ToArray()) +
+                "\n\nThis prevents hidden applications from being left without a tray icon.",
+                "Trayify",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Warning);
+            return;
+        }
+
+        exiting = true;
         foreach (NotifyIcon ni in new List<NotifyIcon>(appTrayIcons.Values))
         {
             ni.Visible = false;
