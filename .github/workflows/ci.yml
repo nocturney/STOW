@@ -37,6 +37,7 @@ jobs:
           $version = (Get-Content ./STOW_VERSION -Raw).Trim()
           $required = @(
             './dist-stow/STOW.exe',
+            './dist-stow/STOWSetup.exe',
             "./dist-stow/STOW-$version-win-x64.zip",
             './dist-stow/SHA256SUMS.txt',
             './dist-stow/DOTNET_RUNTIME_LICENSE.txt',

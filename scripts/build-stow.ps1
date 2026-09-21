@@ -3,6 +3,7 @@ $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $PSScriptRoot
 $version = (Get-Content (Join-Path $root 'STOW_VERSION') -Raw).Trim()
 $project = Join-Path $root 'src\STOW.App\STOW.App.csproj'
+$setupSrc = Join-Path $root 'src\STOWSetup.cs'
 $dist = Join-Path $root 'dist-stow'
 $publish = Join-Path $root 'artifacts\stow-publish'
 
@@ -19,6 +20,14 @@ $numericVersion = ($version -split '-')[0]
 $fileVersion = "$numericVersion.0"
 if ($projectText -notmatch ('<FileVersion>' + [regex]::Escape($fileVersion) + '</FileVersion>')) {
     throw "STOW.App FileVersion does not match $fileVersion"
+}
+
+$setupText = Get-Content $setupSrc -Raw
+if ($setupText -notmatch ('public const string Version\s*=\s*"' + [regex]::Escape($version) + '"')) {
+    throw "STOWSetup.cs Version does not match STOW_VERSION=$version"
+}
+if ($setupText -notmatch ('public const string FileVersion\s*=\s*"' + [regex]::Escape($fileVersion) + '"')) {
+    throw "STOWSetup.cs FileVersion does not match $fileVersion"
 }
 
 foreach ($path in @($dist, $publish)) {
@@ -48,6 +57,23 @@ if ($builtVersion -ne $fileVersion) {
 
 Copy-Item $app (Join-Path $dist 'STOW.exe') -Force
 
+$cscCandidates = @(
+    "$env:WINDIR\Microsoft.NET\Framework64\v4.0.30319\csc.exe",
+    "$env:WINDIR\Microsoft.NET\Framework\v4.0.30319\csc.exe"
+)
+$csc = $cscCandidates | Where-Object { Test-Path $_ } | Select-Object -First 1
+if (-not $csc) { throw 'Could not find the .NET Framework C# compiler for STOWSetup.' }
+
+$setup = Join-Path $dist 'STOWSetup.exe'
+$resourceArg = '/resource:' + (Join-Path $dist 'STOW.exe') + ',STOW.Payload.exe'
+& $csc /nologo /target:winexe /platform:anycpu /optimize+ /out:$setup /reference:System.Windows.Forms.dll /reference:System.Drawing.dll $resourceArg $setupSrc
+if ($LASTEXITCODE -ne 0) { throw "STOWSetup compilation failed with exit code $LASTEXITCODE" }
+
+$setupVersion = (Get-Item $setup).VersionInfo.FileVersion
+if ($setupVersion -ne $fileVersion) {
+    throw "STOWSetup FileVersion $setupVersion does not match expected $fileVersion"
+}
+
 $packageFiles = @(
     'README.md',
     'LICENSE',
@@ -75,17 +101,21 @@ if (-not (Test-Path $desktopNotices)) { throw 'Windows Desktop third-party notic
 Copy-Item $desktopNotices (Join-Path $dist 'DOTNET_WINDOWS_DESKTOP_THIRD_PARTY_NOTICES.txt') -Force
 
 $appHash = (Get-FileHash -Algorithm SHA256 (Join-Path $dist 'STOW.exe')).Hash.ToLowerInvariant()
-"$appHash  STOW.exe" | Set-Content (Join-Path $dist 'SHA256SUMS.txt') -Encoding ascii
+$setupHash = (Get-FileHash -Algorithm SHA256 (Join-Path $dist 'STOWSetup.exe')).Hash.ToLowerInvariant()
+@(
+    "$appHash  STOW.exe",
+    "$setupHash  STOWSetup.exe"
+) | Set-Content (Join-Path $dist 'SHA256SUMS.txt') -Encoding ascii
 
 @(
     "# STOW $version",
     "",
-    "Technical preview build. Publishing is disabled until installer, migration, notices, signing, and release validation are complete."
+    "Technical preview build. Publishing is disabled until updater, signing, and final release validation are complete."
 ) | Set-Content (Join-Path $dist 'release-notes.md') -Encoding utf8
 
 $zip = Join-Path $dist "STOW-$version-win-x64.zip"
 $zipInputs = Get-ChildItem $dist -File | Where-Object { $_.FullName -ne $zip } | Select-Object -ExpandProperty FullName
 Compress-Archive -Path $zipInputs -DestinationPath $zip -CompressionLevel Optimal
 
-Get-Item (Join-Path $dist 'STOW.exe'),$zip,(Join-Path $dist 'SHA256SUMS.txt') |
+Get-Item (Join-Path $dist 'STOW.exe'),(Join-Path $dist 'STOWSetup.exe'),$zip,(Join-Path $dist 'SHA256SUMS.txt') |
     Select-Object Name,Length,LastWriteTime

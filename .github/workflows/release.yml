@@ -35,6 +35,7 @@ jobs:
           $version = (Get-Content ./STOW_VERSION -Raw).Trim()
           $required = @(
             './dist-stow/STOW.exe',
+            './dist-stow/STOWSetup.exe',
             "./dist-stow/STOW-$version-win-x64.zip",
             './dist-stow/SHA256SUMS.txt',
             './dist-stow/DOTNET_RUNTIME_LICENSE.txt',
@@ -52,4 +53,4 @@ jobs:
         shell: powershell
         run: |
           Write-Host "STOW publishing is intentionally disabled."
-          Write-Host "Enable artifact publication only after STOW.exe, STOWSetup.exe, migration, signing and release validation are complete."
+          Write-Host "Installer and migration gates are complete; enable publication only after updater, signing and final release validation are complete."
