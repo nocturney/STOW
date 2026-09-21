@@ -3,6 +3,8 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using STOW.App.Views;
 using STOW.Engine.Contracts;
+using STOW.Infrastructure.Configuration;
+using STOW.Infrastructure.Migration;
 using STOW.Platform.Windows.Discovery;
 
 namespace STOW.App;
@@ -10,10 +12,14 @@ namespace STOW.App;
 public partial class MainWindow : Window
 {
     private readonly IAppDiscovery appDiscovery = new Win32AppDiscovery();
+    private readonly IManagedAppStore managedAppStore;
+    private readonly TrayifyMigrationResult migrationResult;
     private Button? activeButton;
 
     public MainWindow()
     {
+        migrationResult = TrayifyConfigMigrator.ForCurrentUser().MigrateIfNeeded();
+        managedAppStore = TextManagedAppStore.ForCurrentUser();
         InitializeComponent();
         activeButton = AppsNavButton;
         PageHost.Content = CreateAppsView();
@@ -57,5 +63,17 @@ public partial class MainWindow : Window
         };
     }
 
-    private AppsView CreateAppsView() => new(appDiscovery.DiscoverUserFacingApps());
+    private AppsView CreateAppsView() => new(LoadManagedApps(), appDiscovery.DiscoverUserFacingApps());
+
+    private IReadOnlyList<ManagedAppDefinition> LoadManagedApps()
+    {
+        try
+        {
+            return managedAppStore.Load();
+        }
+        catch
+        {
+            return Array.Empty<ManagedAppDefinition>();
+        }
+    }
 }

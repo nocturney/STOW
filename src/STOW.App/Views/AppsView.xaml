@@ -22,14 +22,31 @@
                            Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" />
             </Grid>
 
-            <Border Style="{StaticResource CardBorder}" Margin="0,0,0,20">
+            <Border x:Name="NoManagedApps" Style="{StaticResource CardBorder}" Margin="0,0,0,20" Visibility="Collapsed">
                 <StackPanel HorizontalAlignment="Center" Margin="10,20">
                     <TextBlock Text="No managed apps yet" FontSize="16" FontWeight="SemiBold" />
-                    <TextBlock Text="Managed apps will appear here after the v0.3.3 engine adapter is connected."
+                    <TextBlock Text="Add support will be enabled when the v0.3.3 runtime adapter is connected."
                                Margin="0,6,0,0" TextAlignment="Center" TextWrapping="Wrap"
                                Foreground="{DynamicResource TextSecondaryBrush}" MaxWidth="520" />
                 </StackPanel>
             </Border>
+
+            <ItemsControl x:Name="ManagedAppsList" Margin="0,0,0,10">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border Style="{StaticResource CardBorder}" Padding="0" Margin="0,0,0,10">
+                            <Grid Margin="18,14">
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                                <StackPanel>
+                                    <TextBlock Text="{Binding Name}" FontWeight="SemiBold" FontSize="14" />
+                                    <TextBlock Text="{Binding ProcessName}" FontSize="12" Margin="0,3,0,0" Foreground="{DynamicResource TextSecondaryBrush}" />
+                                </StackPanel>
+                                <CheckBox Grid.Column="1" Content="Configured" IsChecked="{Binding Enabled}" IsEnabled="False" VerticalAlignment="Center" />
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
 
             <Grid Margin="0,0,0,10">
                 <TextBlock Text="Available apps" Style="{StaticResource SectionTitle}" />

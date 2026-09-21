@@ -6,7 +6,8 @@ namespace STOW.App.Views;
 
 public partial class AppsView : UserControl
 {
-    private IReadOnlyList<DiscoveredAppSnapshot> allApps = Array.Empty<DiscoveredAppSnapshot>();
+    private IReadOnlyList<ManagedAppDefinition> managedApps = Array.Empty<ManagedAppDefinition>();
+    private IReadOnlyList<DiscoveredAppSnapshot> availableApps = Array.Empty<DiscoveredAppSnapshot>();
 
     public AppsView()
     {
@@ -14,10 +15,15 @@ public partial class AppsView : UserControl
         ApplyFilter();
     }
 
-    public AppsView(IEnumerable<DiscoveredAppSnapshot> apps)
+    public AppsView(
+        IEnumerable<ManagedAppDefinition> managed,
+        IEnumerable<DiscoveredAppSnapshot> available)
     {
         InitializeComponent();
-        allApps = apps
+        managedApps = managed.OrderBy(app => app.Name, StringComparer.CurrentCultureIgnoreCase).ToArray();
+        var managedKeys = managedApps.Select(app => app.Key).ToHashSet(StringComparer.OrdinalIgnoreCase);
+        availableApps = available
+            .Where(app => !managedKeys.Contains(app.Key))
             .OrderBy(app => app.DisplayName, StringComparer.CurrentCultureIgnoreCase)
             .ToArray();
         ApplyFilter();
@@ -27,21 +33,34 @@ public partial class AppsView : UserControl
 
     private void ApplyFilter()
     {
-        if (AvailableAppsList is null || AvailableSummaryText is null || NoAvailableApps is null)
+        if (ManagedAppsList is null || AvailableAppsList is null ||
+            NoManagedApps is null || NoAvailableApps is null || AvailableSummaryText is null)
             return;
 
         string filter = SearchBox?.Text?.Trim() ?? string.Empty;
-        IReadOnlyList<DiscoveredAppSnapshot> visible = string.IsNullOrEmpty(filter)
-            ? allApps
-            : allApps.Where(app =>
-                (app.DisplayName + " " + app.WindowTitle + " " + app.ProcessName)
-                    .Contains(filter, StringComparison.CurrentCultureIgnoreCase))
-                .ToArray();
+        IReadOnlyList<ManagedAppDefinition> visibleManaged = string.IsNullOrEmpty(filter)
+            ? managedApps
+            : managedApps.Where(app => Matches(filter, app.Name, app.ProcessName, app.TitleHint)).ToArray();
+        IReadOnlyList<DiscoveredAppSnapshot> visibleAvailable = string.IsNullOrEmpty(filter)
+            ? availableApps
+            : availableApps.Where(app => Matches(filter, app.DisplayName, app.WindowTitle, app.ProcessName)).ToArray();
 
-        AvailableAppsList.ItemsSource = visible;
-        AvailableSummaryText.Text = visible.Count == 1
+        ManagedAppsList.ItemsSource = visibleManaged;
+        AvailableAppsList.ItemsSource = visibleAvailable;
+        NoManagedApps.Visibility = managedApps.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+        NoAvailableApps.Visibility = visibleAvailable.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+        AvailableSummaryText.Text = visibleAvailable.Count == 1
             ? "1 running desktop app"
-            : $"{visible.Count} running desktop apps";
-        NoAvailableApps.Visibility = visible.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+            : $"{visibleAvailable.Count} running desktop apps";
+    }
+
+    private static bool Matches(string filter, params string[] values)
+    {
+        foreach (string value in values)
+        {
+            if (!string.IsNullOrEmpty(value) && value.Contains(filter, StringComparison.CurrentCultureIgnoreCase))
+                return true;
+        }
+        return false;
     }
 }
