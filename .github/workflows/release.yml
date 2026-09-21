@@ -1,0 +1,41 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Verify tag matches VERSION
+        shell: powershell
+        run: |
+          $version = (Get-Content ./VERSION -Raw).Trim()
+          if ("v$version" -ne "${{ github.ref_name }}") {
+            throw "Tag ${{ github.ref_name }} does not match VERSION=$version"
+          }
+
+      - name: Build release
+        shell: powershell
+        run: ./scripts/build.ps1
+
+      - name: Publish GitHub Release
+        shell: powershell
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $version = (Get-Content ./VERSION -Raw).Trim()
+          gh release create "v$version" `
+            "./dist/Trayify.exe#Trayify.exe" `
+            "./dist/Trayify-v$version-win.zip#Trayify-v$version-win.zip" `
+            "./dist/SHA256SUMS.txt#SHA256SUMS.txt" `
+            --title "Trayify v$version" `
+            --notes-file "./dist/release-notes.md"
