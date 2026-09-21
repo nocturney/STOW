@@ -2,18 +2,21 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using STOW.App.Views;
+using STOW.Engine.Contracts;
+using STOW.Platform.Windows.Discovery;
 
 namespace STOW.App;
 
 public partial class MainWindow : Window
 {
+    private readonly IAppDiscovery appDiscovery = new Win32AppDiscovery();
     private Button? activeButton;
 
     public MainWindow()
     {
         InitializeComponent();
         activeButton = AppsNavButton;
-        PageHost.Content = new AppsView();
+        PageHost.Content = CreateAppsView();
     }
 
     private void Navigate_Click(object sender, RoutedEventArgs e)
@@ -44,13 +47,15 @@ public partial class MainWindow : Window
 
         PageHost.Content = destination switch
         {
-            "Apps" => new AppsView(),
+            "Apps" => CreateAppsView(),
             "Rules" => new RulesView(),
             "Focus" => new FocusView(),
             "Insights" => new InsightsView(),
             "Settings" => new SettingsView(),
             "About" => new AboutView(),
-            _ => new AppsView()
+            _ => CreateAppsView()
         };
     }
+
+    private AppsView CreateAppsView() => new(appDiscovery.DiscoverUserFacingApps());
 }

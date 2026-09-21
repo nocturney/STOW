@@ -8,9 +8,12 @@
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
-                <TextBox Grid.Column="0" Style="{StaticResource SearchBox}" MaxWidth="480"
-                         HorizontalAlignment="Left" Width="420" Text="Search apps" />
-                <Button Grid.Column="1" Style="{StaticResource PrimaryButton}" Content="Add app" Margin="12,0,0,0" />
+                <TextBox x:Name="SearchBox" Grid.Column="0" Style="{StaticResource SearchBox}"
+                         MaxWidth="480" HorizontalAlignment="Left" Width="420"
+                         TextChanged="SearchBox_TextChanged" />
+                <Button Grid.Column="1" Style="{StaticResource PrimaryButton}" Content="Add app"
+                        IsEnabled="False" ToolTip="Available after the engine migration is connected."
+                        Margin="12,0,0,0" />
             </Grid>
 
             <Grid Margin="0,0,0,10">
@@ -19,75 +22,50 @@
                            Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" />
             </Grid>
 
-            <Border Style="{StaticResource CardBorder}" Padding="0" Margin="0,0,0,10">
-                <Grid Margin="18,14">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="44" />
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="84" />
-                    </Grid.ColumnDefinitions>
-                    <Border Width="34" Height="34" CornerRadius="8" Background="{DynamicResource SurfaceElevatedBrush}">
-                        <TextBlock Text="G" FontWeight="SemiBold" VerticalAlignment="Center" HorizontalAlignment="Center" />
-                    </Border>
-                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                        <TextBlock Text="GrokBot" FontWeight="SemiBold" FontSize="14" />
-                        <TextBlock Text="Running · managed by STOW" FontSize="12"
-                                   Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,3,0,0" />
-                    </StackPanel>
-                    <Border Grid.Column="2" Style="{StaticResource StatusChip}" Margin="12,0,18,0"
-                            VerticalAlignment="Center">
-                        <TextBlock Text="On" FontSize="12" Foreground="{DynamicResource AccentTealBrush}" />
-                    </Border>
-                    <CheckBox Grid.Column="3" Content="Enabled" IsChecked="True" VerticalAlignment="Center" />
-                </Grid>
-            </Border>
-
-            <Border Style="{StaticResource CardBorder}" Padding="0" Margin="0,0,0,20">
-                <Grid Margin="18,14">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="44" />
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="84" />
-                    </Grid.ColumnDefinitions>
-                    <Border Width="34" Height="34" CornerRadius="8" Background="{DynamicResource SurfaceElevatedBrush}">
-                        <TextBlock Text="D" FontWeight="SemiBold" VerticalAlignment="Center" HorizontalAlignment="Center" />
-                    </Border>
-                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                        <TextBlock Text="Discord" FontWeight="SemiBold" FontSize="14" />
-                        <TextBlock Text="Hidden in tray" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,3,0,0" />
-                    </StackPanel>
-                    <Border Grid.Column="2" Style="{StaticResource StatusChip}" Margin="12,0,18,0" VerticalAlignment="Center">
-                        <TextBlock Text="Stowed" FontSize="12" Foreground="{DynamicResource AccentBlueBrush}" />
-                    </Border>
-                    <CheckBox Grid.Column="3" Content="Enabled" IsChecked="True" VerticalAlignment="Center" />
-                </Grid>
+            <Border Style="{StaticResource CardBorder}" Margin="0,0,0,20">
+                <StackPanel HorizontalAlignment="Center" Margin="10,20">
+                    <TextBlock Text="No managed apps yet" FontSize="16" FontWeight="SemiBold" />
+                    <TextBlock Text="Managed apps will appear here after the v0.3.3 engine adapter is connected."
+                               Margin="0,6,0,0" TextAlignment="Center" TextWrapping="Wrap"
+                               Foreground="{DynamicResource TextSecondaryBrush}" MaxWidth="520" />
+                </StackPanel>
             </Border>
 
             <Grid Margin="0,0,0,10">
                 <TextBlock Text="Available apps" Style="{StaticResource SectionTitle}" />
-                <TextBlock Text="Running desktop apps that can be added" HorizontalAlignment="Right"
+                <TextBlock x:Name="AvailableSummaryText" HorizontalAlignment="Right"
                            Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" />
             </Grid>
 
-            <Border Style="{StaticResource CardBorder}" Padding="0">
-                <Grid Margin="18,14">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="44" />
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-                    <Border Width="34" Height="34" CornerRadius="8" Background="{DynamicResource SurfaceElevatedBrush}">
-                        <TextBlock Text="A" FontWeight="SemiBold" VerticalAlignment="Center" HorizontalAlignment="Center" />
-                    </Border>
-                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                        <TextBlock Text="Desktop app" FontWeight="SemiBold" FontSize="14" />
-                        <TextBlock Text="Available to manage" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,3,0,0" />
-                    </StackPanel>
-                    <Button Grid.Column="2" Style="{StaticResource SecondaryButton}" Content="Add" MinWidth="82" />
-                </Grid>
+            <Border x:Name="NoAvailableApps" Style="{StaticResource CardBorder}" Visibility="Collapsed">
+                <TextBlock Text="No user-facing desktop apps match this search."
+                           Foreground="{DynamicResource TextSecondaryBrush}" HorizontalAlignment="Center" />
             </Border>
+
+            <ItemsControl x:Name="AvailableAppsList">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border Style="{StaticResource CardBorder}" Padding="0" Margin="0,0,0,10">
+                            <Grid Margin="18,14">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <StackPanel>
+                                    <TextBlock Text="{Binding DisplayName}" FontWeight="SemiBold" FontSize="14" />
+                                    <TextBlock Text="{Binding WindowTitle}" FontSize="12" Margin="0,3,0,0"
+                                               Foreground="{DynamicResource TextSecondaryBrush}" />
+                                    <TextBlock Text="{Binding ProcessName}" FontSize="11" Margin="0,3,0,0"
+                                               Foreground="{DynamicResource MutedBrush}" />
+                                </StackPanel>
+                                <Button Grid.Column="1" Style="{StaticResource SecondaryButton}" Content="Add"
+                                        IsEnabled="False" VerticalAlignment="Center"
+                                        ToolTip="Available after the engine migration is connected." />
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
         </StackPanel>
     </ScrollViewer>
 </UserControl>
