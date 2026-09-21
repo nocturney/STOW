@@ -1,0 +1,26 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Build
+        shell: powershell
+        run: ./scripts/build.ps1
+
+      - name: Verify output
+        shell: powershell
+        run: |
+          if (-not (Test-Path ./dist/Trayify.exe)) { throw "Trayify.exe was not produced" }
+          Get-FileHash ./dist/Trayify.exe -Algorithm SHA256
