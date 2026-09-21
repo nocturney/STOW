@@ -34,6 +34,7 @@ jobs:
         run: |
           $version = (Get-Content ./VERSION -Raw).Trim()
           gh release create "v$version" `
+            "./dist/TrayifySetup.exe#TrayifySetup.exe" `
             "./dist/Trayify.exe#Trayify.exe" `
             "./dist/Trayify-v$version-win.zip#Trayify-v$version-win.zip" `
             "./dist/SHA256SUMS.txt#SHA256SUMS.txt" `
