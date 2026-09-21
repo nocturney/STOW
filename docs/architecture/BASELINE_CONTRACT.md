@@ -26,6 +26,16 @@ Baseline build SHA-256:
 
 These hashes are build evidence, not future release hashes.
 
+## Restore compatibility harness
+
+`STOW.Platform.Windows.Compatibility.RestoreTargetResolver` mirrors the v0.3.3 target-selection order without changing the legacy source:
+1. use the remembered HWND when it is still valid;
+2. otherwise enumerate top-level windows directly and restrict candidates to tracked PIDs;
+3. prefer exact title + class, then a non-empty-title class match;
+4. never introduce a visibility filter on this hidden-window restore path.
+
+Integration tests cover these cases before the resolver is wired into the runtime engine.
+
 ## Migration principle
 
 The engine is a protected asset, not a rewrite target.
