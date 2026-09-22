@@ -56,14 +56,68 @@
                 <Border Style="{StaticResource CardBorder}">
                     <StackPanel>
                         <TextBlock Text="Saved presets" FontWeight="SemiBold" />
-                        <TextBlock Text="Reusable presets arrive with Focus persistence."
+                        <TextBlock Text="Save the current Keep visible selection for reuse."
                                    Margin="0,5,0,10" TextWrapping="Wrap"
                                    Foreground="{DynamicResource TextSecondaryBrush}" />
-                        <Button Style="{StaticResource SecondaryButton}" Content="Not available yet"
-                                HorizontalAlignment="Left" IsEnabled="False" />
+                        <Button x:Name="SavePresetButton"
+                                Style="{StaticResource SecondaryButton}"
+                                Content="Save current"
+                                HorizontalAlignment="Left"
+                                Click="SavePreset_Click" />
                     </StackPanel>
                 </Border>
             </UniformGrid>
+
+            <Border x:Name="SavedPresetsCard"
+                    Style="{StaticResource CardBorder}"
+                    Margin="0,0,0,14">
+                <StackPanel>
+                    <Grid Margin="0,0,0,8">
+                        <TextBlock Text="Saved presets" Style="{StaticResource SectionTitle}" />
+                        <TextBlock x:Name="SavedPresetsSummaryText"
+                                   HorizontalAlignment="Right"
+                                   Foreground="{DynamicResource TextSecondaryBrush}"
+                                   FontSize="12" />
+                    </Grid>
+                    <TextBlock x:Name="NoSavedPresetsText"
+                               Text="No saved Focus presets yet."
+                               Foreground="{DynamicResource TextSecondaryBrush}"
+                               Margin="0,4,0,2" />
+                    <ItemsControl x:Name="SavedPresetsList">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Margin="0,7">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding Name}" FontWeight="SemiBold" />
+                                        <TextBlock Text="{Binding Summary}"
+                                                   Margin="0,2,0,0"
+                                                   FontSize="11"
+                                                   Foreground="{DynamicResource TextSecondaryBrush}" />
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="1"
+                                                Orientation="Horizontal"
+                                                VerticalAlignment="Center">
+                                        <Button Style="{StaticResource SecondaryButton}"
+                                                Content="Use"
+                                                Tag="{Binding Id}"
+                                                IsEnabled="{Binding CanUse}"
+                                                Margin="0,0,8,0"
+                                                Click="UsePreset_Click" />
+                                        <Button Style="{StaticResource SecondaryButton}"
+                                                Content="Delete"
+                                                Tag="{Binding Id}"
+                                                Click="DeletePreset_Click" />
+                                    </StackPanel>
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </Border>
 
             <Grid>
                 <Grid.ColumnDefinitions>

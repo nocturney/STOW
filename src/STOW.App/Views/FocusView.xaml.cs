@@ -9,8 +9,10 @@ public partial class FocusView : UserControl
 {
     private readonly ITrayEngine? engine;
     private readonly IAppSettingsStore settingsStore;
+    private readonly IFocusPresetStore presetStore;
     private readonly DispatcherTimer refreshTimer;
     private readonly HashSet<string> selectedKeepVisible = new(StringComparer.OrdinalIgnoreCase);
+    private IReadOnlyList<FocusPresetDefinition> presets = Array.Empty<FocusPresetDefinition>();
     private string? runtimeUnavailableReason;
     private bool runtimeHealthy;
 
@@ -21,13 +23,21 @@ public partial class FocusView : UserControl
         bool KeepVisible,
         bool CanEdit);
 
+    private sealed record FocusPresetRow(
+        string Id,
+        string Name,
+        string Summary,
+        bool CanUse);
+
     public FocusView(
         ITrayEngine? engine,
         IAppSettingsStore settingsStore,
+        IFocusPresetStore presetStore,
         string? runtimeUnavailableReason = null)
     {
         this.engine = engine;
         this.settingsStore = settingsStore;
+        this.presetStore = presetStore;
         this.runtimeUnavailableReason = runtimeUnavailableReason;
         runtimeHealthy = engine is not null;
 
@@ -98,8 +108,11 @@ public partial class FocusView : UserControl
             FocusActionButton.IsEnabled = focus.Active || enabled.Length > 0;
             DeepWorkButton.IsEnabled = !focus.Active && enabled.Length > 0;
             KeepAllButton.IsEnabled = !focus.Active && enabled.Length > 0;
+            SavePresetButton.IsEnabled = !focus.Active && enabled.Length > 0;
 
-            if (string.IsNullOrWhiteSpace(runtimeUnavailableReason))
+            bool presetsHealthy = RefreshPresets(focus.Active, enabledKeys);
+
+            if (presetsHealthy && string.IsNullOrWhiteSpace(runtimeUnavailableReason))
                 FocusStatusBanner.Visibility = Visibility.Collapsed;
         }
         catch (Exception ex)
@@ -119,11 +132,177 @@ public partial class FocusView : UserControl
         FocusActionButton.IsEnabled = false;
         DeepWorkButton.IsEnabled = false;
         KeepAllButton.IsEnabled = false;
+        SavePresetButton.IsEnabled = false;
         FocusAppsList.ItemsSource = Array.Empty<FocusAppRow>();
+        SavedPresetsList.ItemsSource = Array.Empty<FocusPresetRow>();
+        SavedPresetsSummaryText.Text = string.Empty;
+        NoSavedPresetsText.Visibility = Visibility.Visible;
         ManagedAppsSummaryText.Text = "Runtime unavailable";
         NoManagedAppsText.Visibility = Visibility.Visible;
         StowedCountText.Text = "0";
         VisibleCountText.Text = "0";
+    }
+
+    private bool RefreshPresets(bool focusActive, HashSet<string> enabledKeys)
+    {
+        try
+        {
+            presets = presetStore.Load();
+
+            FocusPresetRow[] rows = presets
+                .Select(preset =>
+                {
+                    int available = preset.KeepVisibleAppKeys.Count(enabledKeys.Contains);
+                    int missing = preset.KeepVisibleAppKeys.Count - available;
+
+                    string summary;
+                    if (preset.KeepVisibleAppKeys.Count == 0)
+                    {
+                        summary = "Stows all enabled managed apps";
+                    }
+                    else if (missing > 0)
+                    {
+                        summary = $"Keeps {available} visible · {missing} unavailable";
+                    }
+                    else
+                    {
+                        summary = available == 1
+                            ? "Keeps 1 app visible"
+                            : $"Keeps {available} apps visible";
+                    }
+
+                    return new FocusPresetRow(
+                        preset.Id,
+                        preset.Name,
+                        summary,
+                        CanUse: !focusActive);
+                })
+                .ToArray();
+
+            SavedPresetsList.ItemsSource = rows;
+            NoSavedPresetsText.Visibility = rows.Length == 0
+                ? Visibility.Visible
+                : Visibility.Collapsed;
+            SavedPresetsSummaryText.Text = rows.Length == 1
+                ? "1 preset"
+                : $"{rows.Length} presets";
+            return true;
+        }
+        catch (Exception ex)
+        {
+            presets = Array.Empty<FocusPresetDefinition>();
+            SavedPresetsList.ItemsSource = Array.Empty<FocusPresetRow>();
+            SavedPresetsSummaryText.Text = "Unavailable";
+            NoSavedPresetsText.Visibility = Visibility.Visible;
+            FocusStatusBanner.Visibility = Visibility.Visible;
+            FocusStatusText.Text = "Focus presets could not be loaded: " + ex.Message;
+            return false;
+        }
+    }
+
+    private void SavePreset_Click(object sender, RoutedEventArgs e)
+    {
+        if (engine is null || !runtimeHealthy)
+            return;
+
+        var dialog = new FocusPresetNameWindow($"Preset {presets.Count + 1}")
+        {
+            Owner = Window.GetWindow(this)
+        };
+
+        if (dialog.ShowDialog() != true)
+            return;
+
+        string name = dialog.PresetName;
+        if (presets.Any(preset =>
+            preset.Name.Equals(name, StringComparison.CurrentCultureIgnoreCase)))
+        {
+            ShowFailure(
+                "Preset name already exists.",
+                "Choose a different name so saved Focus presets remain unambiguous.");
+            return;
+        }
+
+        FocusPresetDefinition preset =
+            FocusPresetDefinition.Create(name, selectedKeepVisible);
+        var updated = presets.Append(preset).ToArray();
+
+        try
+        {
+            presetStore.Save(updated);
+            presets = updated;
+            RefreshData();
+        }
+        catch (Exception ex)
+        {
+            ShowFailure("STOW could not save the Focus preset.", ex.Message);
+        }
+    }
+
+    private void UsePreset_Click(object sender, RoutedEventArgs e)
+    {
+        if (engine is null ||
+            !runtimeHealthy ||
+            sender is not Button { Tag: string presetId })
+        {
+            return;
+        }
+
+        FocusPresetDefinition? preset = presets.FirstOrDefault(item =>
+            item.Id.Equals(presetId, StringComparison.OrdinalIgnoreCase));
+        if (preset is null)
+            return;
+
+        try
+        {
+            HashSet<string> enabledKeys = engine.GetSnapshot().ManagedApps
+                .Where(app => app.Enabled)
+                .Select(app => app.Key)
+                .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+            selectedKeepVisible.Clear();
+            selectedKeepVisible.UnionWith(
+                preset.KeepVisibleAppKeys.Where(enabledKeys.Contains));
+            RefreshData();
+        }
+        catch (Exception ex)
+        {
+            ShowFailure("STOW could not apply the Focus preset.", ex.Message);
+        }
+    }
+
+    private void DeletePreset_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is not Button { Tag: string presetId })
+            return;
+
+        FocusPresetDefinition? preset = presets.FirstOrDefault(item =>
+            item.Id.Equals(presetId, StringComparison.OrdinalIgnoreCase));
+        if (preset is null)
+            return;
+
+        MessageBoxResult confirmation = MessageBox.Show(
+            $"Delete the Focus preset \"{preset.Name}\"?",
+            "STOW",
+            MessageBoxButton.YesNo,
+            MessageBoxImage.Question);
+        if (confirmation != MessageBoxResult.Yes)
+            return;
+
+        FocusPresetDefinition[] updated = presets
+            .Where(item => !item.Id.Equals(presetId, StringComparison.OrdinalIgnoreCase))
+            .ToArray();
+
+        try
+        {
+            presetStore.Save(updated);
+            presets = updated;
+            RefreshData();
+        }
+        catch (Exception ex)
+        {
+            ShowFailure("STOW could not delete the Focus preset.", ex.Message);
+        }
     }
 
     private void KeepVisible_Click(object sender, RoutedEventArgs e)

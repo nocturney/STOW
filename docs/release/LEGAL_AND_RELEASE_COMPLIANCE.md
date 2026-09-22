@@ -50,7 +50,7 @@ Preview releases may remain unsigned under the current release policy, with an e
 
 Automation cannot establish the following:
 
-- trademark/name clearance for **STOW** in every market or product class;
+- trademark/name clearance for **STOW** in every market or product class; see `TRADEMARK_SCREENING.md` for the preliminary screen and the explicit pre-Stable clearance gate;
 - local consumer-law, warranty, refund or mandatory disclosure requirements if STOW is sold or bundled commercially;
 - tax/VAT obligations arising from paid distribution;
 - sanctions/export-control obligations that may depend on distribution model, cryptography, users or jurisdictions;

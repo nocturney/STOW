@@ -41,7 +41,10 @@ Current operational slice:
 - STOW tracks which apps were stowed specifically by the Focus session. End Focus restores only those apps; apps that were already stowed before Focus remain stowed.
 - If any Focus-hidden app cannot be restored, Focus remains active and keeps its tracking instead of orphaning the window.
 - Deep work and Keep all visible are temporary setup helpers only; they do not modify permanent app configuration.
-- Saved presets and scheduling remain visibly disabled until persistence/scheduling runtimes are implemented.
+- Saved presets are operational and persisted atomically in `%APPDATA%\STOW\focus-presets.json`; each preset stores only a user-visible name and the managed-app keys to keep visible.
+- Using a saved preset ignores app keys that are no longer enabled/managed instead of failing the Focus flow.
+- Saving/deleting presets never changes the permanent managed-app configuration.
+- Scheduling remains visibly disabled until a scheduling runtime is implemented.
 - No fabricated distraction score or recommendation metric is shown.
 
 ## Insights

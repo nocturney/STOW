@@ -18,6 +18,7 @@ public partial class MainWindow : Window
     private readonly IRuleStore ruleStore = JsonRuleStore.ForCurrentUser();
     private readonly IActivityStore activityStore = JsonLinesActivityStore.ForCurrentUser();
     private readonly IAppSettingsStore settingsStore = JsonAppSettingsStore.ForCurrentUser();
+    private readonly IFocusPresetStore focusPresetStore = JsonFocusPresetStore.ForCurrentUser();
     private readonly TrayifyMigrationResult? migrationResult;
     private ITrayEngineRuntime? trayEngine;
     private string? engineUnavailableReason;
@@ -118,7 +119,7 @@ public partial class MainWindow : Window
         {
             "Apps" => CreateAppsView(),
             "Rules" => new RulesView(ruleStore, managedAppStore, trayEngine is not null, engineUnavailableReason),
-            "Focus" => new FocusView(trayEngine, settingsStore, engineUnavailableReason),
+            "Focus" => new FocusView(trayEngine, settingsStore, focusPresetStore, engineUnavailableReason),
             "Insights" => new InsightsView(activityStore),
             "Settings" => new SettingsView(settingsStore, trayEngine),
             "About" => new AboutView(),

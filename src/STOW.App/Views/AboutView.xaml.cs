@@ -255,6 +255,7 @@ public partial class AboutView : UserControl
         lines.AppendLine($".NET: {RuntimeInformation.FrameworkDescription}");
         lines.AppendLine($"STOW config present: {File.Exists(Path.Combine(stowRoot, "config.txt"))}");
         lines.AppendLine($"Rules present: {File.Exists(Path.Combine(stowRoot, "rules.json"))}");
+        lines.AppendLine($"Focus presets present: {File.Exists(Path.Combine(stowRoot, "focus-presets.json"))}");
         lines.AppendLine($"Settings present: {File.Exists(Path.Combine(stowRoot, "settings.json"))}");
         lines.AppendLine($"Insights history present: {File.Exists(Path.Combine(stowRoot, "activity.jsonl"))}");
         lines.AppendLine($"Legacy Trayify config present: {File.Exists(Path.Combine(legacyRoot, "config.txt"))}");
