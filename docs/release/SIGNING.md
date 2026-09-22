@@ -38,3 +38,14 @@ powershell -ExecutionPolicy Bypass -File scripts\verify-release-signing.ps1
 ```
 
 Both binaries must report Authenticode `Valid`. Unsigned binaries are allowed for local technical-preview testing but not for a final signed release gate.
+
+## GitHub Actions release gate
+
+The manual `STOW Release Gate` workflow expects two repository secrets:
+
+- `STOW_SIGNING_PFX_BASE64` — the code-signing PFX encoded as Base64.
+- `STOW_SIGNING_PFX_PASSWORD` — the PFX password.
+
+The workflow imports the certificate only into the ephemeral runner's `CurrentUser\My` store, records its thumbprint through `GITHUB_ENV`, deletes the temporary PFX file, builds with `build-stow.ps1 -Sign`, verifies both Authenticode signatures, then uploads `dist-stow` as a short-lived workflow artifact.
+
+The imported certificate is removed from the runner in an `always()` cleanup step. GitHub Release publication remains disabled; the workflow produces a signed release candidate only.

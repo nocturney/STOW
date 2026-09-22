@@ -8,8 +8,11 @@ permissions:
 
 jobs:
   gate:
-    name: Validate release readiness
+    name: Validate signed release candidate
     runs-on: windows-latest
+    env:
+      STOW_SIGNING_PFX_BASE64: ${{ secrets.STOW_SIGNING_PFX_BASE64 }}
+      STOW_SIGNING_PFX_PASSWORD: ${{ secrets.STOW_SIGNING_PFX_PASSWORD }}
     steps:
       - name: Check out repository
         uses: actions/checkout@v5
@@ -25,11 +28,28 @@ jobs:
       - name: Run STOW tests
         run: dotnet test STOW.slnx -c Release --no-build
 
-      - name: Build self-contained STOW preview
+      - name: Import code-signing certificate
         shell: powershell
-        run: ./scripts/build-stow.ps1
+        run: |
+          if ([string]::IsNullOrWhiteSpace($env:STOW_SIGNING_PFX_BASE64)) { throw 'Missing STOW_SIGNING_PFX_BASE64 secret.' }
+          if ([string]::IsNullOrWhiteSpace($env:STOW_SIGNING_PFX_PASSWORD)) { throw 'Missing STOW_SIGNING_PFX_PASSWORD secret.' }
+          $pfx = Join-Path $env:RUNNER_TEMP 'stow-signing.pfx'
+          [IO.File]::WriteAllBytes($pfx, [Convert]::FromBase64String($env:STOW_SIGNING_PFX_BASE64))
+          $secure = ConvertTo-SecureString $env:STOW_SIGNING_PFX_PASSWORD -AsPlainText -Force
+          $cert = Import-PfxCertificate -FilePath $pfx -CertStoreLocation Cert:\CurrentUser\My -Password $secure
+          if (-not $cert -or -not $cert.HasPrivateKey) { throw 'Signing certificate import failed.' }
+          "STOW_SIGNING_CERT_THUMBPRINT=$($cert.Thumbprint)" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          Remove-Item $pfx -Force
 
-      - name: Verify self-contained preview contents
+      - name: Build signed STOW package
+        shell: powershell
+        run: ./scripts/build-stow.ps1 -Sign -CertificateThumbprint $env:STOW_SIGNING_CERT_THUMBPRINT
+
+      - name: Verify Authenticode signatures
+        shell: powershell
+        run: ./scripts/verify-release-signing.ps1
+
+      - name: Verify signed release contents
         shell: powershell
         run: |
           $version = (Get-Content ./STOW_VERSION -Raw).Trim()
@@ -44,18 +64,32 @@ jobs:
             './dist-stow/DOTNET_WINDOWS_DESKTOP_THIRD_PARTY_NOTICES.txt'
           )
           foreach ($path in $required) { if (-not (Test-Path $path)) { throw "Missing STOW artifact: $path" } }
+          Get-Content ./dist-stow/SHA256SUMS.txt
 
       - name: Verify Trayify compatibility baseline still builds
         shell: powershell
         run: ./scripts/build.ps1
 
-      - name: Verify Authenticode signing gate
+      - name: Upload signed release candidate
+        uses: actions/upload-artifact@v4
+        with:
+          name: stow-signed-release-candidate
+          path: dist-stow/
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Remove imported signing certificate
+        if: always()
         shell: powershell
-        run: ./scripts/verify-release-signing.ps1
+        run: |
+          if (-not [string]::IsNullOrWhiteSpace($env:STOW_SIGNING_CERT_THUMBPRINT)) {
+            $path = "Cert:\CurrentUser\My\$env:STOW_SIGNING_CERT_THUMBPRINT"
+            if (Test-Path $path) { Remove-Item $path -Force }
+          }
 
       - name: Publishing status
         if: always()
         shell: powershell
         run: |
-          Write-Host "STOW publishing is intentionally disabled."
-          Write-Host "Installer, migration and updater gates are complete; signing is the remaining binary-trust gate before final release validation."
+          Write-Host "This workflow validates and uploads a signed release candidate artifact only."
+          Write-Host "GitHub Release publication remains intentionally disabled until final release approval."
