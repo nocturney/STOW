@@ -49,8 +49,13 @@ jobs:
         shell: powershell
         run: ./scripts/build.ps1
 
+      - name: Verify Authenticode signing gate
+        shell: powershell
+        run: ./scripts/verify-release-signing.ps1
+
       - name: Publishing status
+        if: always()
         shell: powershell
         run: |
           Write-Host "STOW publishing is intentionally disabled."
-          Write-Host "Installer, migration and updater gates are complete; enable publication only after signing and final release validation are complete."
+          Write-Host "Installer, migration and updater gates are complete; signing is the remaining binary-trust gate before final release validation."

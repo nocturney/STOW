@@ -1,3 +1,8 @@
+param(
+    [switch]$Sign,
+    [string]$CertificateThumbprint = $env:STOW_SIGNING_CERT_THUMBPRINT
+)
+
 $ErrorActionPreference = 'Stop'
 
 $root = Split-Path -Parent $PSScriptRoot
@@ -107,6 +112,16 @@ $desktopNotices = Join-Path $env:ProgramFiles "dotnet\sdk\$sdkVersion\Sdks\Micro
 if (-not (Test-Path $desktopNotices)) { throw 'Windows Desktop third-party notices were not found.' }
 Copy-Item $desktopNotices (Join-Path $dist 'DOTNET_WINDOWS_DESKTOP_THIRD_PARTY_NOTICES.txt') -Force
 
+if ($Sign) {
+    if ([string]::IsNullOrWhiteSpace($CertificateThumbprint)) {
+        throw 'Signed builds require -CertificateThumbprint or STOW_SIGNING_CERT_THUMBPRINT.'
+    }
+    & (Join-Path $root 'scripts\sign-stow.ps1') `
+        -Dist $dist `
+        -CertificateThumbprint $CertificateThumbprint
+    if ($LASTEXITCODE -ne 0) { throw "STOW signing failed with exit code $LASTEXITCODE" }
+}
+
 $appHash = (Get-FileHash -Algorithm SHA256 (Join-Path $dist 'STOW.exe')).Hash.ToLowerInvariant()
 $setupHash = (Get-FileHash -Algorithm SHA256 (Join-Path $dist 'STOWSetup.exe')).Hash.ToLowerInvariant()
 @(
@@ -117,7 +132,7 @@ $setupHash = (Get-FileHash -Algorithm SHA256 (Join-Path $dist 'STOWSetup.exe')).
 @(
     "# STOW $version",
     "",
-    "Technical preview build. Publishing is disabled until updater, signing, and final release validation are complete."
+    "Technical preview build. Publishing is disabled until signing and final release validation are complete."
 ) | Set-Content (Join-Path $dist 'release-notes.md') -Encoding utf8
 
 $zip = Join-Path $dist "STOW-$version-win-x64.zip"

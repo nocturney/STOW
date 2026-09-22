@@ -45,6 +45,13 @@ Self-contained preview + installer package:
 powershell -ExecutionPolicy Bypass -File scripts\build-stow.ps1
 ```
 
+Signed release package (requires a valid Code Signing certificate and Windows SDK Signing Tools):
+
+```powershell
+$env:STOW_SIGNING_CERT_THUMBPRINT = '<thumbprint>'
+powershell -ExecutionPolicy Bypass -File scripts\build-stow.ps1 -Sign
+```
+
 Silent install/upgrade:
 
 ```powershell
