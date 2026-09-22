@@ -1,7 +1,7 @@
 <UserControl x:Class="STOW.App.Views.AboutView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    <ScrollViewer VerticalScrollBarVisibility="Auto">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
         <StackPanel>
             <Border Style="{StaticResource CardBorder}" Margin="0,0,0,14">
                 <Grid>
@@ -32,24 +32,77 @@
 
             <TextBlock Text="More information" Style="{StaticResource SectionTitle}" Margin="0,8,0,10" />
             <UniformGrid Columns="2" Rows="3">
-                <Border Style="{StaticResource CardBorder}" Margin="0,0,10,10">
-                    <StackPanel><TextBlock Text="Privacy" FontWeight="SemiBold"/><TextBlock Text="How STOW handles local data" Margin="0,5,0,0" Foreground="{DynamicResource TextSecondaryBrush}"/></StackPanel>
-                </Border>
-                <Border Style="{StaticResource CardBorder}" Margin="0,0,0,10">
-                    <StackPanel><TextBlock Text="License" FontWeight="SemiBold"/><TextBlock Text="MIT license and terms" Margin="0,5,0,0" Foreground="{DynamicResource TextSecondaryBrush}"/></StackPanel>
-                </Border>
-                <Border Style="{StaticResource CardBorder}" Margin="0,0,10,10">
-                    <StackPanel><TextBlock Text="Open-source notices" FontWeight="SemiBold"/><TextBlock Text="Third-party components and licenses" Margin="0,5,0,0" Foreground="{DynamicResource TextSecondaryBrush}"/></StackPanel>
-                </Border>
-                <Border Style="{StaticResource CardBorder}" Margin="0,0,0,10">
-                    <StackPanel><TextBlock Text="Diagnostics" FontWeight="SemiBold"/><TextBlock Text="Build, environment and troubleshooting details" Margin="0,5,0,0" Foreground="{DynamicResource TextSecondaryBrush}"/></StackPanel>
-                </Border>
-                <Border Style="{StaticResource CardBorder}" Margin="0,0,10,0">
-                    <StackPanel><TextBlock Text="Support" FontWeight="SemiBold"/><TextBlock Text="Help and issue reporting" Margin="0,5,0,0" Foreground="{DynamicResource TextSecondaryBrush}"/></StackPanel>
-                </Border>
-                <Border Style="{StaticResource CardBorder}">
-                    <StackPanel><TextBlock Text="GitHub &amp; Releases" FontWeight="SemiBold"/><TextBlock Text="Source, releases and release notes" Margin="0,5,0,0" Foreground="{DynamicResource TextSecondaryBrush}"/></StackPanel>
-                </Border>
+                <Button Margin="0,0,10,10" Padding="0" BorderThickness="0" Background="Transparent"
+                        HorizontalContentAlignment="Stretch" Click="Privacy_Click">
+                    <Border Style="{StaticResource CardBorder}">
+                        <StackPanel>
+                            <TextBlock Text="Privacy" FontWeight="SemiBold" />
+                            <TextBlock Text="Local data, network access and update privacy"
+                                       Margin="0,5,0,0" TextWrapping="Wrap"
+                                       Foreground="{DynamicResource TextSecondaryBrush}" />
+                        </StackPanel>
+                    </Border>
+                </Button>
+
+                <Button Margin="0,0,0,10" Padding="0" BorderThickness="0" Background="Transparent"
+                        HorizontalContentAlignment="Stretch" Click="License_Click">
+                    <Border Style="{StaticResource CardBorder}">
+                        <StackPanel>
+                            <TextBlock Text="License" FontWeight="SemiBold" />
+                            <TextBlock Text="MIT license and project terms"
+                                       Margin="0,5,0,0" TextWrapping="Wrap"
+                                       Foreground="{DynamicResource TextSecondaryBrush}" />
+                        </StackPanel>
+                    </Border>
+                </Button>
+
+                <Button Margin="0,0,10,10" Padding="0" BorderThickness="0" Background="Transparent"
+                        HorizontalContentAlignment="Stretch" Click="Notices_Click">
+                    <Border Style="{StaticResource CardBorder}">
+                        <StackPanel>
+                            <TextBlock Text="Open-source notices" FontWeight="SemiBold" />
+                            <TextBlock Text=".NET runtime notices and compatibility-baseline disclosures"
+                                       Margin="0,5,0,0" TextWrapping="Wrap"
+                                       Foreground="{DynamicResource TextSecondaryBrush}" />
+                        </StackPanel>
+                    </Border>
+                </Button>
+
+                <Button Margin="0,0,0,10" Padding="0" BorderThickness="0" Background="Transparent"
+                        HorizontalContentAlignment="Stretch" Click="Diagnostics_Click">
+                    <Border Style="{StaticResource CardBorder}">
+                        <StackPanel>
+                            <TextBlock Text="Diagnostics" FontWeight="SemiBold" />
+                            <TextBlock Text="Copy a local build and environment summary"
+                                       Margin="0,5,0,0" TextWrapping="Wrap"
+                                       Foreground="{DynamicResource TextSecondaryBrush}" />
+                        </StackPanel>
+                    </Border>
+                </Button>
+
+                <Button Margin="0,0,10,0" Padding="0" BorderThickness="0" Background="Transparent"
+                        HorizontalContentAlignment="Stretch" Click="Support_Click">
+                    <Border Style="{StaticResource CardBorder}">
+                        <StackPanel>
+                            <TextBlock Text="Support" FontWeight="SemiBold" />
+                            <TextBlock Text="Issues, bug reports and security guidance"
+                                       Margin="0,5,0,0" TextWrapping="Wrap"
+                                       Foreground="{DynamicResource TextSecondaryBrush}" />
+                        </StackPanel>
+                    </Border>
+                </Button>
+
+                <Button Padding="0" BorderThickness="0" Background="Transparent"
+                        HorizontalContentAlignment="Stretch" Click="GitHubReleases_Click">
+                    <Border Style="{StaticResource CardBorder}">
+                        <StackPanel>
+                            <TextBlock Text="GitHub &amp; Releases" FontWeight="SemiBold" />
+                            <TextBlock Text="Source code, releases and release notes"
+                                       Margin="0,5,0,0" TextWrapping="Wrap"
+                                       Foreground="{DynamicResource TextSecondaryBrush}" />
+                        </StackPanel>
+                    </Border>
+                </Button>
             </UniformGrid>
         </StackPanel>
     </ScrollViewer>

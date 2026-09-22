@@ -1,6 +1,6 @@
 # Code of Conduct
 
-Trayify welcomes constructive participation.
+STOW welcomes constructive participation.
 
 Be respectful, discuss technical ideas rather than attacking people, and do not harass, threaten, discriminate against, or deliberately disrupt other participants.
 

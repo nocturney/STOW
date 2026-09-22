@@ -1,4 +1,7 @@
 using System.Diagnostics;
+using System.IO;
+using System.Runtime.InteropServices;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using STOW.Infrastructure.Updates;
@@ -7,6 +10,12 @@ namespace STOW.App.Views;
 
 public partial class AboutView : UserControl
 {
+    private static readonly Uri RepositoryUri = new("https://github.com/nocturney/STOW");
+    private static readonly Uri PrivacyUri = new("https://github.com/nocturney/STOW/blob/main/PRIVACY.md");
+    private static readonly Uri LicenseUri = new("https://github.com/nocturney/STOW/blob/main/LICENSE");
+    private static readonly Uri NoticesUri = new("https://github.com/nocturney/STOW/blob/main/THIRD_PARTY_NOTICES.md");
+    private static readonly Uri SupportUri = new("https://github.com/nocturney/STOW/issues");
+
     private readonly string currentVersion;
     private readonly string buildLabel;
     private readonly UpdateChannel updateChannel;
@@ -129,6 +138,83 @@ public partial class AboutView : UserControl
 
     private void WhatsNew_Click(object sender, RoutedEventArgs e) =>
         OpenUri(GitHubReleaseUpdater.ReleasesUri);
+
+    private void Privacy_Click(object sender, RoutedEventArgs e) => OpenUri(PrivacyUri);
+
+    private void License_Click(object sender, RoutedEventArgs e) => OpenUri(LicenseUri);
+
+    private void Notices_Click(object sender, RoutedEventArgs e) => OpenUri(NoticesUri);
+
+    private void Support_Click(object sender, RoutedEventArgs e) => OpenUri(SupportUri);
+
+    private void GitHubReleases_Click(object sender, RoutedEventArgs e) =>
+        OpenUri(RepositoryUri);
+
+    private void Diagnostics_Click(object sender, RoutedEventArgs e)
+    {
+        string diagnostics = BuildDiagnosticsSnapshot();
+        try
+        {
+            Clipboard.SetText(diagnostics);
+            MessageBox.Show(
+                "Local STOW diagnostics were copied to the clipboard.\n\nNo diagnostic data was uploaded or sent anywhere.",
+                "STOW Diagnostics",
+                MessageBoxButton.OK,
+                MessageBoxImage.Information);
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(
+                diagnostics + "\n\nClipboard copy failed: " + ex.Message,
+                "STOW Diagnostics",
+                MessageBoxButton.OK,
+                MessageBoxImage.Information);
+        }
+    }
+
+    private string BuildDiagnosticsSnapshot()
+    {
+        string roaming = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+        string stowRoot = Path.Combine(roaming, "STOW");
+        string legacyRoot = Path.Combine(roaming, "Trayify");
+
+        var lines = new StringBuilder();
+        lines.AppendLine("STOW diagnostics");
+        lines.AppendLine($"Version: {currentVersion}");
+        lines.AppendLine($"Build: {buildLabel}");
+        lines.AppendLine($"Channel: {updateChannel}");
+        lines.AppendLine($"Install mode: {DetectInstallMode(Environment.ProcessPath)}");
+        lines.AppendLine($"OS: {RuntimeInformation.OSDescription}");
+        lines.AppendLine($"OS architecture: {RuntimeInformation.OSArchitecture}");
+        lines.AppendLine($"Process architecture: {RuntimeInformation.ProcessArchitecture}");
+        lines.AppendLine($".NET: {RuntimeInformation.FrameworkDescription}");
+        lines.AppendLine($"STOW config present: {File.Exists(Path.Combine(stowRoot, "config.txt"))}");
+        lines.AppendLine($"Rules present: {File.Exists(Path.Combine(stowRoot, "rules.json"))}");
+        lines.AppendLine($"Settings present: {File.Exists(Path.Combine(stowRoot, "settings.json"))}");
+        lines.AppendLine($"Insights history present: {File.Exists(Path.Combine(stowRoot, "activity.jsonl"))}");
+        lines.AppendLine($"Legacy Trayify config present: {File.Exists(Path.Combine(legacyRoot, "config.txt"))}");
+
+        DateTimeOffset? lastCheck = updateState.LoadLastCheck();
+        lines.AppendLine("Last update check: " +
+                         (lastCheck is null ? "Never" : lastCheck.Value.LocalDateTime.ToString("O")));
+        return lines.ToString().TrimEnd();
+    }
+
+    private static string DetectInstallMode(string? executablePath)
+    {
+        if (GitHubReleaseUpdater.IsStandardInstalledLocation(executablePath))
+            return "Standard per-user install";
+        if (string.IsNullOrWhiteSpace(executablePath))
+            return "Unknown";
+
+        string normalized = executablePath.Replace('/', '\\');
+        if (normalized.Contains("\\Microsoft\\WinGet\\Packages\\", StringComparison.OrdinalIgnoreCase))
+            return "WinGet";
+        if (normalized.Contains("\\scoop\\apps\\stow\\", StringComparison.OrdinalIgnoreCase))
+            return "Scoop";
+
+        return "Development / portable";
+    }
 
     private static void OpenUri(Uri uri)
     {

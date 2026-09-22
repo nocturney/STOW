@@ -1,27 +1,35 @@
 # Privacy
 
-Trayify is designed to work locally.
+STOW is designed to work locally.
 
 ## Data collection
 
-Trayify does not include analytics, advertising, telemetry, crash reporting, or user tracking.
+STOW does not include analytics, advertising, telemetry, crash reporting, or user tracking.
 
-Trayify stores its application configuration locally under:
+STOW stores product data locally under:
 
-`%APPDATA%\Trayify`
+`%APPDATA%\STOW`
 
-That configuration contains the applications the user has chosen to manage and the identifiers needed to recognize their windows.
+That local data can include:
+
+- `config.txt` — managed applications and the identifiers needed to recognize their windows;
+- `rules.json` — app rules created by the user;
+- `settings.json` — product preferences such as theme, startup and Focus behavior;
+- `activity.jsonl` — bounded local activity history used by Insights;
+- migration markers used to preserve a safe upgrade path from Trayify.
+
+Insights are calculated from this local history. STOW does not upload that history.
 
 ## Network access
 
-Trayify makes a network request only when the user explicitly chooses **Help > Check for Updates**.
+STOW makes a network request when the user explicitly chooses **Check for Updates** in About.
 
-That request goes to GitHub to read the latest release information. If the user approves an update, Trayify downloads the official `TrayifySetup.exe` and `SHA256SUMS.txt` from the matching versioned GitHub Release, verifies them locally, and launches the installer.
+That request goes to GitHub to read STOW release information. If the user approves an update for a standard installed copy, STOW downloads the official `STOWSetup.exe` and `SHA256SUMS.txt` from the matching versioned GitHub Release, verifies them locally, and launches the installer.
 
-No Trayify configuration is uploaded as part of the update check.
+No STOW configuration, rules, settings, or activity history is uploaded as part of the update check.
 
 Package managers such as WinGet or Scoop may independently contact their own package sources according to those tools' normal behavior.
 
 ## Third parties
 
-GitHub's own privacy and logging practices apply when Trayify connects to GitHub.
+GitHub's own privacy and logging practices apply when STOW connects to GitHub.

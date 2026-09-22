@@ -91,6 +91,18 @@ Required sections:
 - Support
 - GitHub / Releases
 
+Current operational slice:
+- Version, build identity and Stable/Preview channel are read from the running binary;
+- the last explicit update-check time is stored locally;
+- Check for Updates uses GitHub Releases and preserves package-manager ownership for package-managed copies;
+- standard installed copies can download `STOWSetup.exe` and `SHA256SUMS.txt`, verify SHA-256 plus installer version identity, and only then launch the installer;
+- What's New opens published releases;
+- Privacy, License and Open-source notices open the current STOW repository documents;
+- Support opens the STOW issue tracker;
+- GitHub & Releases opens the STOW source repository;
+- Diagnostics creates a local summary of build/runtime/install-mode and STOW data-file presence, copies it to the clipboard, and performs no network upload;
+- active policy/community documents must describe STOW; Trayify references remain only where they are explicitly historical or compatibility-related.
+
 ## Cross-screen requirements
 
 Support Light and Dark themes, high DPI and keyboard navigation.
