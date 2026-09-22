@@ -41,10 +41,12 @@
                         Tag="Focus"
                         Margin="0,0,8,0"
                         Click="RulesFilter_Click" />
-                <Button Style="{StaticResource SecondaryButton}"
+                <Button x:Name="StartupRulesFilterButton"
+                        Style="{StaticResource SecondaryButton}"
                         Content="Startup rules"
-                        IsEnabled="False"
-                        ToolTip="Startup rule triggers are not enabled yet." />
+                        Tag="Startup"
+                        Click="RulesFilter_Click"
+                        ToolTip="Rules applied when a managed app process is first observed." />
             </StackPanel>
 
             <Border x:Name="EmptyRulesCard" Style="{StaticResource CardBorder}" Visibility="Collapsed">
@@ -54,7 +56,7 @@
                                FontSize="16"
                                FontWeight="SemiBold" />
                     <TextBlock x:Name="EmptyRulesBodyText"
-                               Text="Create an app or Focus rule for a managed application."
+                               Text="Create an app, Focus or Startup rule for a managed application."
                                Margin="0,6,0,0"
                                TextAlignment="Center"
                                TextWrapping="Wrap"
@@ -119,6 +121,7 @@
                               Margin="0,6,0,14">
                         <ComboBoxItem Content="The app is minimized" />
                         <ComboBoxItem Content="Focus starts" />
+                        <ComboBoxItem Content="The app starts" />
                     </ComboBox>
 
                     <TextBlock Text="Action" Foreground="{DynamicResource TextSecondaryBrush}" />

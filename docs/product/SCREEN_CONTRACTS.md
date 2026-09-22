@@ -18,7 +18,7 @@ Rules must describe automation intent in plain English and expose enabled state 
 Validation errors stay close to the edited condition/action.
 
 Current operational slice:
-- per-app rules for the `Minimize` and `Focus` triggers;
+- per-app rules for the `Minimize`, `Focus` and `Startup` triggers;
 - actions: `Stow` and `KeepVisible`;
 - enabled/disabled state;
 - 0-100 priority with the highest-priority matching enabled rule winning independently for each trigger;
@@ -26,9 +26,12 @@ Current operational slice:
 - Minimize rules preserve the existing behavior: `KeepVisible` prevents a minimized app from being stowed;
 - Focus rules are evaluated when a Focus session starts: `KeepVisible` adds that enabled managed app to the session's Keep visible set, while `Stow` preserves the normal Focus default;
 - an app explicitly selected by the current Focus setup/preset remains Keep visible even if a Focus rule says `Stow`;
-- rule-store failure/default fallback remains `Stow`, preserving the Trayify v0.3.3 safety contract.
-
-Startup rules remain visible in the information architecture but intentionally disabled until a separate startup-action runtime is defined. They must not appear functional before then.
+- Startup rules apply once when STOW first observes a managed app process PID, including a process already open when the STOW runtime starts;
+- Startup `Stow` hides and tracks that app through the normal safe tray path; Startup `KeepVisible` preserves the normal visible launch behavior;
+- restoring an app that was stowed by a Startup rule does not immediately stow the same PID again; a later process PID is evaluated as a new Startup occurrence;
+- Focus is more specific than Startup: an app first observed during an active Focus session is governed by Focus, and its Startup occurrence is consumed so ending Focus does not retrigger it;
+- Startup rules are separate from the Settings > Start with Windows preference, which controls whether STOW itself is registered with Windows startup;
+- Minimize and Focus rule-store failure/default fallback remains `Stow`; Startup failure/default fallback is `KeepVisible` so adding the trigger does not change existing app-launch behavior.
 
 ## Focus
 

@@ -199,6 +199,121 @@ public sealed class LegacyCompatibleTrayEngineTests
     }
 
     [Fact]
+    public void Startup_stow_rule_hides_app_on_first_observation()
+    {
+        var store = new FakeStore(Grok);
+        var runtime = new FakeRuntime(Window(101, 42, iconic: false));
+        var icons = new FakeTrayIcons();
+        var activity = new FakeActivityStore();
+        var rules = new FakeRuleStore(new RuleDefinition(
+            "startup-stow", "Stow Grok on startup", Grok.Key,
+            RuleTrigger.Startup, RuleAction.Stow, true, 80));
+        using var engine = NewEngine(
+            store,
+            runtime,
+            icons,
+            ruleStore: rules,
+            activityStore: activity);
+
+        engine.Start();
+        TickFullScan(engine);
+
+        Assert.False(runtime.IsWindowVisible(101));
+        Assert.True(icons.Contains(Grok.Key));
+        ActivityEvent stowed = Assert.Single(activity.Events);
+        Assert.Equal(ActivityEventType.AppStowed, stowed.Type);
+        Assert.Equal("Startup", stowed.Source);
+    }
+
+    [Fact]
+    public void Startup_default_and_rule_store_failure_keep_visible()
+    {
+        var store = new FakeStore(Grok);
+        var runtime = new FakeRuntime(Window(101, 42, iconic: false));
+        var icons = new FakeTrayIcons();
+        var rules = new FakeRuleStore { ThrowOnLoad = true };
+        using var engine = NewEngine(store, runtime, icons, ruleStore: rules);
+
+        engine.Start();
+        TickFullScan(engine);
+
+        Assert.True(runtime.IsWindowVisible(101));
+        Assert.False(icons.Contains(Grok.Key));
+    }
+
+    [Fact]
+    public void Manual_restore_after_startup_stow_does_not_retrigger_same_pid()
+    {
+        var store = new FakeStore(Grok);
+        var runtime = new FakeRuntime(Window(101, 42, iconic: false));
+        var icons = new FakeTrayIcons();
+        var rules = new FakeRuleStore(new RuleDefinition(
+            "startup-stow", "Stow Grok on startup", Grok.Key,
+            RuleTrigger.Startup, RuleAction.Stow, true, 80));
+        using var engine = NewEngine(store, runtime, icons, ruleStore: rules);
+
+        engine.Start();
+        TickFullScan(engine);
+        Assert.False(runtime.IsWindowVisible(101));
+
+        Assert.True(engine.Restore(Grok.Key).Succeeded);
+        TickFullScan(engine);
+
+        Assert.True(runtime.IsWindowVisible(101));
+        Assert.False(icons.Contains(Grok.Key));
+    }
+
+    [Fact]
+    public void Startup_rule_runs_again_for_a_new_process_pid()
+    {
+        var store = new FakeStore(Grok);
+        var runtime = new FakeRuntime(Window(101, 42, iconic: false));
+        var icons = new FakeTrayIcons();
+        var rules = new FakeRuleStore(new RuleDefinition(
+            "startup-stow", "Stow Grok on startup", Grok.Key,
+            RuleTrigger.Startup, RuleAction.Stow, true, 80));
+        using var engine = NewEngine(store, runtime, icons, ruleStore: rules);
+
+        engine.Start();
+        TickFullScan(engine);
+        Assert.False(runtime.IsWindowVisible(101));
+
+        runtime.MarkProcessExited(42);
+        TickFullScan(engine);
+        runtime.Add(Window(202, 84, iconic: false));
+        TickFullScan(engine);
+
+        Assert.False(runtime.IsWindowVisible(202));
+        Assert.True(icons.Contains(Grok.Key));
+    }
+
+    [Fact]
+    public void App_opened_during_focus_consumes_startup_rule_without_retrigger_after_focus()
+    {
+        var store = new FakeStore(Grok);
+        var runtime = new FakeRuntime();
+        var icons = new FakeTrayIcons();
+        var rules = new FakeRuleStore(new RuleDefinition(
+            "startup-stow", "Stow Grok on startup", Grok.Key,
+            RuleTrigger.Startup, RuleAction.Stow, true, 80));
+        using var engine = NewEngine(store, runtime, icons, ruleStore: rules);
+
+        engine.Start();
+        Assert.True(engine.StartFocusSession(Array.Empty<string>()).Succeeded);
+
+        runtime.Add(Window(101, 42, iconic: false));
+        TickFullScan(engine);
+        Assert.False(runtime.IsWindowVisible(101));
+        Assert.Contains(Grok.Key, engine.GetFocusSession().StowedByFocusAppKeys);
+
+        Assert.True(engine.EndFocusSession().Succeeded);
+        TickFullScan(engine);
+
+        Assert.True(runtime.IsWindowVisible(101));
+        Assert.False(icons.Contains(Grok.Key));
+    }
+
+    [Fact]
     public void Focus_keep_visible_rule_augments_session_keep_visible_apps()
     {
         var store = new FakeStore(Grok, Editor);

@@ -19,6 +19,8 @@ public sealed class LegacyCompatibleTrayEngine : ITrayEngineRuntime
     private readonly Dictionary<string, HashSet<int>> hiddenPids = new(StringComparer.OrdinalIgnoreCase);
     private readonly HashSet<string> focusKeepVisibleAppKeys = new(StringComparer.OrdinalIgnoreCase);
     private readonly HashSet<string> focusHiddenAppKeys = new(StringComparer.OrdinalIgnoreCase);
+    private readonly Dictionary<string, HashSet<int>> startupHandledPids =
+        new(StringComparer.OrdinalIgnoreCase);
 
     private System.Threading.Timer? timer;
     private SynchronizationContext? synchronizationContext;
@@ -156,6 +158,7 @@ public sealed class LegacyCompatibleTrayEngine : ITrayEngineRuntime
                 trayIcons.Remove(appKey);
                 focusKeepVisibleAppKeys.Remove(appKey);
                 focusHiddenAppKeys.Remove(appKey);
+                startupHandledPids.Remove(appKey);
                 return new(EngineCommandStatus.Succeeded);
             }
             catch (Exception ex)
@@ -185,6 +188,7 @@ public sealed class LegacyCompatibleTrayEngine : ITrayEngineRuntime
                 {
                     focusKeepVisibleAppKeys.Remove(appKey);
                     focusHiddenAppKeys.Remove(appKey);
+                    startupHandledPids.Remove(appKey);
                 }
                 return new(EngineCommandStatus.Succeeded);
             }
@@ -404,6 +408,7 @@ public sealed class LegacyCompatibleTrayEngine : ITrayEngineRuntime
             focusActive = false;
             focusKeepVisibleAppKeys.Clear();
             focusHiddenAppKeys.Clear();
+            startupHandledPids.Clear();
             return new(EngineCommandStatus.Succeeded);
         }
     }
@@ -458,15 +463,52 @@ public sealed class LegacyCompatibleTrayEngine : ITrayEngineRuntime
             IReadOnlyList<RuntimeWindow> windows = runtime.EnumerateUserFacingWindows();
             foreach (ManagedAppDefinition app in managed.Values)
             {
+                PruneStartupHandledPids(app);
                 if (!app.Enabled)
                     continue;
 
-                foreach (RuntimeWindow window in windows)
+                RuntimeWindow[] appWindows = windows
+                    .Where(window => MatchesIdentity(app, window))
+                    .ToArray();
+                if (appWindows.Length == 0)
+                    continue;
+
+                foreach (IGrouping<int, RuntimeWindow> processWindows in
+                    appWindows.GroupBy(window => window.Pid))
                 {
-                    if (!MatchesIdentity(app, window))
+                    if (!MarkStartupHandledIfNew(app.Key, processWindows.Key))
                         continue;
 
-                    if (hiddenPids.TryGetValue(app.Key, out HashSet<int>? activePids) && activePids.Contains(window.Pid))
+                    // Focus is the more specific temporary desktop state. An app
+                    // first observed during Focus consumes its Startup occurrence
+                    // but is still governed by the active Focus session.
+                    if (focusActive)
+                        continue;
+
+                    if (ResolveRuleAction(
+                        app.Key,
+                        RuleTrigger.Startup,
+                        RuleAction.KeepVisible) != RuleAction.Stow)
+                    {
+                        continue;
+                    }
+
+                    bool wasHiddenBeforeStartup = IsManagedHidden(app);
+                    foreach (RuntimeWindow startupWindow in processWindows)
+                    {
+                        runtime.Hide(startupWindow.Handle);
+                        TrackHidden(app, startupWindow);
+                    }
+
+                    EnsureTrayIcon(app);
+                    if (!wasHiddenBeforeStartup)
+                        RecordActivity(ActivityEventType.AppStowed, app, "Startup");
+                }
+
+                foreach (RuntimeWindow window in appWindows)
+                {
+                    if (hiddenPids.TryGetValue(app.Key, out HashSet<int>? activePids) &&
+                        activePids.Contains(window.Pid))
                     {
                         if (runtime.IsWindowVisible(window.Handle))
                             runtime.Hide(window.Handle);
@@ -519,19 +561,52 @@ public sealed class LegacyCompatibleTrayEngine : ITrayEngineRuntime
         }
     }
 
-    private RuleAction ResolveRuleAction(string appKey, RuleTrigger trigger)
+    private RuleAction ResolveRuleAction(
+        string appKey,
+        RuleTrigger trigger,
+        RuleAction fallback = RuleAction.Stow)
     {
         if (ruleStore is null)
-            return RuleAction.Stow;
+            return fallback;
 
         try
         {
-            return RuleEvaluator.Resolve(ruleStore.Load(), appKey, trigger, RuleAction.Stow);
+            return RuleEvaluator.Resolve(ruleStore.Load(), appKey, trigger, fallback);
         }
         catch
         {
-            return RuleAction.Stow;
+            return fallback;
         }
+    }
+
+    private bool MarkStartupHandledIfNew(string appKey, int pid)
+    {
+        if (!startupHandledPids.TryGetValue(appKey, out HashSet<int>? pids))
+        {
+            pids = new HashSet<int>();
+            startupHandledPids[appKey] = pids;
+        }
+
+        return pids.Add(pid);
+    }
+
+    private void PruneStartupHandledPids(ManagedAppDefinition app)
+    {
+        if (!startupHandledPids.TryGetValue(app.Key, out HashSet<int>? pids))
+            return;
+
+        if (!string.IsNullOrWhiteSpace(app.ProcessName))
+        {
+            IReadOnlySet<int> livePids = runtime.GetProcessIdsByName(app.ProcessName);
+            pids.RemoveWhere(pid => !livePids.Contains(pid));
+        }
+        else
+        {
+            pids.RemoveWhere(pid => !runtime.ProcessExists(pid));
+        }
+
+        if (pids.Count == 0)
+            startupHandledPids.Remove(app.Key);
     }
 
     private void TrackHidden(ManagedAppDefinition app, RuntimeWindow window)

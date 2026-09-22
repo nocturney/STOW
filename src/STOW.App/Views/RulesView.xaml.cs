@@ -103,8 +103,9 @@ public partial class RulesView : UserControl
         EmptyRulesBodyText.Text = triggerFilter switch
         {
             RuleTrigger.Focus => "Create a Focus rule to control whether a managed app stays visible when Focus starts.",
+            RuleTrigger.Startup => "Create a Startup rule to control what happens when a managed app process is first observed.",
             RuleTrigger.Minimize => "Create an app rule to override what happens when a managed app is minimized.",
-            _ => "Create an app or Focus rule for a managed application."
+            _ => "Create an app, Focus or Startup rule for a managed application."
         };
 
         string? target = selectId ?? editingRuleId;
@@ -123,10 +124,21 @@ public partial class RulesView : UserControl
             ? "keep visible"
             : "stow in tray";
         string appName = AppName(rule.AppKey);
-        string summary = rule.Trigger == RuleTrigger.Focus
-            ? $"When Focus starts, {action} {appName} · priority {rule.Priority}"
-            : $"When {appName} is minimized, {action} · priority {rule.Priority}";
-        string type = rule.Trigger == RuleTrigger.Focus ? "Focus rule" : "App rule";
+        string summary = rule.Trigger switch
+        {
+            RuleTrigger.Focus =>
+                $"When Focus starts, {action} {appName} · priority {rule.Priority}",
+            RuleTrigger.Startup =>
+                $"When {appName} starts, {action} · priority {rule.Priority}",
+            _ =>
+                $"When {appName} is minimized, {action} · priority {rule.Priority}"
+        };
+        string type = rule.Trigger switch
+        {
+            RuleTrigger.Focus => "Focus rule",
+            RuleTrigger.Startup => "Startup rule",
+            _ => "App rule"
+        };
 
         return new RuleRow(
             rule.Id,
@@ -149,6 +161,7 @@ public partial class RulesView : UserControl
             {
                 "Minimize" => RuleTrigger.Minimize,
                 "Focus" => RuleTrigger.Focus,
+                "Startup" => RuleTrigger.Startup,
                 _ => null
             }
             : null;
@@ -210,7 +223,12 @@ public partial class RulesView : UserControl
         RuleNameTextBox.Text = rule.Name;
         EnabledCheckBox.IsChecked = rule.Enabled;
         PrioritySlider.Value = rule.Priority;
-        TriggerComboBox.SelectedIndex = rule.Trigger == RuleTrigger.Focus ? 1 : 0;
+        TriggerComboBox.SelectedIndex = rule.Trigger switch
+        {
+            RuleTrigger.Focus => 1,
+            RuleTrigger.Startup => 2,
+            _ => 0
+        };
         ActionComboBox.SelectedIndex = rule.Action == RuleAction.KeepVisible ? 1 : 0;
 
         ManagedOption? app = apps.FirstOrDefault(item =>
@@ -241,9 +259,12 @@ public partial class RulesView : UserControl
             return;
         }
 
-        RuleTrigger trigger = TriggerComboBox.SelectedIndex == 1
-            ? RuleTrigger.Focus
-            : RuleTrigger.Minimize;
+        RuleTrigger trigger = TriggerComboBox.SelectedIndex switch
+        {
+            1 => RuleTrigger.Focus,
+            2 => RuleTrigger.Startup,
+            _ => RuleTrigger.Minimize
+        };
         RuleAction action = ActionComboBox.SelectedIndex == 1
             ? RuleAction.KeepVisible
             : RuleAction.Stow;

@@ -3,7 +3,8 @@ namespace STOW.Engine.Contracts;
 public enum RuleTrigger
 {
     Minimize,
-    Focus
+    Focus,
+    Startup
 }
 
 public enum RuleAction

@@ -47,6 +47,31 @@ public sealed class RuleEvaluatorTests
     }
 
     [Fact]
+    public void Startup_trigger_only_matches_startup_rules_and_supports_keep_visible_fallback()
+    {
+        RuleDefinition[] rules =
+        [
+            new("focus", "Focus", "app", RuleTrigger.Focus, RuleAction.Stow, true, 100),
+            new("startup", "Startup", "app", RuleTrigger.Startup, RuleAction.Stow, true, 50)
+        ];
+
+        Assert.Equal(
+            RuleAction.Stow,
+            RuleEvaluator.Resolve(
+                rules,
+                "app",
+                RuleTrigger.Startup,
+                RuleAction.KeepVisible));
+        Assert.Equal(
+            RuleAction.KeepVisible,
+            RuleEvaluator.Resolve(
+                rules,
+                "other",
+                RuleTrigger.Startup,
+                RuleAction.KeepVisible));
+    }
+
+    [Fact]
     public void Disabled_rule_is_ignored()
     {
         RuleDefinition[] rules =
