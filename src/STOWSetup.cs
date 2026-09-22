@@ -15,6 +15,7 @@ using Microsoft.Win32;
 [assembly: AssemblyCopyright("Copyright (c) 2026 Christian Velvet")]
 [assembly: AssemblyVersion("0.4.0.0")]
 [assembly: AssemblyFileVersion("0.4.0.0")]
+[assembly: AssemblyInformationalVersion("0.4.0-preview.1")]
 
 internal static class SetupConstants
 {

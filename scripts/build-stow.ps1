@@ -29,6 +29,9 @@ if ($setupText -notmatch ('public const string Version\s*=\s*"' + [regex]::Escap
 if ($setupText -notmatch ('public const string FileVersion\s*=\s*"' + [regex]::Escape($fileVersion) + '"')) {
     throw "STOWSetup.cs FileVersion does not match $fileVersion"
 }
+if ($setupText -notmatch ('AssemblyInformationalVersion\("' + [regex]::Escape($version) + '"\)')) {
+    throw "STOWSetup.cs informational version does not match STOW_VERSION=$version"
+}
 
 foreach ($path in @($dist, $publish)) {
     if (Test-Path $path) { Remove-Item $path -Recurse -Force }
@@ -69,9 +72,13 @@ $resourceArg = '/resource:' + (Join-Path $dist 'STOW.exe') + ',STOW.Payload.exe'
 & $csc /nologo /target:winexe /platform:anycpu /optimize+ /out:$setup /reference:System.Windows.Forms.dll /reference:System.Drawing.dll $resourceArg $setupSrc
 if ($LASTEXITCODE -ne 0) { throw "STOWSetup compilation failed with exit code $LASTEXITCODE" }
 
-$setupVersion = (Get-Item $setup).VersionInfo.FileVersion
+$setupInfo = (Get-Item $setup).VersionInfo
+$setupVersion = $setupInfo.FileVersion
 if ($setupVersion -ne $fileVersion) {
     throw "STOWSetup FileVersion $setupVersion does not match expected $fileVersion"
+}
+if ($setupInfo.ProductVersion -ne $version) {
+    throw "STOWSetup ProductVersion $($setupInfo.ProductVersion) does not match expected $version"
 }
 
 $packageFiles = @(

@@ -11,7 +11,7 @@ It is the successor to Trayify and is currently in a controlled migration from t
 - Approved navigation: Apps, Rules, Focus, Insights, Settings; About is separate at the bottom.
 - New UI target: **WPF on modern .NET**; Electron is not used for UI.
 - Existing minimize-to-tray engine: Trayify v0.3.3 behavior is the protected compatibility baseline.
-- Runtime handoff and per-user installer migration are validated; updater, signing and package-manager transition are still gated.
+- Runtime handoff, per-user installer migration and GitHub updater are validated; signing and package-manager transition are still gated.
 
 The baseline source commit is `c4ab75082d1f7ecbeee32270cc01eea457a93276`.
 See [`docs/architecture/BASELINE_CONTRACT.md`](docs/architecture/BASELINE_CONTRACT.md) before changing window-management behavior.
