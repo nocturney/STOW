@@ -44,7 +44,14 @@ Current operational slice:
 - Saved presets are operational and persisted atomically in `%APPDATA%\STOW\focus-presets.json`; each preset stores only a user-visible name and the managed-app keys to keep visible.
 - Using a saved preset ignores app keys that are no longer enabled/managed instead of failing the Focus flow.
 - Saving/deleting presets never changes the permanent managed-app configuration.
-- Scheduling remains visibly disabled until a scheduling runtime is implemented.
+- Recurring Focus scheduling is operational and persisted atomically in `%APPDATA%\\STOW\\focus-schedules.json`.
+- A schedule references a saved Focus preset, selected local weekdays, a local start time and a 5–720 minute duration.
+- The scheduling runtime runs while STOW is running, checks local-time occurrences, and marks each occurrence before starting Focus so a crash/restart cannot repeatedly stow apps for the same occurrence.
+- If STOW starts during an unconsumed active schedule window, that occurrence can still begin; occurrences fully missed while STOW was not running are not replayed later.
+- Manual Focus takes priority over overlapping schedules; overlapping schedule occurrences are consumed rather than retriggered after the manual session ends.
+- If multiple schedules overlap, the first runnable occurrence starts and the others are consumed while that Focus session is active.
+- A schedule whose referenced preset is unavailable is surfaced as unavailable without blocking another valid due schedule.
+- Scheduled Focus uses the normal configured Focus-end behavior and never weakens the existing restore-safety contract.
 - No fabricated distraction score or recommendation metric is shown.
 
 ## Insights

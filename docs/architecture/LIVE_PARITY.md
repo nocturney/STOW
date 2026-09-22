@@ -20,10 +20,12 @@ The harness must run in an interactive Windows session. Session 0 is intentional
 
 ## Verified result
 
-Verified on 2026-09-21 in the interactive user session:
+Verified again on 2026-09-22 in the interactive user session:
 
 - `PASS minimize-hide-restore`
 - `PASS electron-hwnd-recreation`
+- `PASS rule-keep-visible`
+- `PASS focus-hide-end-restore`
 - `RESULT=PASS`
 - `EXIT_CODE=0`
 

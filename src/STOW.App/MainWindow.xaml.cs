@@ -2,7 +2,9 @@ using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using System.Windows.Threading;
 using STOW.App.Views;
+using STOW.Engine;
 using STOW.Engine.Contracts;
 using STOW.Infrastructure.Configuration;
 using STOW.Infrastructure.Migration;
@@ -19,7 +21,10 @@ public partial class MainWindow : Window
     private readonly IActivityStore activityStore = JsonLinesActivityStore.ForCurrentUser();
     private readonly IAppSettingsStore settingsStore = JsonAppSettingsStore.ForCurrentUser();
     private readonly IFocusPresetStore focusPresetStore = JsonFocusPresetStore.ForCurrentUser();
+    private readonly IFocusScheduleStore focusScheduleStore = JsonFocusScheduleStore.ForCurrentUser();
     private readonly TrayifyMigrationResult? migrationResult;
+    private FocusScheduleCoordinator? focusScheduleCoordinator;
+    private DispatcherTimer? focusScheduleTimer;
     private ITrayEngineRuntime? trayEngine;
     private string? engineUnavailableReason;
     private Button? activeButton;
@@ -44,6 +49,7 @@ public partial class MainWindow : Window
 
         InitializeComponent();
         StartRuntimeSafely();
+        StartFocusScheduling();
         activeButton = AppsNavButton;
         PageHost.Content = CreateAppsView();
         Closing += MainWindow_Closing;
@@ -89,6 +95,27 @@ public partial class MainWindow : Window
         }
     }
 
+    private void StartFocusScheduling()
+    {
+        if (trayEngine is null)
+            return;
+
+        focusScheduleCoordinator = new FocusScheduleCoordinator(
+            trayEngine,
+            focusScheduleStore,
+            focusPresetStore,
+            settingsStore);
+        focusScheduleCoordinator.Tick(DateTime.Now);
+
+        focusScheduleTimer = new DispatcherTimer
+        {
+            Interval = TimeSpan.FromSeconds(15)
+        };
+        focusScheduleTimer.Tick += (_, _) =>
+            focusScheduleCoordinator?.Tick(DateTime.Now);
+        focusScheduleTimer.Start();
+    }
+
     private void Navigate_Click(object sender, RoutedEventArgs e)
     {
         if (sender is not Button button || button.Tag is not string destination)
@@ -119,7 +146,13 @@ public partial class MainWindow : Window
         {
             "Apps" => CreateAppsView(),
             "Rules" => new RulesView(ruleStore, managedAppStore, trayEngine is not null, engineUnavailableReason),
-            "Focus" => new FocusView(trayEngine, settingsStore, focusPresetStore, engineUnavailableReason),
+            "Focus" => new FocusView(
+                trayEngine,
+                settingsStore,
+                focusPresetStore,
+                focusScheduleStore,
+                focusScheduleCoordinator,
+                engineUnavailableReason),
             "Insights" => new InsightsView(activityStore),
             "Settings" => new SettingsView(settingsStore, trayEngine),
             "About" => new AboutView(),
@@ -172,6 +205,9 @@ public partial class MainWindow : Window
         }
 
         applicationExitRequested = true;
+        focusScheduleTimer?.Stop();
+        focusScheduleTimer = null;
+        focusScheduleCoordinator = null;
         trayEngine?.Dispose();
         trayEngine = null;
         Close();

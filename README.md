@@ -10,7 +10,7 @@ It is the successor to Trayify and is currently in a controlled migration from t
 - Product name and visual direction: **STOW**.
 - Approved navigation: Apps, Rules, Focus, Insights, Settings; About is separate at the bottom.
 - UI/runtime: **WPF on modern .NET**; Electron is not used for UI.
-- Apps, Rules, Focus, Insights, Settings and About now have operational runtime-backed slices.
+- Apps, Rules, Focus, Insights, Settings and About now have operational runtime-backed slices, including saved Focus presets and recurring local-time Focus schedules.
 - Existing minimize-to-tray engine: Trayify v0.3.3 behavior remains the protected compatibility baseline.
 - Per-user installer migration, unsigned Preview releases and the GitHub self-updater are validated end to end.
 - Stable Authenticode signing and final package-manager publication remain gated.

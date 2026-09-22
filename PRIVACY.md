@@ -15,6 +15,7 @@ That local data can include:
 - `config.txt` — managed applications and the identifiers needed to recognize their windows;
 - `rules.json` — app rules created by the user;
 - `focus-presets.json` — saved Focus presets containing local names and managed-app keys to keep visible;
+- `focus-schedules.json` — recurring Focus schedules, their saved-preset references and the last locally consumed occurrence marker used to prevent duplicate schedule triggers;
 - `settings.json` — product preferences such as theme, startup and Focus behavior;
 - `activity.jsonl` — bounded local activity history used by Insights;
 - `update-check.txt` — the time of the last explicit update check;

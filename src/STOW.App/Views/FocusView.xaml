@@ -185,12 +185,83 @@
                     </Border>
                     <Border Style="{StaticResource CardBorder}">
                         <StackPanel>
-                            <TextBlock Text="Schedule" Style="{StaticResource SectionTitle}" />
-                            <TextBlock Text="Scheduled Focus sessions are not enabled yet."
-                                       Margin="0,8,0,10" TextWrapping="Wrap"
+                            <Grid Margin="0,0,0,8">
+                                <TextBlock Text="Schedule" Style="{StaticResource SectionTitle}" />
+                                <TextBlock x:Name="SchedulesSummaryText"
+                                           HorizontalAlignment="Right"
+                                           Foreground="{DynamicResource TextSecondaryBrush}"
+                                           FontSize="12" />
+                            </Grid>
+                            <TextBlock x:Name="ScheduleStatusText"
+                                       Margin="0,0,0,8"
+                                       TextWrapping="Wrap"
+                                       FontSize="11"
+                                       Foreground="{DynamicResource TextSecondaryBrush}"
+                                       Visibility="Collapsed" />
+                            <TextBlock x:Name="NoSchedulesText"
+                                       Text="No Focus schedules yet."
+                                       Margin="0,2,0,8"
+                                       TextWrapping="Wrap"
                                        Foreground="{DynamicResource TextSecondaryBrush}" />
-                            <Button Style="{StaticResource SecondaryButton}" Content="Add schedule"
-                                    HorizontalAlignment="Left" IsEnabled="False" />
+                            <ItemsControl x:Name="ScheduleList">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border BorderBrush="{DynamicResource BorderBrush}"
+                                                BorderThickness="0,1,0,0"
+                                                Padding="0,9,0,8">
+                                            <StackPanel>
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*" />
+                                                        <ColumnDefinition Width="Auto" />
+                                                    </Grid.ColumnDefinitions>
+                                                    <TextBlock Text="{Binding Name}"
+                                                               FontWeight="SemiBold"
+                                                               TextWrapping="Wrap" />
+                                                    <CheckBox Grid.Column="1"
+                                                              Content="On"
+                                                              Tag="{Binding Id}"
+                                                              IsChecked="{Binding Enabled, Mode=OneWay}"
+                                                              IsEnabled="{Binding CanManage}"
+                                                              Click="ScheduleEnabled_Click"
+                                                              Margin="8,0,0,0" />
+                                                </Grid>
+                                                <TextBlock Text="{Binding Details}"
+                                                           Margin="0,3,0,0"
+                                                           TextWrapping="Wrap"
+                                                           FontSize="11"
+                                                           Foreground="{DynamicResource TextSecondaryBrush}" />
+                                                <TextBlock Text="{Binding Status}"
+                                                           Margin="0,2,0,7"
+                                                           TextWrapping="Wrap"
+                                                           FontSize="11"
+                                                           Foreground="{DynamicResource TextSecondaryBrush}" />
+                                                <StackPanel Orientation="Horizontal">
+                                                    <Button Style="{StaticResource SecondaryButton}"
+                                                            Content="Edit"
+                                                            AutomationProperties.Name="Edit Focus schedule"
+                                                            Tag="{Binding Id}"
+                                                            IsEnabled="{Binding CanManage}"
+                                                            Margin="0,0,6,0"
+                                                            Click="EditSchedule_Click" />
+                                                    <Button Style="{StaticResource SecondaryButton}"
+                                                            Content="Delete"
+                                                            AutomationProperties.Name="Delete Focus schedule"
+                                                            Tag="{Binding Id}"
+                                                            IsEnabled="{Binding CanManage}"
+                                                            Click="DeleteSchedule_Click" />
+                                                </StackPanel>
+                                            </StackPanel>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                            <Button x:Name="AddScheduleButton"
+                                    Style="{StaticResource SecondaryButton}"
+                                    Content="Add schedule"
+                                    HorizontalAlignment="Left"
+                                    Margin="0,8,0,0"
+                                    Click="AddSchedule_Click" />
                         </StackPanel>
                     </Border>
                 </StackPanel>
