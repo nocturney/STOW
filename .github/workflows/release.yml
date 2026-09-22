@@ -115,7 +115,7 @@ jobs:
         run: ./scripts/build.ps1
 
       - name: Upload validated release candidate
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: stow-${{ inputs.channel }}-${{ env.STOW_RELEASE_VERSION }}
           path: |
