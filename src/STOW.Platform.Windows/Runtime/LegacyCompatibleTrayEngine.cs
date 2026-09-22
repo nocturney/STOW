@@ -10,6 +10,7 @@ public sealed class LegacyCompatibleTrayEngine : ITrayEngineRuntime
     private readonly ITrayWindowRuntime runtime;
     private readonly ITrayIconRegistry trayIcons;
     private readonly IStartupRegistration startupRegistration;
+    private readonly IRuleStore? ruleStore;
     private readonly bool useTimer;
     private readonly Dictionary<string, ManagedAppDefinition> managed = new(StringComparer.OrdinalIgnoreCase);
     private readonly Dictionary<string, HashSet<nint>> hiddenHandles = new(StringComparer.OrdinalIgnoreCase);
@@ -22,13 +23,14 @@ public sealed class LegacyCompatibleTrayEngine : ITrayEngineRuntime
     private bool running;
     private bool exiting;
 
-    public LegacyCompatibleTrayEngine(IManagedAppStore store)
+    public LegacyCompatibleTrayEngine(IManagedAppStore store, IRuleStore? ruleStore = null)
         : this(
             store,
             new Win32TrayWindowRuntime(),
             new WinFormsTrayIconRegistry(),
             useTimer: true,
-            startupRegistration: new WindowsStartupRegistration())
+            startupRegistration: new WindowsStartupRegistration(),
+            ruleStore: ruleStore)
     {
     }
 
@@ -37,12 +39,14 @@ public sealed class LegacyCompatibleTrayEngine : ITrayEngineRuntime
         ITrayWindowRuntime runtime,
         ITrayIconRegistry trayIcons,
         bool useTimer = true,
-        IStartupRegistration? startupRegistration = null)
+        IStartupRegistration? startupRegistration = null,
+        IRuleStore? ruleStore = null)
     {
         this.store = store;
         this.runtime = runtime;
         this.trayIcons = trayIcons;
         this.startupRegistration = startupRegistration ?? new NoOpStartupRegistration();
+        this.ruleStore = ruleStore;
         this.useTimer = useTimer;
         ReloadManaged();
         UpdateStartupRegistration();
@@ -287,6 +291,9 @@ public sealed class LegacyCompatibleTrayEngine : ITrayEngineRuntime
                     if (!runtime.IsIconic(window.Handle))
                         continue;
 
+                    if (ResolveRuleAction(app.Key, RuleTrigger.Minimize) == RuleAction.KeepVisible)
+                        continue;
+
                     runtime.Hide(window.Handle);
                     TrackHidden(app, window);
                     EnsureTrayIcon(app);
@@ -303,6 +310,21 @@ public sealed class LegacyCompatibleTrayEngine : ITrayEngineRuntime
                 hiddenHandles.Remove(key);
                 trayIcons.Remove(key);
             }
+        }
+    }
+
+    private RuleAction ResolveRuleAction(string appKey, RuleTrigger trigger)
+    {
+        if (ruleStore is null)
+            return RuleAction.Stow;
+
+        try
+        {
+            return RuleEvaluator.Resolve(ruleStore.Load(), appKey, trigger, RuleAction.Stow);
+        }
+        catch
+        {
+            return RuleAction.Stow;
         }
     }
 

@@ -17,6 +17,16 @@ List rules on the left/center and edit the selected rule in a dedicated panel.
 Rules must describe automation intent in plain English and expose enabled state clearly.
 Validation errors stay close to the edited condition/action.
 
+Current operational slice:
+- per-app rules for the `Minimize` trigger;
+- actions: `Stow` and `KeepVisible`;
+- enabled/disabled state;
+- 0-100 priority with the highest-priority matching enabled rule winning;
+- local atomic persistence in `%APPDATA%\\STOW\\rules.json`;
+- default/failure fallback remains `Stow`, preserving the Trayify v0.3.3 behavior contract.
+
+Focus and Startup rule categories remain visible in the information architecture but are intentionally disabled until their corresponding runtimes are implemented. They must not appear functional before then.
+
 ## Focus
 
 Use the approved Focus composition as the visual baseline.

@@ -151,6 +151,46 @@ public sealed class LegacyCompatibleTrayEngineTests
     }
 
     [Fact]
+    public void Keep_visible_rule_prevents_minimized_window_from_being_stowed()
+    {
+        var store = new FakeStore(Grok);
+        var runtime = new FakeRuntime(Window(101, 42, iconic: true));
+        var icons = new FakeTrayIcons();
+        var rules = new FakeRuleStore(new RuleDefinition(
+            "keep",
+            "Keep Grok visible",
+            Grok.Key,
+            RuleTrigger.Minimize,
+            RuleAction.KeepVisible,
+            true,
+            80));
+        using var engine = NewEngine(store, runtime, icons, ruleStore: rules);
+
+        engine.Start();
+        TickFullScan(engine);
+
+        Assert.True(runtime.IsWindowVisible(101));
+        Assert.False(icons.Contains(Grok.Key));
+        Assert.Equal(ManagedAppRuntimeState.Visible, Assert.Single(engine.GetSnapshot().ManagedApps).State);
+    }
+
+    [Fact]
+    public void Rule_store_failure_falls_back_to_legacy_stow_behavior()
+    {
+        var store = new FakeStore(Grok);
+        var runtime = new FakeRuntime(Window(101, 42, iconic: true));
+        var icons = new FakeTrayIcons();
+        var rules = new FakeRuleStore { ThrowOnLoad = true };
+        using var engine = NewEngine(store, runtime, icons, ruleStore: rules);
+
+        engine.Start();
+        TickFullScan(engine);
+
+        Assert.False(runtime.IsWindowVisible(101));
+        Assert.True(icons.Contains(Grok.Key));
+    }
+
+    [Fact]
     public void Startup_registration_tracks_whether_any_managed_app_is_enabled()
     {
         var store = new FakeStore(Grok);
@@ -191,8 +231,15 @@ public sealed class LegacyCompatibleTrayEngineTests
         FakeStore store,
         FakeRuntime runtime,
         FakeTrayIcons icons,
-        IStartupRegistration? startupRegistration = null) =>
-        new(store, runtime, icons, useTimer: false, startupRegistration: startupRegistration);
+        IStartupRegistration? startupRegistration = null,
+        IRuleStore? ruleStore = null) =>
+        new(
+            store,
+            runtime,
+            icons,
+            useTimer: false,
+            startupRegistration: startupRegistration,
+            ruleStore: ruleStore);
 
     private static void TickFullScan(LegacyCompatibleTrayEngine engine)
     {
@@ -238,6 +285,30 @@ public sealed class LegacyCompatibleTrayEngineTests
     {
         public List<bool> Updates { get; } = new();
         public void Update(bool shouldStartWithWindows) => Updates.Add(shouldStartWithWindows);
+    }
+
+    private sealed class FakeRuleStore : IRuleStore
+    {
+        private IReadOnlyList<RuleDefinition> rules;
+
+        public bool ThrowOnLoad { get; set; }
+
+        public FakeRuleStore(params RuleDefinition[] rules)
+        {
+            this.rules = rules;
+        }
+
+        public IReadOnlyList<RuleDefinition> Load()
+        {
+            if (ThrowOnLoad)
+                throw new IOException("simulated rule-store failure");
+            return rules;
+        }
+
+        public void Save(IReadOnlyCollection<RuleDefinition> rules)
+        {
+            this.rules = rules.ToArray();
+        }
     }
 
     private sealed class FakeTrayIcons : ITrayIconRegistry

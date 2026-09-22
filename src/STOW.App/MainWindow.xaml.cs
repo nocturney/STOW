@@ -15,6 +15,7 @@ public partial class MainWindow : Window
 {
     private readonly IAppDiscovery appDiscovery = new Win32AppDiscovery();
     private readonly IManagedAppStore managedAppStore;
+    private readonly IRuleStore ruleStore = JsonRuleStore.ForCurrentUser();
     private readonly TrayifyMigrationResult? migrationResult;
     private ITrayEngineRuntime? trayEngine;
     private string? engineUnavailableReason;
@@ -59,7 +60,7 @@ public partial class MainWindow : Window
 
         try
         {
-            trayEngine = new LegacyCompatibleTrayEngine(managedAppStore);
+            trayEngine = new LegacyCompatibleTrayEngine(managedAppStore, ruleStore);
         }
         catch (Exception ex)
         {
@@ -114,7 +115,7 @@ public partial class MainWindow : Window
         PageHost.Content = destination switch
         {
             "Apps" => CreateAppsView(),
-            "Rules" => new RulesView(),
+            "Rules" => new RulesView(ruleStore, managedAppStore, trayEngine is not null, engineUnavailableReason),
             "Focus" => new FocusView(),
             "Insights" => new InsightsView(),
             "Settings" => new SettingsView(),

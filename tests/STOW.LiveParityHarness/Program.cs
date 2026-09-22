@@ -28,6 +28,7 @@ internal static class Program
 
         failures += RunScenario("minimize-hide-restore", RunMinimizeRestore, log);
         failures += RunScenario("electron-hwnd-recreation", RunRecreatedHwndRestore, log);
+        failures += RunScenario("rule-keep-visible", RunKeepVisibleRule, log);
 
         log.Add($"RESULT={(failures == 0 ? "PASS" : "FAIL")}");
         log.Add($"EXIT_CODE={(failures == 0 ? 0 : 1)}");
@@ -117,6 +118,38 @@ internal static class Program
         Ensure(!icons.Contains(store.Apps[0].Key), "Tray tracking remained after successful restore.");
     }
 
+    private static void RunKeepVisibleRule()
+    {
+        using TargetProcess target = TargetProcess.Start();
+        var runtime = new Win32TrayWindowRuntime();
+        RuntimeWindow window = WaitForWindow(runtime, target.Pid);
+        var store = new FakeStore(ToManaged(window));
+        var icons = new FakeTrayIcons();
+        var rules = new FakeRuleStore(new RuleDefinition(
+            "live-keep",
+            "Keep parity target visible",
+            store.Apps[0].Key,
+            RuleTrigger.Minimize,
+            RuleAction.KeepVisible,
+            true,
+            100));
+        using var engine = new LegacyCompatibleTrayEngine(
+            store,
+            runtime,
+            icons,
+            useTimer: false,
+            ruleStore: rules);
+
+        engine.Start();
+        ShowWindow(window.Handle, SwMinimize);
+        WaitUntil(() => runtime.IsIconic(window.Handle));
+        TickFullScan(engine);
+
+        Ensure(runtime.IsWindowVisible(window.Handle), "KeepVisible rule allowed the window to be hidden.");
+        Ensure(!icons.Contains(store.Apps[0].Key), "KeepVisible rule unexpectedly created tray tracking.");
+        Ensure(engine.Shutdown().Succeeded, "Engine did not shut down after KeepVisible scenario.");
+    }
+
     private static ManagedAppDefinition ToManaged(RuntimeWindow window) => new(
         window.DisplayName,
         window.ExecutablePath,
@@ -177,6 +210,23 @@ internal static class Program
         public FakeStore(params ManagedAppDefinition[] apps) => Apps = apps.ToList();
         public IReadOnlyList<ManagedAppDefinition> Load() => Apps.ToArray();
         public void Save(IReadOnlyCollection<ManagedAppDefinition> apps) => Apps = apps.ToList();
+    }
+
+    private sealed class FakeRuleStore : IRuleStore
+    {
+        private IReadOnlyList<RuleDefinition> rules;
+
+        public FakeRuleStore(params RuleDefinition[] rules)
+        {
+            this.rules = rules;
+        }
+
+        public IReadOnlyList<RuleDefinition> Load() => rules;
+
+        public void Save(IReadOnlyCollection<RuleDefinition> rules)
+        {
+            this.rules = rules.ToArray();
+        }
     }
 
     private sealed class FakeTrayIcons : ITrayIconRegistry
