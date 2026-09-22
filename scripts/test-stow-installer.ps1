@@ -1,6 +1,7 @@
 $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $PSScriptRoot
 $setup = Join-Path $root 'dist-stow\STOWSetup.exe'
+$expectedVersion = (Get-Content (Join-Path $root 'STOW_VERSION') -Raw).Trim()
 $installDir = Join-Path $env:LOCALAPPDATA 'STOW'
 $app = Join-Path $installDir 'STOW.exe'
 $uninstaller = Join-Path $installDir 'Uninstall.exe'
@@ -44,7 +45,7 @@ try {
 
     $arp = Get-ItemProperty $arpKey -ErrorAction SilentlyContinue
     Add-Check 'ARP_REGISTERED' ($null -ne $arp)
-    Add-Check 'ARP_VERSION' ($arp.DisplayVersion -eq '0.4.0-preview.1') $arp.DisplayVersion
+    Add-Check 'ARP_VERSION' ($arp.DisplayVersion -eq $expectedVersion) $arp.DisplayVersion
     $startup = (Get-ItemProperty $runKey -ErrorAction SilentlyContinue).STOW
     Add-Check 'STARTUP_RESTORED' (-not [string]::IsNullOrWhiteSpace($startup)) $startup
 
