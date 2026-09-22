@@ -47,6 +47,16 @@ jobs:
           )
           foreach ($path in $required) { if (-not (Test-Path $path)) { throw "Missing STOW artifact: $path" } }
 
+      - name: Validate package-manager metadata generation
+        shell: powershell
+        run: |
+          $version = (Get-Content ./STOW_VERSION -Raw).Trim()
+          $parameters = @{ Version = $version; OutputRoot = './artifacts/package-metadata-ci' }
+          if ($version.Contains('-')) { $parameters.AllowPrerelease = $true }
+          & ./scripts/generate-package-metadata.ps1 @parameters
+          if (-not (Test-Path "./artifacts/package-metadata-ci/winget/$version/ChristianVelvet.STOW.installer.yaml")) { throw 'WinGet metadata was not generated.' }
+          if (-not (Test-Path './artifacts/package-metadata-ci/scoop/stow.json')) { throw 'Scoop metadata was not generated.' }
+
   trayify-baseline:
     name: Trayify v0.3.3 compatibility baseline
     runs-on: windows-latest

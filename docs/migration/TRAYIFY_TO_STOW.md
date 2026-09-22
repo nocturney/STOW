@@ -18,13 +18,14 @@ Migration must preserve user configuration and the proven runtime behavior while
 - Executable: `STOW.exe`
 - Installer: `STOWSetup.exe`
 - Repository: `nocturney/STOW`
+- WinGet target identity: `ChristianVelvet.STOW`
+- Scoop manifest: `stow`
 
-Package-manager identifiers are changed only when corresponding manifests and upgrade behavior are ready.
 ## Implementation status
 
-The first migration slice is implemented in `STOW.Infrastructure.Migration.TrayifyConfigMigrator`.
-It migrates only the legacy configuration file, validates records, writes atomically, preserves the Trayify source and is idempotent.
-Registry/startup, installed-app identity and package-manager migration remain intentionally separate until their rollback behavior is covered by tests.
+Configuration migration, startup handoff, installed-app registration, safe installer upgrade/uninstall, updater routing, and package-manager identity generation are implemented and regression-gated.
+The original Trayify configuration remains preserved as rollback data.
+Package-manager metadata is generated from final release artifacts and is not submitted until the matching GitHub release assets exist.
 
 ## One-time migration algorithm
 
@@ -47,4 +48,5 @@ Uninstalling STOW must never delete retained Trayify rollback data unless the us
 
 ## Release gate
 
-Trayify -> STOW upgrade is blocked until the v0.3.3 restore regression suite passes against the new engine boundary.
+The v0.3.3 restore parity gate and real GrokBot/Electron handoff have passed. Installer migration and updater gates have also passed.
+The remaining final binary-trust blocker is Authenticode signing with a real Code Signing certificate, followed by final signed-release validation and package-manager submission.
