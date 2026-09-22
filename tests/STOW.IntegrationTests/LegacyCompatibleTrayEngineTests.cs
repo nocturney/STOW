@@ -13,6 +13,14 @@ public sealed class LegacyCompatibleTrayEngineTests
         "Chrome_WidgetWin_1",
         true);
 
+    private static readonly ManagedAppDefinition Editor = new(
+        "Editor",
+        @"C:\Apps\Editor.exe",
+        "Editor",
+        "Editor",
+        "EditorWindow",
+        true);
+
     [Fact]
     public void Minimized_managed_window_is_hidden_and_tracked_after_full_scan()
     {
@@ -191,6 +199,116 @@ public sealed class LegacyCompatibleTrayEngineTests
     }
 
     [Fact]
+    public void Focus_stows_non_keep_apps_and_end_restores_only_focus_hidden_apps()
+    {
+        var store = new FakeStore(Grok, Editor);
+        var runtime = new FakeRuntime(
+            Window(101, 42, iconic: false),
+            EditorWindow(202, 84, iconic: false));
+        var icons = new FakeTrayIcons();
+        using var engine = NewEngine(store, runtime, icons);
+
+        engine.Start();
+        EngineCommandResult started = engine.StartFocusSession(new[] { Editor.Key });
+
+        Assert.True(started.Succeeded);
+        Assert.False(runtime.IsWindowVisible(101));
+        Assert.True(runtime.IsWindowVisible(202));
+        FocusSessionSnapshot active = engine.GetFocusSession();
+        Assert.True(active.Active);
+        Assert.Contains(Grok.Key, active.StowedByFocusAppKeys);
+        Assert.Contains(Editor.Key, active.KeepVisibleAppKeys);
+
+        EngineCommandResult ended = engine.EndFocusSession();
+
+        Assert.True(ended.Succeeded);
+        Assert.True(runtime.IsWindowVisible(101));
+        Assert.True(runtime.IsWindowVisible(202));
+        Assert.False(engine.GetFocusSession().Active);
+    }
+
+    [Fact]
+    public void End_focus_does_not_restore_app_that_was_stowed_before_focus()
+    {
+        var store = new FakeStore(Grok, Editor);
+        var runtime = new FakeRuntime(
+            Window(101, 42, iconic: true),
+            EditorWindow(202, 84, iconic: false));
+        var icons = new FakeTrayIcons();
+        using var engine = NewEngine(store, runtime, icons);
+
+        engine.Start();
+        TickFullScan(engine);
+        Assert.False(runtime.IsWindowVisible(101));
+
+        Assert.True(engine.StartFocusSession(Array.Empty<string>()).Succeeded);
+        Assert.False(runtime.IsWindowVisible(202));
+
+        Assert.True(engine.EndFocusSession().Succeeded);
+
+        Assert.False(runtime.IsWindowVisible(101));
+        Assert.True(runtime.IsWindowVisible(202));
+        Assert.True(icons.Contains(Grok.Key));
+    }
+
+    [Fact]
+    public void App_opened_during_focus_is_stowed_on_next_full_scan()
+    {
+        var store = new FakeStore(Grok);
+        var runtime = new FakeRuntime();
+        var icons = new FakeTrayIcons();
+        using var engine = NewEngine(store, runtime, icons);
+
+        engine.Start();
+        Assert.True(engine.StartFocusSession(Array.Empty<string>()).Succeeded);
+
+        runtime.Add(Window(101, 42, iconic: false));
+        TickFullScan(engine);
+
+        Assert.False(runtime.IsWindowVisible(101));
+        Assert.Contains(Grok.Key, engine.GetFocusSession().StowedByFocusAppKeys);
+    }
+
+    [Fact]
+    public void Manual_restore_during_focus_keeps_app_visible_for_rest_of_session()
+    {
+        var store = new FakeStore(Grok);
+        var runtime = new FakeRuntime(Window(101, 42, iconic: false));
+        var icons = new FakeTrayIcons();
+        using var engine = NewEngine(store, runtime, icons);
+
+        engine.Start();
+        Assert.True(engine.StartFocusSession(Array.Empty<string>()).Succeeded);
+        Assert.False(runtime.IsWindowVisible(101));
+
+        Assert.True(engine.Restore(Grok.Key).Succeeded);
+        TickFullScan(engine);
+
+        Assert.True(runtime.IsWindowVisible(101));
+        Assert.Contains(Grok.Key, engine.GetFocusSession().KeepVisibleAppKeys);
+    }
+
+    [Fact]
+    public void Focus_end_failure_keeps_session_active_and_tracking_intact()
+    {
+        var store = new FakeStore(Grok);
+        var runtime = new FakeRuntime(Window(101, 42, iconic: false));
+        var icons = new FakeTrayIcons();
+        using var engine = NewEngine(store, runtime, icons);
+
+        engine.Start();
+        Assert.True(engine.StartFocusSession(Array.Empty<string>()).Succeeded);
+        runtime.RestoreSucceeds = false;
+
+        EngineCommandResult result = engine.EndFocusSession();
+
+        Assert.Equal(EngineCommandStatus.RestoreTargetUnavailable, result.Status);
+        Assert.True(engine.GetFocusSession().Active);
+        Assert.True(icons.Contains(Grok.Key));
+        Assert.False(runtime.IsWindowVisible(101));
+    }
+
+    [Fact]
     public void Startup_registration_tracks_whether_any_managed_app_is_enabled()
     {
         var store = new FakeStore(Grok);
@@ -261,6 +379,21 @@ public sealed class LegacyCompatibleTrayEngineTests
             @"C:\Apps\GrokBot.exe",
             "GrokBot",
             "GrokBot",
+            visible,
+            iconic);
+
+    private static FakeWindow EditorWindow(
+        nint handle,
+        int pid,
+        bool iconic,
+        bool visible = true) => new(
+            handle,
+            pid,
+            "Editor",
+            "EditorWindow",
+            @"C:\Apps\Editor.exe",
+            "Editor",
+            "Editor",
             visible,
             iconic);
 

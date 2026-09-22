@@ -1,68 +1,142 @@
 <UserControl x:Class="STOW.App.Views.FocusView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    <ScrollViewer VerticalScrollBarVisibility="Auto">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
         <StackPanel>
             <Border Style="{StaticResource CardBorder}" Margin="0,0,0,14">
                 <Grid>
-                    <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
                     <StackPanel>
-                        <TextBlock Text="Find your focus" FontSize="20" FontWeight="SemiBold" />
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Find your focus" FontSize="20" FontWeight="SemiBold" />
+                            <Border x:Name="SessionStatusChip" Style="{StaticResource StatusChip}"
+                                    Margin="10,0,0,0" VerticalAlignment="Center">
+                                <TextBlock x:Name="SessionStatusText" Text="Inactive" />
+                            </Border>
+                        </StackPanel>
                         <TextBlock Text="Temporarily stow distractions without changing your permanent app setup."
-                                   Margin="0,5,0,0" Foreground="{DynamicResource TextSecondaryBrush}" />
+                                   Margin="0,6,0,0" Foreground="{DynamicResource TextSecondaryBrush}" />
                     </StackPanel>
-                    <Button Grid.Column="1" Style="{StaticResource PrimaryButton}" Content="Start Focus" VerticalAlignment="Center" />
+                    <Button x:Name="FocusActionButton" Grid.Column="1" Style="{StaticResource PrimaryButton}"
+                            Content="Start Focus" VerticalAlignment="Center" Click="FocusAction_Click" />
                 </Grid>
             </Border>
 
-            <TextBlock Text="Quick presets" Style="{StaticResource SectionTitle}" Margin="0,2,0,10" />
+            <Border x:Name="FocusStatusBanner" Style="{StaticResource CardBorder}"
+                    Background="{DynamicResource SurfaceElevatedBrush}" Margin="0,0,0,14" Visibility="Collapsed">
+                <TextBlock x:Name="FocusStatusText" TextWrapping="Wrap"
+                           Foreground="{DynamicResource TextSecondaryBrush}" />
+            </Border>
+
+            <TextBlock Text="Quick setup" Style="{StaticResource SectionTitle}" Margin="0,2,0,10" />
             <UniformGrid Columns="3" Margin="0,0,0,14">
                 <Border Style="{StaticResource CardBorder}" Margin="0,0,10,0">
-                    <StackPanel><TextBlock Text="Deep work" FontWeight="SemiBold"/><TextBlock Text="Stow communication and media apps" Margin="0,5,0,0" TextWrapping="Wrap" Foreground="{DynamicResource TextSecondaryBrush}"/></StackPanel>
+                    <StackPanel>
+                        <TextBlock Text="Deep work" FontWeight="SemiBold" />
+                        <TextBlock Text="Stow every enabled managed app for a blank-slate desktop."
+                                   Margin="0,5,0,10" TextWrapping="Wrap"
+                                   Foreground="{DynamicResource TextSecondaryBrush}" />
+                        <Button x:Name="DeepWorkButton" Style="{StaticResource SecondaryButton}"
+                                Content="Use preset" HorizontalAlignment="Left" Click="DeepWork_Click" />
+                    </StackPanel>
                 </Border>
                 <Border Style="{StaticResource CardBorder}" Margin="0,0,10,0">
-                    <StackPanel><TextBlock Text="Meeting" FontWeight="SemiBold"/><TextBlock Text="Keep collaboration visible, stow the rest" Margin="0,5,0,0" TextWrapping="Wrap" Foreground="{DynamicResource TextSecondaryBrush}"/></StackPanel>
+                    <StackPanel>
+                        <TextBlock Text="Keep all visible" FontWeight="SemiBold" />
+                        <TextBlock Text="Select every managed app as visible before starting a session."
+                                   Margin="0,5,0,10" TextWrapping="Wrap"
+                                   Foreground="{DynamicResource TextSecondaryBrush}" />
+                        <Button x:Name="KeepAllButton" Style="{StaticResource SecondaryButton}"
+                                Content="Use preset" HorizontalAlignment="Left" Click="KeepAll_Click" />
+                    </StackPanel>
                 </Border>
                 <Border Style="{StaticResource CardBorder}">
-                    <StackPanel><TextBlock Text="Create preset" FontWeight="SemiBold"/><TextBlock Text="Save a desktop state for later" Margin="0,5,0,0" TextWrapping="Wrap" Foreground="{DynamicResource TextSecondaryBrush}"/></StackPanel>
+                    <StackPanel>
+                        <TextBlock Text="Saved presets" FontWeight="SemiBold" />
+                        <TextBlock Text="Reusable presets arrive with Focus persistence."
+                                   Margin="0,5,0,10" TextWrapping="Wrap"
+                                   Foreground="{DynamicResource TextSecondaryBrush}" />
+                        <Button Style="{StaticResource SecondaryButton}" Content="Not available yet"
+                                HorizontalAlignment="Left" IsEnabled="False" />
+                    </StackPanel>
                 </Border>
             </UniformGrid>
 
             <Grid>
-                <Grid.ColumnDefinitions><ColumnDefinition Width="1.15*"/><ColumnDefinition Width="12"/><ColumnDefinition Width="1*"/></Grid.ColumnDefinitions>
-                <StackPanel Grid.Column="0">
-                    <Border Style="{StaticResource CardBorder}" Margin="0,0,0,12">
-                        <StackPanel>
-                            <TextBlock Text="Focus schedule" Style="{StaticResource SectionTitle}" />
-                            <TextBlock Text="No scheduled sessions" Margin="0,8,0,12" Foreground="{DynamicResource TextSecondaryBrush}" />
-                            <Button Style="{StaticResource SecondaryButton}" Content="Add schedule" HorizontalAlignment="Left" />
-                        </StackPanel>
-                    </Border>
-                    <Border Style="{StaticResource CardBorder}">
-                        <StackPanel>
-                            <TextBlock Text="Apps during focus" Style="{StaticResource SectionTitle}" />
-                            <Grid Margin="0,12,0,0">
-                                <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
-                                <StackPanel><TextBlock Text="Stowed" FontWeight="SemiBold"/><TextBlock Text="Discord · Media apps" Margin="0,5,0,0" Foreground="{DynamicResource TextSecondaryBrush}"/></StackPanel>
-                                <StackPanel Grid.Column="1"><TextBlock Text="Visible" FontWeight="SemiBold"/><TextBlock Text="Editor · Browser" Margin="0,5,0,0" Foreground="{DynamicResource TextSecondaryBrush}"/></StackPanel>
-                            </Grid>
-                        </StackPanel>
-                    </Border>
-                </StackPanel>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1.4*" />
+                    <ColumnDefinition Width="14" />
+                    <ColumnDefinition Width="0.8*" />
+                </Grid.ColumnDefinitions>
+
+                <Border Grid.Column="0" Style="{StaticResource CardBorder}">
+                    <StackPanel>
+                        <Grid Margin="0,0,0,12">
+                            <TextBlock Text="Apps during Focus" Style="{StaticResource SectionTitle}" />
+                            <TextBlock x:Name="ManagedAppsSummaryText" HorizontalAlignment="Right"
+                                       Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" />
+                        </Grid>
+                        <TextBlock x:Name="NoManagedAppsText"
+                                   Text="No enabled managed apps are available. Add and enable apps from Apps first."
+                                   TextWrapping="Wrap" Foreground="{DynamicResource TextSecondaryBrush}"
+                                   Visibility="Collapsed" Margin="0,4,0,4" />
+                        <ItemsControl x:Name="FocusAppsList">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid Margin="0,7">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel>
+                                            <TextBlock Text="{Binding Name}" FontWeight="SemiBold" />
+                                            <TextBlock Text="{Binding ProcessName}" FontSize="11" Margin="0,2,0,0"
+                                                       Foreground="{DynamicResource TextSecondaryBrush}" />
+                                        </StackPanel>
+                                        <CheckBox Grid.Column="1" Content="Keep visible" Tag="{Binding Key}"
+                                                  IsChecked="{Binding KeepVisible, Mode=OneWay}"
+                                                  IsEnabled="{Binding CanEdit}"
+                                                  Click="KeepVisible_Click" VerticalAlignment="Center" />
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </Border>
 
                 <StackPanel Grid.Column="2">
                     <Border Style="{StaticResource CardBorder}" Margin="0,0,0,12">
                         <StackPanel>
-                            <TextBlock Text="Distraction level" Style="{StaticResource SectionTitle}" />
-                            <TextBlock Text="24%" FontSize="34" FontWeight="SemiBold" Margin="0,10,0,2" Foreground="{DynamicResource AccentTealBrush}" />
-                            <ProgressBar Height="8" Minimum="0" Maximum="100" Value="24" />
+                            <TextBlock Text="Session" Style="{StaticResource SectionTitle}" />
+                            <Grid Margin="0,12,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Stowed by Focus" Foreground="{DynamicResource TextSecondaryBrush}" />
+                                <TextBlock x:Name="StowedCountText" Grid.Column="1" Text="0" FontWeight="SemiBold" />
+                            </Grid>
+                            <Grid Margin="0,8,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Kept visible" Foreground="{DynamicResource TextSecondaryBrush}" />
+                                <TextBlock x:Name="VisibleCountText" Grid.Column="1" Text="0" FontWeight="SemiBold" />
+                            </Grid>
                         </StackPanel>
                     </Border>
                     <Border Style="{StaticResource CardBorder}">
                         <StackPanel>
-                            <TextBlock Text="Recommended for you" Style="{StaticResource SectionTitle}" />
-                            <TextBlock Text="Try Deep work when communication apps start competing for attention."
-                                       Margin="0,8,0,0" TextWrapping="Wrap" Foreground="{DynamicResource TextSecondaryBrush}" />
+                            <TextBlock Text="Schedule" Style="{StaticResource SectionTitle}" />
+                            <TextBlock Text="Scheduled Focus sessions are not enabled yet."
+                                       Margin="0,8,0,10" TextWrapping="Wrap"
+                                       Foreground="{DynamicResource TextSecondaryBrush}" />
+                            <Button Style="{StaticResource SecondaryButton}" Content="Add schedule"
+                                    HorizontalAlignment="Left" IsEnabled="False" />
                         </StackPanel>
                     </Border>
                 </StackPanel>

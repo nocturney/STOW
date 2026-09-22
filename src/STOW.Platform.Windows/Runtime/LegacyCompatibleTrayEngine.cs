@@ -15,6 +15,8 @@ public sealed class LegacyCompatibleTrayEngine : ITrayEngineRuntime
     private readonly Dictionary<string, ManagedAppDefinition> managed = new(StringComparer.OrdinalIgnoreCase);
     private readonly Dictionary<string, HashSet<nint>> hiddenHandles = new(StringComparer.OrdinalIgnoreCase);
     private readonly Dictionary<string, HashSet<int>> hiddenPids = new(StringComparer.OrdinalIgnoreCase);
+    private readonly HashSet<string> focusKeepVisibleAppKeys = new(StringComparer.OrdinalIgnoreCase);
+    private readonly HashSet<string> focusHiddenAppKeys = new(StringComparer.OrdinalIgnoreCase);
 
     private System.Threading.Timer? timer;
     private SynchronizationContext? synchronizationContext;
@@ -22,6 +24,7 @@ public sealed class LegacyCompatibleTrayEngine : ITrayEngineRuntime
     private int engineTicks;
     private bool running;
     private bool exiting;
+    private bool focusActive;
 
     public LegacyCompatibleTrayEngine(IManagedAppStore store, IRuleStore? ruleStore = null)
         : this(
@@ -139,6 +142,8 @@ public sealed class LegacyCompatibleTrayEngine : ITrayEngineRuntime
             {
                 SaveManaged();
                 trayIcons.Remove(appKey);
+                focusKeepVisibleAppKeys.Remove(appKey);
+                focusHiddenAppKeys.Remove(appKey);
                 return new(EngineCommandStatus.Succeeded);
             }
             catch (Exception ex)
@@ -164,6 +169,11 @@ public sealed class LegacyCompatibleTrayEngine : ITrayEngineRuntime
             try
             {
                 SaveManaged();
+                if (!enabled)
+                {
+                    focusKeepVisibleAppKeys.Remove(appKey);
+                    focusHiddenAppKeys.Remove(appKey);
+                }
                 return new(EngineCommandStatus.Succeeded);
             }
             catch (Exception ex)
@@ -184,9 +194,126 @@ public sealed class LegacyCompatibleTrayEngine : ITrayEngineRuntime
             if (!IsManagedHidden(app))
                 return new(EngineCommandStatus.Succeeded);
 
-            return RestoreManaged(app, foreground: true)
-                ? new(EngineCommandStatus.Succeeded)
-                : RestoreUnavailable(app);
+            if (!RestoreManaged(app, foreground: true))
+                return RestoreUnavailable(app);
+
+            if (focusActive)
+            {
+                focusHiddenAppKeys.Remove(app.Key);
+                focusKeepVisibleAppKeys.Add(app.Key);
+            }
+
+            return new(EngineCommandStatus.Succeeded);
+        }
+    }
+
+    public FocusSessionSnapshot GetFocusSession()
+    {
+        lock (gate)
+        {
+            return new FocusSessionSnapshot(
+                focusActive,
+                focusKeepVisibleAppKeys.ToArray(),
+                focusHiddenAppKeys.ToArray());
+        }
+    }
+
+    public EngineCommandResult StartFocusSession(IReadOnlyCollection<string> keepVisibleAppKeys)
+    {
+        lock (gate)
+        {
+            if (!running)
+                return new(EngineCommandStatus.Failed, "STOW runtime is not running.");
+            if (focusActive)
+                return new(EngineCommandStatus.AlreadyExists, "A Focus session is already active.");
+
+            focusKeepVisibleAppKeys.Clear();
+            foreach (string key in keepVisibleAppKeys)
+            {
+                if (managed.ContainsKey(key))
+                    focusKeepVisibleAppKeys.Add(key);
+            }
+
+            focusHiddenAppKeys.Clear();
+            focusActive = true;
+
+            IReadOnlyList<RuntimeWindow> windows = runtime.EnumerateUserFacingWindows();
+            foreach (ManagedAppDefinition app in managed.Values)
+            {
+                if (!app.Enabled || focusKeepVisibleAppKeys.Contains(app.Key))
+                    continue;
+
+                bool wasHidden = IsManagedHidden(app);
+                bool hiddenAny = false;
+                foreach (RuntimeWindow window in windows.Where(window => MatchesIdentity(app, window)))
+                {
+                    runtime.Hide(window.Handle);
+                    TrackHidden(app, window);
+                    hiddenAny = true;
+                }
+
+                if (!hiddenAny)
+                    continue;
+
+                EnsureTrayIcon(app);
+                if (!wasHidden)
+                    focusHiddenAppKeys.Add(app.Key);
+            }
+
+            return new(EngineCommandStatus.Succeeded);
+        }
+    }
+
+    public EngineCommandResult EndFocusSession()
+    {
+        lock (gate)
+        {
+            if (!focusActive)
+                return new(EngineCommandStatus.Succeeded);
+
+            var failures = new List<string>();
+            foreach (string key in focusHiddenAppKeys.ToArray())
+            {
+                if (!managed.TryGetValue(key, out ManagedAppDefinition? app))
+                {
+                    focusHiddenAppKeys.Remove(key);
+                    continue;
+                }
+
+                if (!IsManagedHidden(app))
+                {
+                    focusHiddenAppKeys.Remove(key);
+                    continue;
+                }
+
+                if (hiddenPids.TryGetValue(app.Key, out HashSet<int>? pids) &&
+                    pids.Count > 0 &&
+                    pids.All(pid => !runtime.ProcessExists(pid)))
+                {
+                    hiddenPids.Remove(app.Key);
+                    hiddenHandles.Remove(app.Key);
+                    trayIcons.Remove(app.Key);
+                    focusHiddenAppKeys.Remove(app.Key);
+                    continue;
+                }
+
+                if (RestoreManaged(app, foreground: false))
+                    focusHiddenAppKeys.Remove(app.Key);
+                else
+                    failures.Add(app.Name);
+            }
+
+            if (failures.Count > 0)
+            {
+                return new(
+                    EngineCommandStatus.RestoreTargetUnavailable,
+                    "Focus is still active because STOW could not safely restore: " + string.Join(", ", failures));
+            }
+
+            focusActive = false;
+            focusKeepVisibleAppKeys.Clear();
+            focusHiddenAppKeys.Clear();
+            return new(EngineCommandStatus.Succeeded);
         }
     }
 
@@ -219,6 +346,9 @@ public sealed class LegacyCompatibleTrayEngine : ITrayEngineRuntime
             timer?.Dispose();
             timer = null;
             trayIcons.RemoveAll();
+            focusActive = false;
+            focusKeepVisibleAppKeys.Clear();
+            focusHiddenAppKeys.Clear();
             return new(EngineCommandStatus.Succeeded);
         }
     }
@@ -288,6 +418,20 @@ public sealed class LegacyCompatibleTrayEngine : ITrayEngineRuntime
                         continue;
                     }
 
+                    if (focusActive)
+                    {
+                        if (focusKeepVisibleAppKeys.Contains(app.Key))
+                            continue;
+
+                        bool wasHidden = IsManagedHidden(app);
+                        runtime.Hide(window.Handle);
+                        TrackHidden(app, window);
+                        EnsureTrayIcon(app);
+                        if (!wasHidden)
+                            focusHiddenAppKeys.Add(app.Key);
+                        continue;
+                    }
+
                     if (!runtime.IsIconic(window.Handle))
                         continue;
 
@@ -309,6 +453,7 @@ public sealed class LegacyCompatibleTrayEngine : ITrayEngineRuntime
                 hiddenPids.Remove(key);
                 hiddenHandles.Remove(key);
                 trayIcons.Remove(key);
+                focusHiddenAppKeys.Remove(key);
             }
         }
     }

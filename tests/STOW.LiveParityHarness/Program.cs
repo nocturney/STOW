@@ -29,6 +29,7 @@ internal static class Program
         failures += RunScenario("minimize-hide-restore", RunMinimizeRestore, log);
         failures += RunScenario("electron-hwnd-recreation", RunRecreatedHwndRestore, log);
         failures += RunScenario("rule-keep-visible", RunKeepVisibleRule, log);
+        failures += RunScenario("focus-hide-end-restore", RunFocusHideRestore, log);
 
         log.Add($"RESULT={(failures == 0 ? "PASS" : "FAIL")}");
         log.Add($"EXIT_CODE={(failures == 0 ? 0 : 1)}");
@@ -148,6 +149,32 @@ internal static class Program
         Ensure(runtime.IsWindowVisible(window.Handle), "KeepVisible rule allowed the window to be hidden.");
         Ensure(!icons.Contains(store.Apps[0].Key), "KeepVisible rule unexpectedly created tray tracking.");
         Ensure(engine.Shutdown().Succeeded, "Engine did not shut down after KeepVisible scenario.");
+    }
+
+    private static void RunFocusHideRestore()
+    {
+        using TargetProcess target = TargetProcess.Start();
+        var runtime = new Win32TrayWindowRuntime();
+        RuntimeWindow window = WaitForWindow(runtime, target.Pid);
+        var store = new FakeStore(ToManaged(window));
+        var icons = new FakeTrayIcons();
+        using var engine = new LegacyCompatibleTrayEngine(
+            store,
+            runtime,
+            icons,
+            useTimer: false);
+
+        engine.Start();
+        EngineCommandResult started = engine.StartFocusSession(Array.Empty<string>());
+        Ensure(started.Succeeded, started.Message ?? "Focus did not start.");
+        Ensure(!runtime.IsWindowVisible(window.Handle), "Focus did not hide the managed window.");
+        Ensure(icons.Contains(store.Apps[0].Key), "Focus did not create tray tracking.");
+
+        EngineCommandResult ended = engine.EndFocusSession();
+        Ensure(ended.Succeeded, ended.Message ?? "Focus did not end.");
+        Ensure(runtime.IsWindowVisible(window.Handle), "Focus did not restore the managed window.");
+        Ensure(!runtime.IsIconic(window.Handle), "Focus-restored window remained minimized.");
+        Ensure(!icons.Contains(store.Apps[0].Key), "Focus tray tracking remained after restore.");
     }
 
     private static ManagedAppDefinition ToManaged(RuntimeWindow window) => new(

@@ -27,6 +27,12 @@ public interface ITrayEngine
     EngineCommandResult SetEnabled(string appKey, bool enabled);
 
     EngineCommandResult Restore(string appKey);
+
+    FocusSessionSnapshot GetFocusSession();
+
+    EngineCommandResult StartFocusSession(IReadOnlyCollection<string> keepVisibleAppKeys);
+
+    EngineCommandResult EndFocusSession();
 }
 
 public interface ITrayEngineRuntime : ITrayEngine, IDisposable

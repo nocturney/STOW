@@ -116,7 +116,7 @@ public partial class MainWindow : Window
         {
             "Apps" => CreateAppsView(),
             "Rules" => new RulesView(ruleStore, managedAppStore, trayEngine is not null, engineUnavailableReason),
-            "Focus" => new FocusView(),
+            "Focus" => new FocusView(trayEngine, engineUnavailableReason),
             "Insights" => new InsightsView(),
             "Settings" => new SettingsView(),
             "About" => new AboutView(),
