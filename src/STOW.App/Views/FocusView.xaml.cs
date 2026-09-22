@@ -8,6 +8,7 @@ namespace STOW.App.Views;
 public partial class FocusView : UserControl
 {
     private readonly ITrayEngine? engine;
+    private readonly IAppSettingsStore settingsStore;
     private readonly DispatcherTimer refreshTimer;
     private readonly HashSet<string> selectedKeepVisible = new(StringComparer.OrdinalIgnoreCase);
     private string? runtimeUnavailableReason;
@@ -20,9 +21,13 @@ public partial class FocusView : UserControl
         bool KeepVisible,
         bool CanEdit);
 
-    public FocusView(ITrayEngine? engine, string? runtimeUnavailableReason = null)
+    public FocusView(
+        ITrayEngine? engine,
+        IAppSettingsStore settingsStore,
+        string? runtimeUnavailableReason = null)
     {
         this.engine = engine;
+        this.settingsStore = settingsStore;
         this.runtimeUnavailableReason = runtimeUnavailableReason;
         runtimeHealthy = engine is not null;
 
@@ -169,8 +174,15 @@ public partial class FocusView : UserControl
         try
         {
             FocusSessionSnapshot focus = engine.GetFocusSession();
+            FocusEndBehavior endBehavior = FocusEndBehavior.RestorePreviousDesktop;
+            if (focus.Active)
+            {
+                try { endBehavior = settingsStore.Load().FocusEndBehavior; }
+                catch { endBehavior = FocusEndBehavior.RestorePreviousDesktop; }
+            }
+
             EngineCommandResult result = focus.Active
-                ? engine.EndFocusSession()
+                ? engine.EndFocusSession(endBehavior)
                 : engine.StartFocusSession(selectedKeepVisible.ToArray());
 
             if (!result.Succeeded && result.Status != EngineCommandStatus.AlreadyExists)

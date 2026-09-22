@@ -12,6 +12,7 @@ public sealed class LegacyCompatibleTrayEngine : ITrayEngineRuntime
     private readonly IStartupRegistration startupRegistration;
     private readonly IRuleStore? ruleStore;
     private readonly IActivityStore? activityStore;
+    private readonly IAppSettingsStore? settingsStore;
     private readonly bool useTimer;
     private readonly Dictionary<string, ManagedAppDefinition> managed = new(StringComparer.OrdinalIgnoreCase);
     private readonly Dictionary<string, HashSet<nint>> hiddenHandles = new(StringComparer.OrdinalIgnoreCase);
@@ -30,7 +31,8 @@ public sealed class LegacyCompatibleTrayEngine : ITrayEngineRuntime
     public LegacyCompatibleTrayEngine(
         IManagedAppStore store,
         IRuleStore? ruleStore = null,
-        IActivityStore? activityStore = null)
+        IActivityStore? activityStore = null,
+        IAppSettingsStore? settingsStore = null)
         : this(
             store,
             new Win32TrayWindowRuntime(),
@@ -38,7 +40,8 @@ public sealed class LegacyCompatibleTrayEngine : ITrayEngineRuntime
             useTimer: true,
             startupRegistration: new WindowsStartupRegistration(),
             ruleStore: ruleStore,
-            activityStore: activityStore)
+            activityStore: activityStore,
+            settingsStore: settingsStore)
     {
     }
 
@@ -49,7 +52,8 @@ public sealed class LegacyCompatibleTrayEngine : ITrayEngineRuntime
         bool useTimer = true,
         IStartupRegistration? startupRegistration = null,
         IRuleStore? ruleStore = null,
-        IActivityStore? activityStore = null)
+        IActivityStore? activityStore = null,
+        IAppSettingsStore? settingsStore = null)
     {
         this.store = store;
         this.runtime = runtime;
@@ -57,6 +61,7 @@ public sealed class LegacyCompatibleTrayEngine : ITrayEngineRuntime
         this.startupRegistration = startupRegistration ?? new NoOpStartupRegistration();
         this.ruleStore = ruleStore;
         this.activityStore = activityStore;
+        this.settingsStore = settingsStore;
         this.useTimer = useTimer;
         ReloadManaged();
         UpdateStartupRegistration();
@@ -275,12 +280,22 @@ public sealed class LegacyCompatibleTrayEngine : ITrayEngineRuntime
         }
     }
 
-    public EngineCommandResult EndFocusSession()
+    public EngineCommandResult EndFocusSession(
+        FocusEndBehavior behavior = FocusEndBehavior.RestorePreviousDesktop)
     {
         lock (gate)
         {
             if (!focusActive)
                 return new(EngineCommandStatus.Succeeded);
+
+            if (behavior == FocusEndBehavior.KeepAppsStowed)
+            {
+                focusActive = false;
+                focusKeepVisibleAppKeys.Clear();
+                focusHiddenAppKeys.Clear();
+                RecordActivity(ActivityEventType.FocusEnded, source: "FocusKeepStowed");
+                return new(EngineCommandStatus.Succeeded);
+            }
 
             var failures = new List<string>();
             foreach (string key in focusHiddenAppKeys.ToArray())
@@ -326,6 +341,22 @@ public sealed class LegacyCompatibleTrayEngine : ITrayEngineRuntime
             focusHiddenAppKeys.Clear();
             RecordActivity(ActivityEventType.FocusEnded, source: "Focus");
             return new(EngineCommandStatus.Succeeded);
+        }
+    }
+
+    public EngineCommandResult RefreshSettings()
+    {
+        lock (gate)
+        {
+            try
+            {
+                UpdateStartupRegistration();
+                return new(EngineCommandStatus.Succeeded);
+            }
+            catch (Exception ex)
+            {
+                return new(EngineCommandStatus.Failed, ex.Message);
+            }
         }
     }
 
@@ -621,7 +652,15 @@ public sealed class LegacyCompatibleTrayEngine : ITrayEngineRuntime
 
     private void UpdateStartupRegistration()
     {
-        startupRegistration.Update(managed.Values.Any(app => app.Enabled));
+        bool startWithWindows = true;
+        if (settingsStore is not null)
+        {
+            try { startWithWindows = settingsStore.Load().StartWithWindows; }
+            catch { startWithWindows = true; }
+        }
+
+        startupRegistration.Update(
+            startWithWindows && managed.Values.Any(app => app.Enabled));
     }
 
     private void RecordActivity(

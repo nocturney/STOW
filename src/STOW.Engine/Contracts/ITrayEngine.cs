@@ -32,7 +32,10 @@ public interface ITrayEngine
 
     EngineCommandResult StartFocusSession(IReadOnlyCollection<string> keepVisibleAppKeys);
 
-    EngineCommandResult EndFocusSession();
+    EngineCommandResult EndFocusSession(
+        FocusEndBehavior behavior = FocusEndBehavior.RestorePreviousDesktop);
+
+    EngineCommandResult RefreshSettings();
 }
 
 public interface ITrayEngineRuntime : ITrayEngine, IDisposable

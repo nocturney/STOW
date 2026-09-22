@@ -17,6 +17,7 @@ public partial class MainWindow : Window
     private readonly IManagedAppStore managedAppStore;
     private readonly IRuleStore ruleStore = JsonRuleStore.ForCurrentUser();
     private readonly IActivityStore activityStore = JsonLinesActivityStore.ForCurrentUser();
+    private readonly IAppSettingsStore settingsStore = JsonAppSettingsStore.ForCurrentUser();
     private readonly TrayifyMigrationResult? migrationResult;
     private ITrayEngineRuntime? trayEngine;
     private string? engineUnavailableReason;
@@ -61,7 +62,7 @@ public partial class MainWindow : Window
 
         try
         {
-            trayEngine = new LegacyCompatibleTrayEngine(managedAppStore, ruleStore, activityStore);
+            trayEngine = new LegacyCompatibleTrayEngine(managedAppStore, ruleStore, activityStore, settingsStore);
         }
         catch (Exception ex)
         {
@@ -117,9 +118,9 @@ public partial class MainWindow : Window
         {
             "Apps" => CreateAppsView(),
             "Rules" => new RulesView(ruleStore, managedAppStore, trayEngine is not null, engineUnavailableReason),
-            "Focus" => new FocusView(trayEngine, engineUnavailableReason),
+            "Focus" => new FocusView(trayEngine, settingsStore, engineUnavailableReason),
             "Insights" => new InsightsView(activityStore),
-            "Settings" => new SettingsView(),
+            "Settings" => new SettingsView(settingsStore, trayEngine),
             "About" => new AboutView(),
             _ => CreateAppsView()
         };
@@ -136,8 +137,18 @@ public partial class MainWindow : Window
         if (applicationExitRequested)
             return;
 
+        bool keepRunning = true;
+        try { keepRunning = settingsStore.Load().KeepRunningInTray; }
+        catch { keepRunning = true; }
+
         e.Cancel = true;
-        Hide();
+        if (keepRunning)
+        {
+            Hide();
+            return;
+        }
+
+        _ = RequestApplicationExit();
     }
 
     public bool RequestApplicationExit()

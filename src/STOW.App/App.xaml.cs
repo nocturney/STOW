@@ -1,6 +1,7 @@
 using System.Windows;
 using System.Windows.Threading;
 using STOW.App.Themes;
+using STOW.Infrastructure.Configuration;
 using STOW.Infrastructure.Runtime;
 using STOW.Platform.Windows.Runtime;
 
@@ -18,7 +19,7 @@ public partial class App : Application
     {
         base.OnStartup(e);
         ShutdownMode = ShutdownMode.OnExplicitShutdown;
-        ThemeManager.ApplySystemTheme();
+        ApplyConfiguredTheme();
 
         bool background = e.Args.Any(arg =>
             string.Equals(arg, "--background", StringComparison.OrdinalIgnoreCase));
@@ -66,6 +67,18 @@ public partial class App : Application
                 MessageBoxImage.Error);
             DisposeShell();
             Shutdown(1);
+        }
+    }
+
+    private static void ApplyConfiguredTheme()
+    {
+        try
+        {
+            ThemeManager.ApplyPreference(JsonAppSettingsStore.ForCurrentUser().Load().Theme);
+        }
+        catch
+        {
+            ThemeManager.ApplySystemTheme();
         }
     }
 

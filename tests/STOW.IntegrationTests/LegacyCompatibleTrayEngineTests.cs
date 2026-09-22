@@ -329,6 +329,53 @@ public sealed class LegacyCompatibleTrayEngineTests
     }
 
     [Fact]
+    public void Startup_registration_respects_saved_start_with_windows_setting()
+    {
+        var store = new FakeStore(Grok);
+        var runtime = new FakeRuntime(Window(101, 42, iconic: false));
+        var icons = new FakeTrayIcons();
+        var startup = new FakeStartupRegistration();
+        var settings = new FakeSettingsStore
+        {
+            Settings = AppSettings.Default with { StartWithWindows = false }
+        };
+        using var engine = NewEngine(
+            store,
+            runtime,
+            icons,
+            startupRegistration: startup,
+            settingsStore: settings);
+
+        Assert.Equal(new[] { false }, startup.Updates);
+
+        settings.Settings = settings.Settings with { StartWithWindows = true };
+        Assert.True(engine.RefreshSettings().Succeeded);
+
+        Assert.Equal(new[] { false, true }, startup.Updates);
+    }
+
+    [Fact]
+    public void Focus_end_can_keep_focus_hidden_apps_stowed()
+    {
+        var store = new FakeStore(Grok);
+        var runtime = new FakeRuntime(Window(101, 42, iconic: false));
+        var icons = new FakeTrayIcons();
+        using var engine = NewEngine(store, runtime, icons);
+
+        engine.Start();
+        Assert.True(engine.StartFocusSession(Array.Empty<string>()).Succeeded);
+        Assert.False(runtime.IsWindowVisible(101));
+
+        EngineCommandResult ended = engine.EndFocusSession(FocusEndBehavior.KeepAppsStowed);
+
+        Assert.True(ended.Succeeded);
+        Assert.False(engine.GetFocusSession().Active);
+        Assert.False(runtime.IsWindowVisible(101));
+        Assert.True(icons.Contains(Grok.Key));
+        Assert.Equal(ManagedAppRuntimeState.Stowed, Assert.Single(engine.GetSnapshot().ManagedApps).State);
+    }
+
+    [Fact]
     public void Minimize_and_manual_restore_are_recorded_locally()
     {
         var store = new FakeStore(Grok);
@@ -417,7 +464,8 @@ public sealed class LegacyCompatibleTrayEngineTests
         FakeTrayIcons icons,
         IStartupRegistration? startupRegistration = null,
         IRuleStore? ruleStore = null,
-        IActivityStore? activityStore = null) =>
+        IActivityStore? activityStore = null,
+        IAppSettingsStore? settingsStore = null) =>
         new(
             store,
             runtime,
@@ -425,7 +473,8 @@ public sealed class LegacyCompatibleTrayEngineTests
             useTimer: false,
             startupRegistration: startupRegistration,
             ruleStore: ruleStore,
-            activityStore: activityStore);
+            activityStore: activityStore,
+            settingsStore: settingsStore);
 
     private static void TickFullScan(LegacyCompatibleTrayEngine engine)
     {
@@ -509,6 +558,18 @@ public sealed class LegacyCompatibleTrayEngineTests
         public void Save(IReadOnlyCollection<RuleDefinition> rules)
         {
             this.rules = rules.ToArray();
+        }
+    }
+
+    private sealed class FakeSettingsStore : IAppSettingsStore
+    {
+        public AppSettings Settings { get; set; } = AppSettings.Default;
+
+        public AppSettings Load() => Settings;
+
+        public void Save(AppSettings settings)
+        {
+            Settings = settings;
         }
     }
 

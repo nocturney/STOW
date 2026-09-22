@@ -67,6 +67,16 @@ Only mutable product settings belong here.
 Examples: startup behavior, theme, notification preferences and compatible update behavior.
 Do not place product/legal/reference documents here.
 
+Current operational slice:
+- settings are persisted atomically in `%APPDATA%\STOW\settings.json`;
+- defaults preserve the existing behavior: keep running in tray, start with Windows, System theme and restore the previous desktop when Focus ends;
+- General controls whether closing the manager window keeps STOW running in the tray or safely exits the app;
+- Startup controls Windows startup registration, still gated by whether at least one managed app is enabled;
+- Appearance persists System / Light / Dark and applies it immediately; the saved preference is restored on next launch;
+- Focus behavior can either restore the previous desktop or leave Focus-hidden apps stowed when the session ends;
+- Notifications remain visibly unavailable until a real notification runtime exists; no decorative toggle is presented as functional;
+- Privacy, updates, license and notices remain in About rather than Settings.
+
 ## About
 
 Standalone navigation destination anchored separately at the bottom.
