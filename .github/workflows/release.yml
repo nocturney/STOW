@@ -130,8 +130,6 @@ jobs:
         run: |
           $tag = $env:STOW_RELEASE_TAG
           $version = $env:STOW_RELEASE_VERSION
-          & gh release view $tag --repo $env:GITHUB_REPOSITORY *> $null
-          if ($LASTEXITCODE -eq 0) { throw "GitHub Release $tag already exists." }
           $releaseArgs = @(
             'release','create',$tag,
             './dist-stow/STOW.exe',
