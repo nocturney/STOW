@@ -1,6 +1,10 @@
 # STOW Code Signing
 
-STOW release binaries must use Authenticode code signing before the release workflow is considered final-release ready.
+STOW supports two release paths:
+
+- Preview releases may be intentionally unsigned. They still require SHA-256 verification, installer/version validation, and all runtime/installer regression gates. Windows SmartScreen may warn because publisher trust is absent.
+- Stable releases require valid Authenticode code signing before publication.
+
 SHA-256 checksums protect download integrity but do not establish publisher trust or replace Authenticode.
 
 ## Required tooling

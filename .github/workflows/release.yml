@@ -1,14 +1,28 @@
-name: STOW Release Gate
+name: STOW Release
 
 on:
   workflow_dispatch:
+    inputs:
+      channel:
+        description: Release channel
+        required: true
+        default: preview
+        type: choice
+        options:
+          - preview
+          - stable
+      publish:
+        description: Publish the validated GitHub Release
+        required: true
+        default: false
+        type: boolean
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
-  gate:
-    name: Validate signed release candidate
+  release:
+    name: Validate ${{ inputs.channel }} release
     runs-on: windows-latest
     env:
       STOW_SIGNING_PFX_BASE64: ${{ secrets.STOW_SIGNING_PFX_BASE64 }}
@@ -22,17 +36,30 @@ jobs:
         with:
           dotnet-version: 10.0.x
 
+      - name: Validate release channel and version
+        shell: powershell
+        run: |
+          $version = (Get-Content ./STOW_VERSION -Raw).Trim()
+          $channel = '${{ inputs.channel }}'
+          $isPrerelease = $version.Contains('-')
+          if ($channel -eq 'preview' -and -not $isPrerelease) { throw "Preview channel requires a prerelease STOW_VERSION. Found $version" }
+          if ($channel -eq 'stable' -and $isPrerelease) { throw "Stable channel requires a stable STOW_VERSION. Found $version" }
+          if ($env:GITHUB_REF -ne 'refs/heads/main') { throw "Releases must be created from main. Current ref: $env:GITHUB_REF" }
+          "STOW_RELEASE_VERSION=$version" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          "STOW_RELEASE_TAG=v$version" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
       - name: Build STOW
         run: dotnet build STOW.slnx -c Release
 
       - name: Run STOW tests
         run: dotnet test STOW.slnx -c Release --no-build
 
-      - name: Import code-signing certificate
+      - name: Import code-signing certificate for stable release
+        if: inputs.channel == 'stable'
         shell: powershell
         run: |
-          if ([string]::IsNullOrWhiteSpace($env:STOW_SIGNING_PFX_BASE64)) { throw 'Missing STOW_SIGNING_PFX_BASE64 secret.' }
-          if ([string]::IsNullOrWhiteSpace($env:STOW_SIGNING_PFX_PASSWORD)) { throw 'Missing STOW_SIGNING_PFX_PASSWORD secret.' }
+          if ([string]::IsNullOrWhiteSpace($env:STOW_SIGNING_PFX_BASE64)) { throw 'Stable releases require STOW_SIGNING_PFX_BASE64.' }
+          if ([string]::IsNullOrWhiteSpace($env:STOW_SIGNING_PFX_PASSWORD)) { throw 'Stable releases require STOW_SIGNING_PFX_PASSWORD.' }
           $pfx = Join-Path $env:RUNNER_TEMP 'stow-signing.pfx'
           [IO.File]::WriteAllBytes($pfx, [Convert]::FromBase64String($env:STOW_SIGNING_PFX_BASE64))
           $secure = ConvertTo-SecureString $env:STOW_SIGNING_PFX_PASSWORD -AsPlainText -Force
@@ -41,23 +68,31 @@ jobs:
           "STOW_SIGNING_CERT_THUMBPRINT=$($cert.Thumbprint)" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
           Remove-Item $pfx -Force
 
-      - name: Build signed STOW package
+      - name: Build unsigned preview package
+        if: inputs.channel == 'preview'
+        shell: powershell
+        run: ./scripts/build-stow.ps1
+
+      - name: Build signed stable package
+        if: inputs.channel == 'stable'
         shell: powershell
         run: ./scripts/build-stow.ps1 -Sign -CertificateThumbprint $env:STOW_SIGNING_CERT_THUMBPRINT
 
-      - name: Verify Authenticode signatures
+      - name: Verify stable Authenticode signatures
+        if: inputs.channel == 'stable'
         shell: powershell
         run: ./scripts/verify-release-signing.ps1
 
-      - name: Verify signed release contents
+      - name: Verify release contents
         shell: powershell
         run: |
-          $version = (Get-Content ./STOW_VERSION -Raw).Trim()
+          $version = $env:STOW_RELEASE_VERSION
           $required = @(
             './dist-stow/STOW.exe',
             './dist-stow/STOWSetup.exe',
             "./dist-stow/STOW-$version-win-x64.zip",
             './dist-stow/SHA256SUMS.txt',
+            './dist-stow/release-notes.md',
             './dist-stow/DOTNET_RUNTIME_LICENSE.txt',
             './dist-stow/DOTNET_RUNTIME_THIRD_PARTY_NOTICES.txt',
             './dist-stow/DOTNET_WINDOWS_DESKTOP_LICENSE.txt',
@@ -66,30 +101,57 @@ jobs:
           foreach ($path in $required) { if (-not (Test-Path $path)) { throw "Missing STOW artifact: $path" } }
           Get-Content ./dist-stow/SHA256SUMS.txt
 
+      - name: Generate package-manager metadata candidate
+        shell: powershell
+        run: |
+          $parameters = @{ Version = $env:STOW_RELEASE_VERSION; OutputRoot = './artifacts/package-metadata-release' }
+          if ('${{ inputs.channel }}' -eq 'preview') { $parameters.AllowPrerelease = $true }
+          & ./scripts/generate-package-metadata.ps1 @parameters
+
       - name: Verify Trayify compatibility baseline still builds
         shell: powershell
         run: ./scripts/build.ps1
 
-      - name: Upload signed release candidate
+      - name: Upload validated release candidate
         uses: actions/upload-artifact@v4
         with:
-          name: stow-signed-release-candidate
-          path: dist-stow/
+          name: stow-${{ inputs.channel }}-${{ env.STOW_RELEASE_VERSION }}
+          path: |
+            dist-stow/
+            artifacts/package-metadata-release/
           if-no-files-found: error
           retention-days: 7
 
+      - name: Publish GitHub Release
+        if: inputs.publish
+        shell: powershell
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          $tag = $env:STOW_RELEASE_TAG
+          $version = $env:STOW_RELEASE_VERSION
+          & gh release view $tag --repo $env:GITHUB_REPOSITORY *> $null
+          if ($LASTEXITCODE -eq 0) { throw "GitHub Release $tag already exists." }
+          $releaseArgs = @(
+            'release','create',$tag,
+            './dist-stow/STOW.exe',
+            './dist-stow/STOWSetup.exe',
+            "./dist-stow/STOW-$version-win-x64.zip",
+            './dist-stow/SHA256SUMS.txt',
+            '--repo',$env:GITHUB_REPOSITORY,
+            '--target',$env:GITHUB_SHA,
+            '--title',"STOW $version",
+            '--notes-file','./dist-stow/release-notes.md'
+          )
+          if ('${{ inputs.channel }}' -eq 'preview') { $releaseArgs += '--prerelease' }
+          & gh @releaseArgs
+          if ($LASTEXITCODE -ne 0) { throw "GitHub Release publication failed with exit code $LASTEXITCODE" }
+
       - name: Remove imported signing certificate
-        if: always()
+        if: always() && inputs.channel == 'stable'
         shell: powershell
         run: |
           if (-not [string]::IsNullOrWhiteSpace($env:STOW_SIGNING_CERT_THUMBPRINT)) {
             $path = "Cert:\CurrentUser\My\$env:STOW_SIGNING_CERT_THUMBPRINT"
             if (Test-Path $path) { Remove-Item $path -Force }
           }
-
-      - name: Publishing status
-        if: always()
-        shell: powershell
-        run: |
-          Write-Host "This workflow validates and uploads a signed release candidate artifact only."
-          Write-Host "GitHub Release publication remains intentionally disabled until final release approval."

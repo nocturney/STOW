@@ -129,10 +129,20 @@ $setupHash = (Get-FileHash -Algorithm SHA256 (Join-Path $dist 'STOWSetup.exe')).
     "$setupHash  STOWSetup.exe"
 ) | Set-Content (Join-Path $dist 'SHA256SUMS.txt') -Encoding ascii
 
+$isPrerelease = $version.Contains('-')
+$releaseSummary = if ($isPrerelease -and -not $Sign) {
+    'Preview release. This build is intentionally unsigned; Windows SmartScreen may warn. Verify SHA-256 checksums before installation.'
+} elseif ($Sign) {
+    'Signed release build. Verify Authenticode publisher information and SHA-256 checksums before installation.'
+} else {
+    'Unsigned local release candidate. Stable publication requires Authenticode signing.'
+}
 @(
     "# STOW $version",
     "",
-    "Technical preview build. Publishing is disabled until signing and final release validation are complete."
+    $releaseSummary,
+    "",
+    'A calmer desktop starts here.'
 ) | Set-Content (Join-Path $dist 'release-notes.md') -Encoding utf8
 
 $zip = Join-Path $dist "STOW-$version-win-x64.zip"
