@@ -91,7 +91,10 @@ Current operational slice:
 - Startup controls Windows startup registration, still gated by whether at least one managed app is enabled;
 - Appearance persists System / Light / Dark and applies it immediately; the saved preference is restored on next launch;
 - Focus behavior can either restore the previous desktop or leave Focus-hidden apps stowed when the session ends;
-- Notifications remain visibly unavailable until a real notification runtime exists; no decorative toggle is presented as functional;
+- Notifications are operational, local Windows tray notifications and are disabled by default so upgrades do not introduce unsolicited alerts;
+- the current notification scope is intentionally narrow: scheduled Focus start/end events only;
+- notification delivery is best-effort and can never alter Focus, hide/restore, scheduling or shutdown safety;
+- clicking a STOW notification opens the manager window;
 - Privacy, updates, license and notices remain in About rather than Settings.
 
 ## About

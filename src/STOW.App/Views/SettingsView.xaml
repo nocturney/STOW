@@ -73,13 +73,16 @@
                     </Grid.ColumnDefinitions>
                     <StackPanel>
                         <TextBlock Text="Notifications" Style="{StaticResource SectionTitle}" />
-                        <TextBlock Text="Notification controls will appear when the notification runtime is implemented."
+                        <TextBlock Text="Show local Windows tray notifications when scheduled Focus sessions start or end."
                                    Margin="0,5,0,0" TextWrapping="Wrap"
                                    Foreground="{DynamicResource TextSecondaryBrush}" />
                     </StackPanel>
-                    <Button Grid.Column="1" Style="{StaticResource SecondaryButton}"
-                            Content="Not available yet" IsEnabled="False"
-                            VerticalAlignment="Center" />
+                    <CheckBox x:Name="NotificationsCheckBox"
+                              Grid.Column="1"
+                              Content="Scheduled Focus notifications"
+                              VerticalAlignment="Center"
+                              Checked="Notifications_Changed"
+                              Unchecked="Notifications_Changed" />
                 </Grid>
             </Border>
 

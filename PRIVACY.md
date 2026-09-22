@@ -16,7 +16,7 @@ That local data can include:
 - `rules.json` — app rules created by the user;
 - `focus-presets.json` — saved Focus presets containing local names and managed-app keys to keep visible;
 - `focus-schedules.json` — recurring Focus schedules, their saved-preset references and the last locally consumed occurrence marker used to prevent duplicate schedule triggers;
-- `settings.json` — product preferences such as theme, startup and Focus behavior;
+- `settings.json` — product preferences such as theme, startup, Focus behavior and whether local scheduled-Focus notifications are enabled;
 - `activity.jsonl` — bounded local activity history used by Insights;
 - `update-check.txt` — the time of the last explicit update check;
 - `legal-acceptance.txt` — the local terms revision, acceptance timestamp and acceptance source used to avoid repeatedly asking for the same license/third-party-term acknowledgment;
@@ -42,6 +42,8 @@ Opening a project/support link launches the user's default browser; the destinat
 Package managers such as WinGet or Scoop may independently contact their own package sources according to those tools' normal behavior.
 
 ## Operating-system services
+
+When the user enables scheduled-Focus notifications, STOW uses its local Windows notification-area (system tray) icon to show start/end notifications. STOW does not send notification contents to a STOW cloud service, and notification failure does not affect Focus behavior.
 
 STOW does not implement its own crash-reporting service. Windows and the .NET runtime can participate in operating-system features such as Windows Error Reporting or security/reputation checks according to the user's Windows settings and organizational policy. Those services are provided by Microsoft, not by STOW.
 

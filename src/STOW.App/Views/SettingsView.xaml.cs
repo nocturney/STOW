@@ -27,6 +27,7 @@ public partial class SettingsView : UserControl
             AppSettings settings = settingsStore.Load();
             KeepRunningCheckBox.IsChecked = settings.KeepRunningInTray;
             StartWithWindowsCheckBox.IsChecked = settings.StartWithWindows;
+            NotificationsCheckBox.IsChecked = settings.NotificationsEnabled;
 
             LightThemeRadio.IsChecked = settings.Theme == ThemePreference.Light;
             DarkThemeRadio.IsChecked = settings.Theme == ThemePreference.Dark;
@@ -54,6 +55,7 @@ public partial class SettingsView : UserControl
     {
         KeepRunningCheckBox.IsChecked = AppSettings.Default.KeepRunningInTray;
         StartWithWindowsCheckBox.IsChecked = AppSettings.Default.StartWithWindows;
+        NotificationsCheckBox.IsChecked = AppSettings.Default.NotificationsEnabled;
         SystemThemeRadio.IsChecked = true;
         FocusEndComboBox.SelectedIndex = 0;
     }
@@ -90,6 +92,17 @@ public partial class SettingsView : UserControl
                     "The setting was saved, but STOW could not refresh Windows startup registration.");
             }
         }
+    }
+
+    private void Notifications_Changed(object sender, RoutedEventArgs e)
+    {
+        if (loading)
+            return;
+
+        _ = Save(settings => settings with
+        {
+            NotificationsEnabled = NotificationsCheckBox.IsChecked == true
+        });
     }
 
     private void Theme_Click(object sender, RoutedEventArgs e)

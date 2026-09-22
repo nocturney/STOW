@@ -1,8 +1,9 @@
 using System.Drawing;
+using STOW.Engine.Contracts;
 
 namespace STOW.Platform.Windows.Runtime;
 
-public sealed class MainTrayIconHost : IDisposable
+public sealed class MainTrayIconHost : IUserNotificationSink, IDisposable
 {
     private readonly System.Windows.Forms.ContextMenuStrip menu;
     private readonly System.Windows.Forms.NotifyIcon notifyIcon;
@@ -29,6 +30,36 @@ public sealed class MainTrayIconHost : IDisposable
             Visible = true
         };
         notifyIcon.DoubleClick += (_, _) => open();
+        notifyIcon.BalloonTipClicked += (_, _) => open();
+    }
+
+    public void Show(
+        string title,
+        string message,
+        UserNotificationKind kind = UserNotificationKind.Information)
+    {
+        if (string.IsNullOrWhiteSpace(message))
+            return;
+
+        try
+        {
+            System.Windows.Forms.ToolTipIcon icon = kind switch
+            {
+                UserNotificationKind.Warning => System.Windows.Forms.ToolTipIcon.Warning,
+                UserNotificationKind.Error => System.Windows.Forms.ToolTipIcon.Error,
+                _ => System.Windows.Forms.ToolTipIcon.Info
+            };
+
+            notifyIcon.ShowBalloonTip(
+                5000,
+                string.IsNullOrWhiteSpace(title) ? "STOW" : title.Trim(),
+                message.Trim(),
+                icon);
+        }
+        catch
+        {
+            // Notifications are best-effort and must never affect STOW runtime safety.
+        }
     }
 
     private static Icon ResolveApplicationIcon()

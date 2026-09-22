@@ -75,6 +75,75 @@ public sealed class FocusScheduleCoordinatorTests
         Assert.Null(coordinator.GetStatus().ActiveScheduleId);
     }
     [Fact]
+    public void Enabled_notifications_are_sent_once_for_scheduled_start_and_end()
+    {
+        var scheduleStore = new FakeScheduleStore(Schedule());
+        var engine = new FakeTrayEngine();
+        var notifications = new FakeNotificationSink();
+        var coordinator = new FocusScheduleCoordinator(
+            engine,
+            scheduleStore,
+            new FakePresetStore(Preset()),
+            new FakeSettingsStore(notificationsEnabled: true),
+            notifications);
+
+        coordinator.Tick(new DateTime(2026, 9, 21, 9, 15, 0));
+        coordinator.Tick(new DateTime(2026, 9, 21, 9, 20, 0));
+        coordinator.Tick(new DateTime(2026, 9, 21, 10, 0, 0));
+
+        Assert.Collection(
+            notifications.Items,
+            item =>
+            {
+                Assert.Equal("Focus started", item.Title);
+                Assert.Contains("Morning", item.Message);
+                Assert.Contains("10:00", item.Message);
+            },
+            item =>
+            {
+                Assert.Equal("Focus ended", item.Title);
+                Assert.Contains("Morning", item.Message);
+            });
+    }
+
+    [Fact]
+    public void Disabled_notifications_emit_nothing()
+    {
+        var notifications = new FakeNotificationSink();
+        var coordinator = new FocusScheduleCoordinator(
+            new FakeTrayEngine(),
+            new FakeScheduleStore(Schedule()),
+            new FakePresetStore(Preset()),
+            new FakeSettingsStore(),
+            notifications);
+
+        coordinator.Tick(new DateTime(2026, 9, 21, 9, 15, 0));
+
+        Assert.Empty(notifications.Items);
+    }
+
+    [Fact]
+    public void Notification_failure_never_breaks_scheduled_focus()
+    {
+        var engine = new FakeTrayEngine();
+        var notifications = new FakeNotificationSink { ThrowOnShow = true };
+        var coordinator = new FocusScheduleCoordinator(
+            engine,
+            new FakeScheduleStore(Schedule()),
+            new FakePresetStore(Preset()),
+            new FakeSettingsStore(notificationsEnabled: true),
+            notifications);
+
+        coordinator.Tick(new DateTime(2026, 9, 21, 9, 15, 0));
+        Assert.True(engine.FocusActive);
+        Assert.True(coordinator.GetStatus().Healthy);
+
+        coordinator.Tick(new DateTime(2026, 9, 21, 10, 0, 0));
+        Assert.False(engine.FocusActive);
+        Assert.True(coordinator.GetStatus().Healthy);
+    }
+
+    [Fact]
     public void Missing_preset_does_not_block_another_due_schedule()
     {
         FocusScheduleDefinition missing = Schedule() with
@@ -173,9 +242,14 @@ public sealed class FocusScheduleCoordinatorTests
         private AppSettings settings;
 
         public FakeSettingsStore(
-            FocusEndBehavior behavior = FocusEndBehavior.RestorePreviousDesktop)
+            FocusEndBehavior behavior = FocusEndBehavior.RestorePreviousDesktop,
+            bool notificationsEnabled = false)
         {
-            settings = AppSettings.Default with { FocusEndBehavior = behavior };
+            settings = AppSettings.Default with
+            {
+                FocusEndBehavior = behavior,
+                NotificationsEnabled = notificationsEnabled
+            };
         }
 
         public AppSettings Load() => settings;
@@ -183,6 +257,24 @@ public sealed class FocusScheduleCoordinatorTests
         public void Save(AppSettings settings)
         {
             this.settings = settings;
+        }
+    }
+
+    private sealed class FakeNotificationSink : IUserNotificationSink
+    {
+        public List<(string Title, string Message, UserNotificationKind Kind)> Items { get; } =
+            new();
+        public bool ThrowOnShow { get; set; }
+
+        public void Show(
+            string title,
+            string message,
+            UserNotificationKind kind = UserNotificationKind.Information)
+        {
+            if (ThrowOnShow)
+                throw new IOException("simulated notification failure");
+
+            Items.Add((title, message, kind));
         }
     }
 

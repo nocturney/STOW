@@ -9,8 +9,10 @@ public sealed class FocusScheduleCoordinator
     private readonly IFocusScheduleStore scheduleStore;
     private readonly IFocusPresetStore presetStore;
     private readonly IAppSettingsStore settingsStore;
+    private readonly IUserNotificationSink? notificationSink;
 
     private string? activeScheduleId;
+    private string? activeScheduleName;
     private DateTime? activeUntilLocal;
     private FocusScheduleRuntimeStatus status = FocusScheduleRuntimeStatus.Idle;
 
@@ -18,12 +20,14 @@ public sealed class FocusScheduleCoordinator
         ITrayEngine engine,
         IFocusScheduleStore scheduleStore,
         IFocusPresetStore presetStore,
-        IAppSettingsStore settingsStore)
+        IAppSettingsStore settingsStore,
+        IUserNotificationSink? notificationSink = null)
     {
         this.engine = engine;
         this.scheduleStore = scheduleStore;
         this.presetStore = presetStore;
         this.settingsStore = settingsStore;
+        this.notificationSink = notificationSink;
     }
 
     public FocusScheduleRuntimeStatus GetStatus()
@@ -66,8 +70,15 @@ public sealed class FocusScheduleCoordinator
                 scheduleStore.Save(schedules);
             if (!focus.Active)
             {
+                string? completedName = activeScheduleName;
                 ClearActiveSchedule();
                 status = FocusScheduleRuntimeStatus.Idle;
+                if (!string.IsNullOrWhiteSpace(completedName))
+                {
+                    NotifyIfEnabled(
+                        "Focus ended",
+                        $"{completedName} ended.");
+                }
                 return;
             }
 
@@ -88,8 +99,15 @@ public sealed class FocusScheduleCoordinator
             EngineCommandResult endResult = engine.EndFocusSession(behavior);
             if (endResult.Succeeded)
             {
+                string? completedName = activeScheduleName;
                 ClearActiveSchedule();
                 status = FocusScheduleRuntimeStatus.Idle;
+                if (!string.IsNullOrWhiteSpace(completedName))
+                {
+                    NotifyIfEnabled(
+                        "Focus ended",
+                        $"{completedName} finished.");
+                }
             }
             else
             {
@@ -195,12 +213,16 @@ public sealed class FocusScheduleCoordinator
         }
 
         activeScheduleId = due.Schedule.Id;
+        activeScheduleName = due.Schedule.Name;
         activeUntilLocal = due.Occurrence.EndLocal;
         status = new FocusScheduleRuntimeStatus(
             Healthy: true,
             Message: null,
             ActiveScheduleId: activeScheduleId,
             ActiveUntilLocal: activeUntilLocal);
+        NotifyIfEnabled(
+            "Focus started",
+            $"{due.Schedule.Name} is running until {due.Occurrence.EndLocal:HH:mm}.");
     }
 
     private static IReadOnlyList<FocusScheduleDefinition> ConsumeCurrentOccurrences(
@@ -242,9 +264,31 @@ public sealed class FocusScheduleCoordinator
         return changed ? updated : schedules;
     }
 
+    private void NotifyIfEnabled(
+        string title,
+        string message,
+        UserNotificationKind kind = UserNotificationKind.Information)
+    {
+        if (notificationSink is null)
+            return;
+
+        try
+        {
+            if (!settingsStore.Load().NotificationsEnabled)
+                return;
+
+            notificationSink.Show(title, message, kind);
+        }
+        catch
+        {
+            // Notifications are best-effort and must never affect Focus safety.
+        }
+    }
+
     private void ClearActiveSchedule()
     {
         activeScheduleId = null;
+        activeScheduleName = null;
         activeUntilLocal = null;
     }
 }

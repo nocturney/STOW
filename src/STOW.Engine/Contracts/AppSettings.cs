@@ -17,13 +17,15 @@ public sealed record AppSettings(
     bool KeepRunningInTray,
     bool StartWithWindows,
     ThemePreference Theme,
-    FocusEndBehavior FocusEndBehavior)
+    FocusEndBehavior FocusEndBehavior,
+    bool NotificationsEnabled = false)
 {
     public static AppSettings Default { get; } = new(
         KeepRunningInTray: true,
         StartWithWindows: true,
         Theme: ThemePreference.System,
-        FocusEndBehavior: FocusEndBehavior.RestorePreviousDesktop);
+        FocusEndBehavior: FocusEndBehavior.RestorePreviousDesktop,
+        NotificationsEnabled: false);
 }
 
 public interface IAppSettingsStore

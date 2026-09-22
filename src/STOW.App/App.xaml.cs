@@ -46,9 +46,9 @@ public partial class App : Application
                 return;
             }
 
-            managerWindow = new MainWindow();
-            MainWindow = managerWindow;
             CreateMainTrayIcon();
+            managerWindow = new MainWindow(mainTrayIcon);
+            MainWindow = managerWindow;
 
             showSignalTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(250) };
             showSignalTimer.Tick += (_, _) =>

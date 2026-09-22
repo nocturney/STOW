@@ -22,6 +22,7 @@ public partial class MainWindow : Window
     private readonly IAppSettingsStore settingsStore = JsonAppSettingsStore.ForCurrentUser();
     private readonly IFocusPresetStore focusPresetStore = JsonFocusPresetStore.ForCurrentUser();
     private readonly IFocusScheduleStore focusScheduleStore = JsonFocusScheduleStore.ForCurrentUser();
+    private readonly IUserNotificationSink? notificationSink;
     private readonly TrayifyMigrationResult? migrationResult;
     private FocusScheduleCoordinator? focusScheduleCoordinator;
     private DispatcherTimer? focusScheduleTimer;
@@ -30,8 +31,9 @@ public partial class MainWindow : Window
     private Button? activeButton;
     private bool applicationExitRequested;
 
-    public MainWindow()
+    public MainWindow(IUserNotificationSink? notificationSink = null)
     {
+        this.notificationSink = notificationSink;
         bool legacyRunning = new LegacyTrayifyPresence().IsRunning();
         if (legacyRunning)
         {
@@ -104,7 +106,8 @@ public partial class MainWindow : Window
             trayEngine,
             focusScheduleStore,
             focusPresetStore,
-            settingsStore);
+            settingsStore,
+            notificationSink);
         focusScheduleCoordinator.Tick(DateTime.Now);
 
         focusScheduleTimer = new DispatcherTimer
