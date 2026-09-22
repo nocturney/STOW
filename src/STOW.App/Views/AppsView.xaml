@@ -10,6 +10,8 @@
                 </Grid.ColumnDefinitions>
                 <TextBox x:Name="SearchBox" Grid.Column="0" Style="{StaticResource SearchBox}"
                          MaxWidth="480" HorizontalAlignment="Left" Width="420"
+                         AutomationProperties.Name="Search apps"
+                         AutomationProperties.HelpText="Filter managed and available applications."
                          TextChanged="SearchBox_TextChanged" />
                 <Button Grid.Column="1" Style="{StaticResource PrimaryButton}" Content="Add app"
                         IsEnabled="False" ToolTip="Use Add on a running app below."
@@ -19,25 +21,28 @@
             <Border x:Name="EngineStatusBanner" Style="{StaticResource CardBorder}"
                     Background="{DynamicResource SurfaceElevatedBrush}" Margin="0,0,0,18" Visibility="Collapsed">
                 <TextBlock x:Name="EngineStatusText" TextWrapping="Wrap"
+                           AutomationProperties.LiveSetting="Polite"
                            Foreground="{DynamicResource TextSecondaryBrush}" />
             </Border>
 
             <Grid Margin="0,0,0,10">
                 <TextBlock Text="Managed apps" Style="{StaticResource SectionTitle}" />
                 <TextBlock x:Name="ManagedSummaryText" HorizontalAlignment="Right"
-                           Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" />
+                           Foreground="{DynamicResource TextSecondaryBrush}" FontSize="{DynamicResource FontSize12}" />
             </Grid>
 
             <Border x:Name="NoManagedApps" Style="{StaticResource CardBorder}" Margin="0,0,0,20" Visibility="Collapsed">
                 <StackPanel HorizontalAlignment="Center" Margin="10,20">
-                    <TextBlock Text="No managed apps yet" FontSize="16" FontWeight="SemiBold" />
+                    <TextBlock Text="No managed apps yet" FontSize="{DynamicResource FontSize16}" FontWeight="SemiBold" />
                     <TextBlock Text="Choose Add next to a running desktop app to let STOW manage it."
                                Margin="0,6,0,0" TextAlignment="Center" TextWrapping="Wrap"
                                Foreground="{DynamicResource TextSecondaryBrush}" MaxWidth="520" />
                 </StackPanel>
             </Border>
 
-            <ItemsControl x:Name="ManagedAppsList" Margin="0,0,0,10">
+            <ItemsControl x:Name="ManagedAppsList"
+                          AutomationProperties.Name="Managed apps"
+                          Margin="0,0,0,10">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
                         <Border Style="{StaticResource CardBorder}" Padding="0" Margin="0,0,0,10">
@@ -50,12 +55,18 @@
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
                                 <StackPanel>
-                                    <TextBlock Text="{Binding Name}" FontWeight="SemiBold" FontSize="14" />
-                                    <TextBlock Text="{Binding ProcessName}" FontSize="12" Margin="0,3,0,0"
+                                    <TextBlock Text="{Binding Name}"
+                                               FontWeight="SemiBold"
+                                               FontSize="{DynamicResource FontSize14}"
+                                               TextWrapping="Wrap" />
+                                    <TextBlock Text="{Binding ProcessName}"
+                                               FontSize="{DynamicResource FontSize12}"
+                                               Margin="0,3,0,0"
+                                               TextWrapping="Wrap"
                                                Foreground="{DynamicResource TextSecondaryBrush}" />
                                 </StackPanel>
                                 <Border Grid.Column="1" Style="{StaticResource StatusChip}" Margin="12,0,12,0" VerticalAlignment="Center">
-                                    <TextBlock Text="{Binding StatusText}" FontSize="12" />
+                                    <TextBlock Text="{Binding StatusText}" FontSize="{DynamicResource FontSize12}" />
                                 </Border>
                                 <CheckBox Grid.Column="2" Content="Enabled" Tag="{Binding Key}"
                                           IsChecked="{Binding Enabled, Mode=OneWay}" IsEnabled="{Binding CanManage}"
@@ -75,7 +86,7 @@
             <Grid Margin="0,0,0,10">
                 <TextBlock Text="Available apps" Style="{StaticResource SectionTitle}" />
                 <TextBlock x:Name="AvailableSummaryText" HorizontalAlignment="Right"
-                           Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" />
+                           Foreground="{DynamicResource TextSecondaryBrush}" FontSize="{DynamicResource FontSize12}" />
             </Grid>
 
             <Border x:Name="NoAvailableApps" Style="{StaticResource CardBorder}" Visibility="Collapsed">
@@ -83,7 +94,8 @@
                            Foreground="{DynamicResource TextSecondaryBrush}" HorizontalAlignment="Center" />
             </Border>
 
-            <ItemsControl x:Name="AvailableAppsList">
+            <ItemsControl x:Name="AvailableAppsList"
+                          AutomationProperties.Name="Available apps">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
                         <Border Style="{StaticResource CardBorder}" Padding="0" Margin="0,0,0,10">
@@ -93,10 +105,19 @@
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
                                 <StackPanel>
-                                    <TextBlock Text="{Binding DisplayName}" FontWeight="SemiBold" FontSize="14" />
-                                    <TextBlock Text="{Binding WindowTitle}" FontSize="12" Margin="0,3,0,0"
+                                    <TextBlock Text="{Binding DisplayName}"
+                                               FontWeight="SemiBold"
+                                               FontSize="{DynamicResource FontSize14}"
+                                               TextWrapping="Wrap" />
+                                    <TextBlock Text="{Binding WindowTitle}"
+                                               FontSize="{DynamicResource FontSize12}"
+                                               Margin="0,3,0,0"
+                                               TextWrapping="Wrap"
                                                Foreground="{DynamicResource TextSecondaryBrush}" />
-                                    <TextBlock Text="{Binding ProcessName}" FontSize="11" Margin="0,3,0,0"
+                                    <TextBlock Text="{Binding ProcessName}"
+                                               FontSize="{DynamicResource FontSize11}"
+                                               Margin="0,3,0,0"
+                                               TextWrapping="Wrap"
                                                Foreground="{DynamicResource MutedBrush}" />
                                 </StackPanel>
                                 <Button Grid.Column="1" Style="{StaticResource SecondaryButton}" Content="Add"

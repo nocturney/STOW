@@ -10,24 +10,27 @@
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
                     <StackPanel>
-                        <TextBlock Text="STOW" FontSize="24" FontWeight="SemiBold" />
+                        <TextBlock Text="STOW" FontSize="{DynamicResource FontSize24}" FontWeight="SemiBold" />
                         <TextBlock Text="A calmer desktop starts here." Margin="0,5,0,0"
                                    Foreground="{DynamicResource TextSecondaryBrush}" />
-                        <StackPanel Orientation="Horizontal" Margin="0,18,0,0">
-                            <TextBlock x:Name="VersionText" Text="Version  —" Margin="0,0,24,0" />
-                            <TextBlock x:Name="BuildText" Text="Build  —" Margin="0,0,24,0" />
-                            <TextBlock x:Name="ChannelText" Text="Channel  —" />
-                        </StackPanel>
+                        <WrapPanel Margin="0,18,0,0">
+                            <TextBlock x:Name="VersionText" Text="Version  —" Margin="0,0,24,8" />
+                            <TextBlock x:Name="BuildText" Text="Build  —" Margin="0,0,24,8" />
+                            <TextBlock x:Name="ChannelText" Text="Channel  —" Margin="0,0,0,8" />
+                        </WrapPanel>
                         <TextBlock x:Name="LastCheckText" Text="Last update check  Never" Margin="0,8,0,0"
-                                   Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" />
+                                   Foreground="{DynamicResource TextSecondaryBrush}" FontSize="{DynamicResource FontSize12}" />
                     </StackPanel>
-                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                    <WrapPanel Grid.Column="1"
+                               VerticalAlignment="Center"
+                               HorizontalAlignment="Right">
                         <Button x:Name="WhatsNewButton" Style="{StaticResource SecondaryButton}"
-                                Content="Release Notes" Margin="0,0,10,0"
+                                Content="Release Notes" Margin="0,0,10,8"
                                 Click="WhatsNew_Click" />
                         <Button x:Name="CheckUpdatesButton" Style="{StaticResource PrimaryButton}"
-                                Content="Check for Updates" Click="CheckUpdates_Click" />
-                    </StackPanel>
+                                Content="Check for Updates" Margin="0,0,0,8"
+                                Click="CheckUpdates_Click" />
+                    </WrapPanel>
                 </Grid>
             </Border>
 

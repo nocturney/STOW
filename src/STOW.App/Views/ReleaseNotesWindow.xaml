@@ -16,7 +16,7 @@
 
         <StackPanel>
             <TextBlock x:Name="ReleaseTitleText"
-                       FontSize="24" FontWeight="SemiBold"
+                       FontSize="{DynamicResource FontSize24}" FontWeight="SemiBold"
                        Foreground="{DynamicResource TextPrimaryBrush}" />
             <TextBlock x:Name="ReleaseMetaText"
                        Margin="0,6,0,0"
@@ -40,7 +40,7 @@
                                       BorderThickness="0">
                 <FlowDocument x:Name="NotesDocument"
                               PagePadding="12"
-                              FontSize="14"
+                              FontSize="{DynamicResource FontSize14}"
                               Foreground="{DynamicResource TextPrimaryBrush}" />
             </FlowDocumentScrollViewer>
         </Border>

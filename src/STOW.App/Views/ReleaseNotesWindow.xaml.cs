@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Documents;
+using STOW.App.Themes;
 using STOW.Infrastructure.Updates;
 
 namespace STOW.App.Views;
@@ -65,12 +66,13 @@ public partial class ReleaseNotesWindow : Window
                 var paragraph = new Paragraph(new Run(CleanInlineMarkdown(heading)))
                 {
                     FontWeight = FontWeights.SemiBold,
-                    FontSize = headingLevel switch
-                    {
-                        1 => 22,
-                        2 => 18,
-                        _ => 15
-                    },
+                    FontSize = AccessibilityManager.Scale(
+                        headingLevel switch
+                        {
+                            1 => 22,
+                            2 => 18,
+                            _ => 15
+                        }),
                     Margin = new Thickness(0, headingLevel == 1 ? 8 : 14, 0, 6)
                 };
                 NotesDocument.Blocks.Add(paragraph);
@@ -90,7 +92,7 @@ public partial class ReleaseNotesWindow : Window
             var body = new Paragraph(new Run(CleanInlineMarkdown(text)))
             {
                 Margin = new Thickness(bullet || numbered ? 12 : 0, 3, 0, 5),
-                LineHeight = 21
+                LineHeight = AccessibilityManager.Scale(21)
             };
             NotesDocument.Blocks.Add(body);
         }

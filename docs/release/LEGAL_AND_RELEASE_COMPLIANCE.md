@@ -24,6 +24,8 @@ Every release build must:
 
 The automated gate is `scripts/verify-release-legal.ps1`.
 
+Accessibility is a separate release-quality gate rather than a legal certification claim. UI-changing releases must complete the acceptance checks in `docs/accessibility/ACCESSIBILITY.md`, including keyboard, UI Automation, 200% text, contrast-theme and live restore-parity checks.
+
 ## Contribution provenance
 
 External contributions are accepted under the repository MIT License. Contributors must have the right to submit their work and must not import third-party material without compatible licensing and required attribution.

@@ -15,7 +15,7 @@
 
         <StackPanel Margin="0,0,0,14">
             <TextBlock x:Name="DocumentTitleText"
-                       FontSize="24" FontWeight="SemiBold"
+                       FontSize="{DynamicResource FontSize24}" FontWeight="SemiBold"
                        Foreground="{DynamicResource TextPrimaryBrush}" />
             <TextBlock x:Name="DocumentSubtitleText"
                        Margin="0,6,0,0"
@@ -35,7 +35,7 @@
                      Background="Transparent"
                      Foreground="{DynamicResource TextPrimaryBrush}"
                      FontFamily="Consolas, Segoe UI"
-                     FontSize="13"
+                     FontSize="{DynamicResource FontSize13}"
                      Padding="10" />
         </Border>
 

@@ -10,7 +10,7 @@
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
                     <StackPanel>
-                        <TextBlock Text="Private by design" FontSize="17" FontWeight="SemiBold" />
+                        <TextBlock Text="Private by design" FontSize="{DynamicResource FontSize17}" FontWeight="SemiBold" />
                         <TextBlock Text="Insights are calculated from local STOW activity and stay on this PC."
                                    Margin="0,5,0,0" Foreground="{DynamicResource TextSecondaryBrush}" />
                     </StackPanel>
@@ -23,6 +23,7 @@
             <Border x:Name="InsightsStatusBanner" Style="{StaticResource CardBorder}"
                     Background="{DynamicResource SurfaceElevatedBrush}" Margin="0,0,0,14" Visibility="Collapsed">
                 <TextBlock x:Name="InsightsStatusText" TextWrapping="Wrap"
+                           AutomationProperties.LiveSetting="Polite"
                            Foreground="{DynamicResource TextSecondaryBrush}" />
             </Border>
 
@@ -30,26 +31,26 @@
                 <Border Style="{StaticResource CardBorder}" Margin="0,0,10,0">
                     <StackPanel>
                         <TextBlock Text="Stows · last 7 days" Foreground="{DynamicResource TextSecondaryBrush}" />
-                        <TextBlock x:Name="StowsCountText" Text="0" FontSize="30" FontWeight="SemiBold" Margin="0,8,0,0" />
+                        <TextBlock x:Name="StowsCountText" Text="0" FontSize="{DynamicResource FontSize30}" FontWeight="SemiBold" Margin="0,8,0,0" />
                     </StackPanel>
                 </Border>
                 <Border Style="{StaticResource CardBorder}" Margin="0,0,10,0">
                     <StackPanel>
                         <TextBlock Text="Restores · last 7 days" Foreground="{DynamicResource TextSecondaryBrush}" />
-                        <TextBlock x:Name="RestoresCountText" Text="0" FontSize="30" FontWeight="SemiBold" Margin="0,8,0,0" />
+                        <TextBlock x:Name="RestoresCountText" Text="0" FontSize="{DynamicResource FontSize30}" FontWeight="SemiBold" Margin="0,8,0,0" />
                     </StackPanel>
                 </Border>
                 <Border Style="{StaticResource CardBorder}">
                     <StackPanel>
                         <TextBlock Text="Focus sessions · last 7 days" Foreground="{DynamicResource TextSecondaryBrush}" />
-                        <TextBlock x:Name="FocusCountText" Text="0" FontSize="30" FontWeight="SemiBold" Margin="0,8,0,0" />
+                        <TextBlock x:Name="FocusCountText" Text="0" FontSize="{DynamicResource FontSize30}" FontWeight="SemiBold" Margin="0,8,0,0" />
                     </StackPanel>
                 </Border>
             </UniformGrid>
 
             <Border x:Name="EmptyHistoryCard" Style="{StaticResource CardBorder}">
                 <StackPanel HorizontalAlignment="Center" Margin="20,34">
-                    <TextBlock Text="No local history yet" FontSize="18" FontWeight="SemiBold" HorizontalAlignment="Center" />
+                    <TextBlock Text="No local history yet" FontSize="{DynamicResource FontSize18}" FontWeight="SemiBold" HorizontalAlignment="Center" />
                     <TextBlock Text="Once STOW stows, restores, or runs Focus sessions, useful patterns will appear here."
                                Margin="0,8,0,0" TextAlignment="Center" TextWrapping="Wrap" MaxWidth="540"
                                Foreground="{DynamicResource TextSecondaryBrush}" />
@@ -71,7 +72,7 @@
                         <StackPanel>
                             <TextBlock Text="Most stowed app" Style="{StaticResource SectionTitle}" />
                             <TextBlock x:Name="MostStowedAppText" Text="—"
-                                       Margin="0,10,0,0" FontSize="20" FontWeight="SemiBold" />
+                                       Margin="0,10,0,0" FontSize="{DynamicResource FontSize20}" FontWeight="SemiBold" />
                             <TextBlock x:Name="MostStowedCountText" Margin="0,4,0,0"
                                        Foreground="{DynamicResource TextSecondaryBrush}" />
                         </StackPanel>
@@ -83,7 +84,7 @@
                                        TextWrapping="Wrap" Foreground="{DynamicResource TextSecondaryBrush}" />
                             <TextBlock Text="Stored only in %APPDATA%STOWactivity.jsonl"
                                        Margin="0,5,0,0" TextWrapping="Wrap"
-                                       Foreground="{DynamicResource MutedBrush}" FontSize="11" />
+                                       Foreground="{DynamicResource MutedBrush}" FontSize="{DynamicResource FontSize11}" />
                         </StackPanel>
                     </Border>
                 </StackPanel>
@@ -93,9 +94,10 @@
                         <Grid Margin="0,0,0,8">
                             <TextBlock Text="Recent activity" Style="{StaticResource SectionTitle}" />
                             <TextBlock x:Name="RecentCountText" HorizontalAlignment="Right"
-                                       Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" />
+                                       Foreground="{DynamicResource TextSecondaryBrush}" FontSize="{DynamicResource FontSize12}" />
                         </Grid>
-                        <ItemsControl x:Name="RecentActivityList">
+                        <ItemsControl x:Name="RecentActivityList"
+                                      AutomationProperties.Name="Recent activity">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
                                     <Grid Margin="0,7">
@@ -103,11 +105,11 @@
                                             <ColumnDefinition Width="92" />
                                             <ColumnDefinition Width="*" />
                                         </Grid.ColumnDefinitions>
-                                        <TextBlock Text="{Binding TimeText}" FontSize="11"
+                                        <TextBlock Text="{Binding TimeText}" FontSize="{DynamicResource FontSize11}"
                                                    Foreground="{DynamicResource MutedBrush}" />
                                         <StackPanel Grid.Column="1">
                                             <TextBlock Text="{Binding Title}" FontWeight="SemiBold" />
-                                            <TextBlock Text="{Binding Detail}" FontSize="11" Margin="0,2,0,0"
+                                            <TextBlock Text="{Binding Detail}" FontSize="{DynamicResource FontSize11}" Margin="0,2,0,0"
                                                        Foreground="{DynamicResource TextSecondaryBrush}" />
                                         </StackPanel>
                                     </Grid>

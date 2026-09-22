@@ -132,7 +132,7 @@ public partial class MainWindow : Window
 
         activeButton = button;
         activeButton.Background = (Brush)FindResource("SelectionBrush");
-        activeButton.Foreground = (Brush)FindResource("TextPrimaryBrush");
+        activeButton.Foreground = (Brush)FindResource("SelectionForegroundBrush");
 
         (PageTitleText.Text, PageSubtitleText.Text) = destination switch
         {

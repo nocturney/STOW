@@ -32,7 +32,7 @@ public sealed class JsonAppSettingsStore : IAppSettingsStore
 
         string json = File.ReadAllText(path);
         AppSettings? settings = JsonSerializer.Deserialize<AppSettings>(json, JsonOptions);
-        return settings ?? AppSettings.Default;
+        return Normalize(settings ?? AppSettings.Default);
     }
 
     public void Save(AppSettings settings)
@@ -45,7 +45,8 @@ public sealed class JsonAppSettingsStore : IAppSettingsStore
         string temp = path + ".writing-" + Guid.NewGuid().ToString("N");
         try
         {
-            File.WriteAllText(temp, JsonSerializer.Serialize(settings, JsonOptions));
+            AppSettings normalized = Normalize(settings);
+            File.WriteAllText(temp, JsonSerializer.Serialize(normalized, JsonOptions));
             if (File.Exists(path))
                 File.Replace(temp, path, destinationBackupFileName: null);
             else
@@ -60,5 +61,16 @@ public sealed class JsonAppSettingsStore : IAppSettingsStore
             }
             catch { }
         }
+    }
+
+    private static AppSettings Normalize(AppSettings settings)
+    {
+        int scale = settings.AccessibilityTextScalePercent switch
+        {
+            100 or 125 or 150 or 200 => settings.AccessibilityTextScalePercent,
+            _ => 100
+        };
+
+        return settings with { AccessibilityTextScalePercent = scale };
     }
 }

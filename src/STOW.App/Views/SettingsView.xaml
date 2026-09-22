@@ -6,6 +6,7 @@
             <Border x:Name="SettingsStatusBanner" Style="{StaticResource CardBorder}"
                     Background="{DynamicResource SurfaceElevatedBrush}" Margin="0,0,0,12" Visibility="Collapsed">
                 <TextBlock x:Name="SettingsStatusText" TextWrapping="Wrap"
+                           AutomationProperties.LiveSetting="Polite"
                            Foreground="{DynamicResource TextSecondaryBrush}" />
             </Border>
 
@@ -43,6 +44,56 @@
                                      Content="System" Tag="System"
                                      Click="Theme_Click" />
                     </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <Border Style="{StaticResource CardBorder}" Margin="0,0,0,12">
+                <StackPanel>
+                    <TextBlock Text="Accessibility" Style="{StaticResource SectionTitle}" />
+                    <TextBlock Text="Keyboard navigation and screen-reader support are always enabled. Windows contrast themes are followed automatically."
+                               Margin="0,5,0,14" TextWrapping="Wrap"
+                               Foreground="{DynamicResource TextSecondaryBrush}" />
+
+                    <Grid Margin="0,0,0,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel>
+                            <TextBlock x:Name="TextSizeLabel"
+                                       Text="Text size"
+                                       FontWeight="SemiBold" />
+                            <TextBlock Text="Increase STOW text without changing Windows display scaling."
+                                       Margin="0,4,20,0" TextWrapping="Wrap"
+                                       Foreground="{DynamicResource TextSecondaryBrush}" />
+                        </StackPanel>
+                        <ComboBox x:Name="TextScaleComboBox" Grid.Column="1"
+                                  MinHeight="44"
+                                  AutomationProperties.LabeledBy="{Binding ElementName=TextSizeLabel}"
+                                  SelectionChanged="TextScale_SelectionChanged">
+                            <ComboBoxItem Tag="100" Content="Standard (100%)" />
+                            <ComboBoxItem Tag="125" Content="Large (125%)" />
+                            <ComboBoxItem Tag="150" Content="Extra large (150%)" />
+                            <ComboBoxItem Tag="200" Content="Maximum (200%)" />
+                        </ComboBox>
+                    </Grid>
+
+                    <CheckBox x:Name="EnhancedContrastCheckBox"
+                              Content="Increase contrast in STOW"
+                              Margin="0,2,0,8"
+                              Checked="Accessibility_Changed"
+                              Unchecked="Accessibility_Changed" />
+                    <CheckBox x:Name="UseSystemFontCheckBox"
+                              Content="Use the Windows UI font"
+                              Margin="0,0,0,4"
+                              Checked="Accessibility_Changed"
+                              Unchecked="Accessibility_Changed" />
+                    <TextBlock x:Name="SystemContrastStatusText"
+                               Text="Windows contrast theme is active. STOW is following it."
+                               Margin="0,8,0,0" TextWrapping="Wrap"
+                               AutomationProperties.LiveSetting="Polite"
+                               Foreground="{DynamicResource TextSecondaryBrush}"
+                               Visibility="Collapsed" />
                 </StackPanel>
             </Border>
 
@@ -99,7 +150,8 @@
                                    Foreground="{DynamicResource TextSecondaryBrush}" />
                     </StackPanel>
                     <ComboBox x:Name="FocusEndComboBox" Grid.Column="1"
-                              Width="210" Height="38" VerticalAlignment="Center"
+                              MinHeight="44" VerticalAlignment="Center"
+                              AutomationProperties.Name="Focus end behavior"
                               SelectionChanged="FocusEnd_SelectionChanged">
                         <ComboBoxItem Tag="RestorePreviousDesktop" Content="Restore previous desktop" />
                         <ComboBoxItem Tag="KeepAppsStowed" Content="Keep Focus apps stowed" />

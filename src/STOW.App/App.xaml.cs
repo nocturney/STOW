@@ -1,7 +1,9 @@
+using System.ComponentModel;
 using System.Windows;
 using System.Windows.Threading;
 using STOW.App.Themes;
 using STOW.App.Views;
+using STOW.Engine.Contracts;
 using STOW.Infrastructure.Configuration;
 using STOW.Infrastructure.Runtime;
 using STOW.Platform.Windows.Runtime;
@@ -20,7 +22,8 @@ public partial class App : Application
     {
         base.OnStartup(e);
         ShutdownMode = ShutdownMode.OnExplicitShutdown;
-        ApplyConfiguredTheme();
+        ApplyConfiguredAppearance();
+        SystemParameters.StaticPropertyChanged += SystemParameters_StaticPropertyChanged;
 
         bool background = e.Args.Any(arg =>
             string.Equals(arg, "--background", StringComparison.OrdinalIgnoreCase));
@@ -133,16 +136,32 @@ public partial class App : Application
         }
     }
 
-    private static void ApplyConfiguredTheme()
+    private static void ApplyConfiguredAppearance()
     {
         try
         {
-            ThemeManager.ApplyPreference(JsonAppSettingsStore.ForCurrentUser().Load().Theme);
+            AccessibilityManager.Apply(
+                JsonAppSettingsStore.ForCurrentUser().Load());
         }
         catch
         {
-            ThemeManager.ApplySystemTheme();
+            AccessibilityManager.Apply(AppSettings.Default);
         }
+    }
+
+    private void SystemParameters_StaticPropertyChanged(
+        object? sender,
+        PropertyChangedEventArgs e)
+    {
+        if (!string.Equals(
+            e.PropertyName,
+            nameof(SystemParameters.HighContrast),
+            StringComparison.Ordinal))
+        {
+            return;
+        }
+
+        Dispatcher.BeginInvoke(ApplyConfiguredAppearance);
     }
 
     private void ShowManager()
@@ -195,6 +214,7 @@ public partial class App : Application
 
     protected override void OnExit(ExitEventArgs e)
     {
+        SystemParameters.StaticPropertyChanged -= SystemParameters_StaticPropertyChanged;
         DisposeShell();
         base.OnExit(e);
     }

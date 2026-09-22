@@ -3,20 +3,24 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Save Focus preset"
         Width="420"
-        Height="210"
+        MinHeight="210"
+        SizeToContent="Height"
         ResizeMode="NoResize"
         WindowStartupLocation="CenterOwner"
         Background="{DynamicResource CanvasBrush}">
     <Border Margin="16" Style="{StaticResource CardBorder}">
         <StackPanel>
             <TextBlock Text="Save current Focus setup"
-                       FontSize="18"
+                       FontSize="{DynamicResource FontSize18}"
                        FontWeight="SemiBold" />
             <TextBlock Text="Give this Keep visible selection a reusable name."
                        Margin="0,6,0,14"
+                       TextWrapping="Wrap"
                        Foreground="{DynamicResource TextSecondaryBrush}" />
             <TextBox x:Name="NameTextBox"
                      Style="{StaticResource SearchBox}"
+                     AutomationProperties.Name="Preset name"
+                     AutomationProperties.HelpText="Name this reusable Focus preset."
                      MaxLength="64" />
             <StackPanel Orientation="Horizontal"
                         HorizontalAlignment="Right"

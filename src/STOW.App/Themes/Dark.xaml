@@ -6,12 +6,16 @@
     <Color x:Key="TextPrimaryColor">#E5E7EB</Color>
     <Color x:Key="TextSecondaryColor">#A7B4C7</Color>
     <Color x:Key="BorderColor">#334155</Color>
+    <Color x:Key="ControlBorderColor">#64748B</Color>
     <Color x:Key="AccentBlueColor">#3B82F6</Color>
     <Color x:Key="AccentBlueStrongColor">#2563EB</Color>
     <Color x:Key="AccentTealColor">#14B8A6</Color>
+    <Color x:Key="AccentForegroundColor">#FFFFFF</Color>
     <Color x:Key="SelectionColor">#153A68</Color>
+    <Color x:Key="SelectionForegroundColor">#E5E7EB</Color>
     <Color x:Key="HoverColor">#162942</Color>
-    <Color x:Key="MutedColor">#64748B</Color>
+    <Color x:Key="HoverForegroundColor">#E5E7EB</Color>
+    <Color x:Key="MutedColor">#8190A5</Color>
 
     <SolidColorBrush x:Key="CanvasBrush" Color="{StaticResource CanvasColor}" />
     <SolidColorBrush x:Key="SurfaceBrush" Color="{StaticResource SurfaceColor}" />
@@ -19,10 +23,14 @@
     <SolidColorBrush x:Key="TextPrimaryBrush" Color="{StaticResource TextPrimaryColor}" />
     <SolidColorBrush x:Key="TextSecondaryBrush" Color="{StaticResource TextSecondaryColor}" />
     <SolidColorBrush x:Key="BorderBrush" Color="{StaticResource BorderColor}" />
+    <SolidColorBrush x:Key="ControlBorderBrush" Color="{StaticResource ControlBorderColor}" />
     <SolidColorBrush x:Key="AccentBlueBrush" Color="{StaticResource AccentBlueColor}" />
     <SolidColorBrush x:Key="AccentBlueStrongBrush" Color="{StaticResource AccentBlueStrongColor}" />
     <SolidColorBrush x:Key="AccentTealBrush" Color="{StaticResource AccentTealColor}" />
+    <SolidColorBrush x:Key="AccentForegroundBrush" Color="{StaticResource AccentForegroundColor}" />
     <SolidColorBrush x:Key="SelectionBrush" Color="{StaticResource SelectionColor}" />
+    <SolidColorBrush x:Key="SelectionForegroundBrush" Color="{StaticResource SelectionForegroundColor}" />
     <SolidColorBrush x:Key="HoverBrush" Color="{StaticResource HoverColor}" />
+    <SolidColorBrush x:Key="HoverForegroundBrush" Color="{StaticResource HoverForegroundColor}" />
     <SolidColorBrush x:Key="MutedBrush" Color="{StaticResource MutedColor}" />
 </ResourceDictionary>

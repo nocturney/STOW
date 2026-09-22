@@ -7,17 +7,29 @@ namespace STOW.App.Themes;
 public enum ThemeMode
 {
     Light,
-    Dark
+    Dark,
+    HighContrast
 }
 
 public static class ThemeManager
 {
     public static ThemeMode Current { get; private set; } = ThemeMode.Light;
     public static ThemePreference Preference { get; private set; } = ThemePreference.System;
+    public static bool EnhancedContrast { get; private set; }
 
-    public static void ApplyPreference(ThemePreference preference)
+    public static void ApplyPreference(
+        ThemePreference preference,
+        bool enhancedContrast = false)
     {
         Preference = preference;
+        EnhancedContrast = enhancedContrast;
+
+        if (SystemParameters.HighContrast || enhancedContrast)
+        {
+            Apply(ThemeMode.HighContrast);
+            return;
+        }
+
         switch (preference)
         {
             case ThemePreference.Light:
@@ -27,7 +39,7 @@ public static class ThemeManager
                 Apply(ThemeMode.Dark);
                 break;
             default:
-                ApplySystemTheme();
+                ApplySystemThemeCore();
                 break;
         }
     }
@@ -50,7 +62,11 @@ public static class ThemeManager
 
     public static void ApplySystemTheme()
     {
-        Preference = ThemePreference.System;
+        ApplyPreference(ThemePreference.System, EnhancedContrast);
+    }
+
+    private static void ApplySystemThemeCore()
+    {
         const string key = @"HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize";
         object? raw = Registry.GetValue(key, "AppsUseLightTheme", 1);
         bool light = raw is int value ? value != 0 : true;

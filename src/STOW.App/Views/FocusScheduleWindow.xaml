@@ -14,24 +14,26 @@
             <StackPanel>
                 <TextBlock x:Name="HeadingText"
                            Text="Add Focus schedule"
-                           FontSize="18"
+                           FontSize="{DynamicResource FontSize18}"
                            FontWeight="SemiBold" />
                 <TextBlock Text="Run a saved Focus preset on a recurring local-time schedule."
                            Margin="0,6,0,16"
                            TextWrapping="Wrap"
                            Foreground="{DynamicResource TextSecondaryBrush}" />
 
-                <TextBlock Text="Name" FontWeight="SemiBold" />
+                <TextBlock x:Name="ScheduleNameLabel" Text="Name" FontWeight="SemiBold" />
                 <TextBox x:Name="NameTextBox"
                          Style="{StaticResource SearchBox}"
+                         AutomationProperties.LabeledBy="{Binding ElementName=ScheduleNameLabel}"
                          MaxLength="64"
                          Margin="0,6,0,14" />
 
-                <TextBlock Text="Saved preset" FontWeight="SemiBold" />
+                <TextBlock x:Name="SchedulePresetLabel" Text="Saved preset" FontWeight="SemiBold" />
                 <ComboBox x:Name="PresetComboBox"
                           Margin="0,6,0,14"
-                          MinHeight="34"
+                          MinHeight="44"
                           Padding="8,4"
+                          AutomationProperties.LabeledBy="{Binding ElementName=SchedulePresetLabel}"
                           DisplayMemberPath="Name"
                           SelectedValuePath="Id" />
                 <TextBlock Text="Days" FontWeight="SemiBold" />
@@ -52,25 +54,29 @@
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
                     <StackPanel>
-                        <TextBlock Text="Start time" FontWeight="SemiBold" />
+                        <TextBlock x:Name="ScheduleStartLabel" Text="Start time" FontWeight="SemiBold" />
                         <TextBox x:Name="StartTimeTextBox"
                                  Style="{StaticResource SearchBox}"
                                  Margin="0,6,0,0"
+                                 AutomationProperties.LabeledBy="{Binding ElementName=ScheduleStartLabel}"
+                                 AutomationProperties.HelpText="24-hour local time, for example 09:30."
                                  ToolTip="24-hour local time, for example 09:30" />
                         <TextBlock Text="24-hour local time (HH:mm)"
                                    Margin="0,4,0,0"
-                                   FontSize="11"
+                                   FontSize="{DynamicResource FontSize11}"
                                    Foreground="{DynamicResource TextSecondaryBrush}" />
                     </StackPanel>
                     <StackPanel Grid.Column="2">
-                        <TextBlock Text="Duration" FontWeight="SemiBold" />
+                        <TextBlock x:Name="ScheduleDurationLabel" Text="Duration" FontWeight="SemiBold" />
                         <TextBox x:Name="DurationTextBox"
                                  Style="{StaticResource SearchBox}"
                                  Margin="0,6,0,0"
+                                 AutomationProperties.LabeledBy="{Binding ElementName=ScheduleDurationLabel}"
+                                 AutomationProperties.HelpText="Enter a duration from 5 to 720 minutes."
                                  ToolTip="5 to 720 minutes" />
                         <TextBlock Text="5–720 minutes"
                                    Margin="0,4,0,0"
-                                   FontSize="11"
+                                   FontSize="{DynamicResource FontSize11}"
                                    Foreground="{DynamicResource TextSecondaryBrush}" />
                     </StackPanel>
                 </Grid>
@@ -80,7 +86,7 @@
                         CornerRadius="8">
                     <TextBlock Text="Schedules use your Windows local time. If STOW opens during an unconsumed schedule window, it can start that Focus session then. Manual Focus takes priority over overlapping schedules."
                                TextWrapping="Wrap"
-                               FontSize="11"
+                               FontSize="{DynamicResource FontSize11}"
                                Foreground="{DynamicResource TextSecondaryBrush}" />
                 </Border>
 

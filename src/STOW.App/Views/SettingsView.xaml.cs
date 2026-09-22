@@ -28,6 +28,18 @@ public partial class SettingsView : UserControl
             KeepRunningCheckBox.IsChecked = settings.KeepRunningInTray;
             StartWithWindowsCheckBox.IsChecked = settings.StartWithWindows;
             NotificationsCheckBox.IsChecked = settings.NotificationsEnabled;
+            EnhancedContrastCheckBox.IsChecked = settings.EnhancedContrast;
+            UseSystemFontCheckBox.IsChecked = settings.UseSystemFont;
+            TextScaleComboBox.SelectedIndex = settings.AccessibilityTextScalePercent switch
+            {
+                125 => 1,
+                150 => 2,
+                200 => 3,
+                _ => 0
+            };
+            SystemContrastStatusText.Visibility = SystemParameters.HighContrast
+                ? Visibility.Visible
+                : Visibility.Collapsed;
 
             LightThemeRadio.IsChecked = settings.Theme == ThemePreference.Light;
             DarkThemeRadio.IsChecked = settings.Theme == ThemePreference.Dark;
@@ -56,6 +68,12 @@ public partial class SettingsView : UserControl
         KeepRunningCheckBox.IsChecked = AppSettings.Default.KeepRunningInTray;
         StartWithWindowsCheckBox.IsChecked = AppSettings.Default.StartWithWindows;
         NotificationsCheckBox.IsChecked = AppSettings.Default.NotificationsEnabled;
+        EnhancedContrastCheckBox.IsChecked = AppSettings.Default.EnhancedContrast;
+        UseSystemFontCheckBox.IsChecked = AppSettings.Default.UseSystemFont;
+        TextScaleComboBox.SelectedIndex = 0;
+        SystemContrastStatusText.Visibility = SystemParameters.HighContrast
+            ? Visibility.Visible
+            : Visibility.Collapsed;
         SystemThemeRadio.IsChecked = true;
         FocusEndComboBox.SelectedIndex = 0;
     }
@@ -114,7 +132,55 @@ public partial class SettingsView : UserControl
             return;
 
         if (Save(settings => settings with { Theme = preference }))
-            ThemeManager.ApplyPreference(preference);
+            ApplyAppearance();
+    }
+
+    private void TextScale_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (loading ||
+            TextScaleComboBox.SelectedItem is not ComboBoxItem { Tag: string value } ||
+            !int.TryParse(value, out int scale))
+        {
+            return;
+        }
+
+        if (Save(settings => settings with
+        {
+            AccessibilityTextScalePercent = scale
+        }))
+        {
+            ApplyAppearance();
+        }
+    }
+
+    private void Accessibility_Changed(object sender, RoutedEventArgs e)
+    {
+        if (loading)
+            return;
+
+        if (Save(settings => settings with
+        {
+            EnhancedContrast = EnhancedContrastCheckBox.IsChecked == true,
+            UseSystemFont = UseSystemFontCheckBox.IsChecked == true
+        }))
+        {
+            ApplyAppearance();
+        }
+    }
+
+    private void ApplyAppearance()
+    {
+        try
+        {
+            AccessibilityManager.Apply(settingsStore.Load());
+            SystemContrastStatusText.Visibility = SystemParameters.HighContrast
+                ? Visibility.Visible
+                : Visibility.Collapsed;
+        }
+        catch (Exception ex)
+        {
+            ShowWarning("The setting was saved, but STOW could not apply it live. " + ex.Message);
+        }
     }
 
     private void FocusEnd_SelectionChanged(object sender, SelectionChangedEventArgs e)

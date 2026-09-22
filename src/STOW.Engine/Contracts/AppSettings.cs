@@ -18,14 +18,20 @@ public sealed record AppSettings(
     bool StartWithWindows,
     ThemePreference Theme,
     FocusEndBehavior FocusEndBehavior,
-    bool NotificationsEnabled = false)
+    bool NotificationsEnabled = false,
+    int AccessibilityTextScalePercent = 100,
+    bool EnhancedContrast = false,
+    bool UseSystemFont = false)
 {
     public static AppSettings Default { get; } = new(
         KeepRunningInTray: true,
         StartWithWindows: true,
         Theme: ThemePreference.System,
         FocusEndBehavior: FocusEndBehavior.RestorePreviousDesktop,
-        NotificationsEnabled: false);
+        NotificationsEnabled: false,
+        AccessibilityTextScalePercent: 100,
+        EnhancedContrast: false,
+        UseSystemFont: false);
 }
 
 public interface IAppSettingsStore

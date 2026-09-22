@@ -90,6 +90,9 @@ Current operational slice:
 - General controls whether closing the manager window keeps STOW running in the tray or safely exits the app;
 - Startup controls Windows startup registration, still gated by whether at least one managed app is enabled;
 - Appearance persists System / Light / Dark and applies it immediately; the saved preference is restored on next launch;
+- Accessibility persists app text size (100% / 125% / 150% / 200%), optional increased contrast and optional Windows UI font, all applied live;
+- Windows Contrast Themes override the normal Light/Dark palette automatically so a user never has to re-enable contrast inside STOW;
+- keyboard navigation, visible keyboard focus and UI Automation exposure are baseline behavior rather than optional toggles;
 - Focus behavior can either restore the previous desktop or leave Focus-hidden apps stowed when the session ends;
 - Notifications are operational, local Windows tray notifications and are disabled by default so upgrades do not introduce unsolicited alerts;
 - the current notification scope is intentionally narrow: scheduled Focus start/end events only;
@@ -127,6 +130,10 @@ Current operational slice:
 
 ## Cross-screen requirements
 
-Support Light and Dark themes, high DPI and keyboard navigation.
-No critical action may be encoded by color alone.
+Support Light, Dark and Windows Contrast Themes, high DPI and keyboard navigation.
+All actionable controls must remain keyboard reachable with a clearly visible focus indicator.
+Standard controls and any custom interactive surface must expose meaningful names, roles, states and values through UI Automation.
+No critical action or state may be encoded by color alone.
+Normal-size text should target at least 4.5:1 contrast and essential non-text UI/state indicators at least 3:1.
+The UI must remain usable at the supported 200% in-app text setting and under Windows display scaling without clipping critical controls.
 Destructive or compatibility-sensitive operations must explain their consequence before execution.

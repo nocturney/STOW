@@ -11,10 +11,12 @@
                     </Grid.ColumnDefinitions>
                     <StackPanel>
                         <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="Find your focus" FontSize="20" FontWeight="SemiBold" />
+                            <TextBlock Text="Find your focus" FontSize="{DynamicResource FontSize20}" FontWeight="SemiBold" />
                             <Border x:Name="SessionStatusChip" Style="{StaticResource StatusChip}"
                                     Margin="10,0,0,0" VerticalAlignment="Center">
-                                <TextBlock x:Name="SessionStatusText" Text="Inactive" />
+                                <TextBlock x:Name="SessionStatusText"
+                                           Text="Inactive"
+                                           AutomationProperties.LiveSetting="Polite" />
                             </Border>
                         </StackPanel>
                         <TextBlock Text="Temporarily stow distractions without changing your permanent app setup."
@@ -28,6 +30,7 @@
             <Border x:Name="FocusStatusBanner" Style="{StaticResource CardBorder}"
                     Background="{DynamicResource SurfaceElevatedBrush}" Margin="0,0,0,14" Visibility="Collapsed">
                 <TextBlock x:Name="FocusStatusText" TextWrapping="Wrap"
+                           AutomationProperties.LiveSetting="Polite"
                            Foreground="{DynamicResource TextSecondaryBrush}" />
             </Border>
 
@@ -77,13 +80,14 @@
                         <TextBlock x:Name="SavedPresetsSummaryText"
                                    HorizontalAlignment="Right"
                                    Foreground="{DynamicResource TextSecondaryBrush}"
-                                   FontSize="12" />
+                                   FontSize="{DynamicResource FontSize12}" />
                     </Grid>
                     <TextBlock x:Name="NoSavedPresetsText"
                                Text="No saved Focus presets yet."
                                Foreground="{DynamicResource TextSecondaryBrush}"
                                Margin="0,4,0,2" />
-                    <ItemsControl x:Name="SavedPresetsList">
+                    <ItemsControl x:Name="SavedPresetsList"
+                                  AutomationProperties.Name="Saved Focus presets">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
                                 <Grid Margin="0,7">
@@ -95,7 +99,7 @@
                                         <TextBlock Text="{Binding Name}" FontWeight="SemiBold" />
                                         <TextBlock Text="{Binding Summary}"
                                                    Margin="0,2,0,0"
-                                                   FontSize="11"
+                                                   FontSize="{DynamicResource FontSize11}"
                                                    Foreground="{DynamicResource TextSecondaryBrush}" />
                                     </StackPanel>
                                     <StackPanel Grid.Column="1"
@@ -131,13 +135,14 @@
                         <Grid Margin="0,0,0,12">
                             <TextBlock Text="Apps during Focus" Style="{StaticResource SectionTitle}" />
                             <TextBlock x:Name="ManagedAppsSummaryText" HorizontalAlignment="Right"
-                                       Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" />
+                                       Foreground="{DynamicResource TextSecondaryBrush}" FontSize="{DynamicResource FontSize12}" />
                         </Grid>
                         <TextBlock x:Name="NoManagedAppsText"
                                    Text="No enabled managed apps are available. Add and enable apps from Apps first."
                                    TextWrapping="Wrap" Foreground="{DynamicResource TextSecondaryBrush}"
                                    Visibility="Collapsed" Margin="0,4,0,4" />
-                        <ItemsControl x:Name="FocusAppsList">
+                        <ItemsControl x:Name="FocusAppsList"
+                                      AutomationProperties.Name="Apps during Focus">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
                                     <Grid Margin="0,7">
@@ -147,7 +152,7 @@
                                         </Grid.ColumnDefinitions>
                                         <StackPanel>
                                             <TextBlock Text="{Binding Name}" FontWeight="SemiBold" />
-                                            <TextBlock Text="{Binding ProcessName}" FontSize="11" Margin="0,2,0,0"
+                                            <TextBlock Text="{Binding ProcessName}" FontSize="{DynamicResource FontSize11}" Margin="0,2,0,0"
                                                        Foreground="{DynamicResource TextSecondaryBrush}" />
                                         </StackPanel>
                                         <CheckBox Grid.Column="1" Content="Keep visible" Tag="{Binding Key}"
@@ -190,12 +195,13 @@
                                 <TextBlock x:Name="SchedulesSummaryText"
                                            HorizontalAlignment="Right"
                                            Foreground="{DynamicResource TextSecondaryBrush}"
-                                           FontSize="12" />
+                                           FontSize="{DynamicResource FontSize12}" />
                             </Grid>
                             <TextBlock x:Name="ScheduleStatusText"
                                        Margin="0,0,0,8"
                                        TextWrapping="Wrap"
-                                       FontSize="11"
+                                       AutomationProperties.LiveSetting="Polite"
+                                       FontSize="{DynamicResource FontSize11}"
                                        Foreground="{DynamicResource TextSecondaryBrush}"
                                        Visibility="Collapsed" />
                             <TextBlock x:Name="NoSchedulesText"
@@ -203,7 +209,8 @@
                                        Margin="0,2,0,8"
                                        TextWrapping="Wrap"
                                        Foreground="{DynamicResource TextSecondaryBrush}" />
-                            <ItemsControl x:Name="ScheduleList">
+                            <ItemsControl x:Name="ScheduleList"
+                                          AutomationProperties.Name="Focus schedules">
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
                                         <Border BorderBrush="{DynamicResource BorderBrush}"
@@ -229,12 +236,12 @@
                                                 <TextBlock Text="{Binding Details}"
                                                            Margin="0,3,0,0"
                                                            TextWrapping="Wrap"
-                                                           FontSize="11"
+                                                           FontSize="{DynamicResource FontSize11}"
                                                            Foreground="{DynamicResource TextSecondaryBrush}" />
                                                 <TextBlock Text="{Binding Status}"
                                                            Margin="0,2,0,7"
                                                            TextWrapping="Wrap"
-                                                           FontSize="11"
+                                                           FontSize="{DynamicResource FontSize11}"
                                                            Foreground="{DynamicResource TextSecondaryBrush}" />
                                                 <StackPanel Orientation="Horizontal">
                                                     <Button Style="{StaticResource SecondaryButton}"

@@ -19,6 +19,9 @@ public sealed class JsonAppSettingsStoreTests
         Assert.True(store.Load().KeepRunningInTray);
         Assert.True(store.Load().StartWithWindows);
         Assert.False(store.Load().NotificationsEnabled);
+        Assert.Equal(100, store.Load().AccessibilityTextScalePercent);
+        Assert.False(store.Load().EnhancedContrast);
+        Assert.False(store.Load().UseSystemFont);
         Assert.Equal(ThemePreference.System, store.Load().Theme);
         Assert.Equal(
             FocusEndBehavior.RestorePreviousDesktop,
@@ -55,6 +58,41 @@ public sealed class JsonAppSettingsStoreTests
             Assert.Equal(ThemePreference.Dark, settings.Theme);
             Assert.Equal(FocusEndBehavior.KeepAppsStowed, settings.FocusEndBehavior);
             Assert.False(settings.NotificationsEnabled);
+            Assert.Equal(100, settings.AccessibilityTextScalePercent);
+            Assert.False(settings.EnhancedContrast);
+            Assert.False(settings.UseSystemFont);
+        }
+        finally
+        {
+            try { Directory.Delete(dir, recursive: true); } catch { }
+        }
+    }
+
+    [Fact]
+    public void Unsupported_accessibility_text_scale_falls_back_to_standard()
+    {
+        string dir = Path.Combine(
+            Path.GetTempPath(),
+            "stow-settings-" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(dir);
+        string path = Path.Combine(dir, "settings.json");
+
+        try
+        {
+            File.WriteAllText(
+                path,
+                """
+                {
+                  "KeepRunningInTray": true,
+                  "StartWithWindows": true,
+                  "Theme": "System",
+                  "FocusEndBehavior": "RestorePreviousDesktop",
+                  "AccessibilityTextScalePercent": 999
+                }
+                """);
+
+            var store = new JsonAppSettingsStore(path);
+            Assert.Equal(100, store.Load().AccessibilityTextScalePercent);
         }
         finally
         {
@@ -79,7 +117,10 @@ public sealed class JsonAppSettingsStoreTests
                 StartWithWindows: false,
                 Theme: ThemePreference.Dark,
                 FocusEndBehavior: FocusEndBehavior.KeepAppsStowed,
-                NotificationsEnabled: true);
+                NotificationsEnabled: true,
+                AccessibilityTextScalePercent: 200,
+                EnhancedContrast: true,
+                UseSystemFont: true);
 
             store.Save(expected);
             AppSettings actual = store.Load();

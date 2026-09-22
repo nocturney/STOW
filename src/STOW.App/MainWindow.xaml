@@ -23,20 +23,22 @@
                 </Grid.RowDefinitions>
 
                 <StackPanel Margin="14,10,14,24">
-                    <TextBlock Text="STOW" FontSize="22" FontWeight="SemiBold" />
+                    <TextBlock Text="STOW" FontSize="{DynamicResource FontSize22}" FontWeight="SemiBold" />
                     <TextBlock Text="A calmer desktop starts here." Margin="0,5,0,0"
-                               FontSize="11.5" Foreground="{DynamicResource TextSecondaryBrush}" />
+                               FontSize="{DynamicResource FontSize115}"
+                               TextWrapping="Wrap"
+                               Foreground="{DynamicResource TextSecondaryBrush}" />
                 </StackPanel>
                 <StackPanel Grid.Row="1">
-                    <Button x:Name="AppsNavButton" Style="{StaticResource NavButton}" Content="Apps" Tag="Apps" Click="Navigate_Click"
-                            Background="{DynamicResource SelectionBrush}" Foreground="{DynamicResource TextPrimaryBrush}" />
-                    <Button Style="{StaticResource NavButton}" Content="Rules" Tag="Rules" Click="Navigate_Click" />
-                    <Button Style="{StaticResource NavButton}" Content="Focus" Tag="Focus" Click="Navigate_Click" />
-                    <Button Style="{StaticResource NavButton}" Content="Insights" Tag="Insights" Click="Navigate_Click" />
-                    <Button Style="{StaticResource NavButton}" Content="Settings" Tag="Settings" Click="Navigate_Click" />
+                    <Button x:Name="AppsNavButton" Style="{StaticResource NavButton}" Content="_Apps" Tag="Apps" Click="Navigate_Click"
+                            Background="{DynamicResource SelectionBrush}" Foreground="{DynamicResource SelectionForegroundBrush}" />
+                    <Button Style="{StaticResource NavButton}" Content="_Rules" Tag="Rules" Click="Navigate_Click" />
+                    <Button Style="{StaticResource NavButton}" Content="_Focus" Tag="Focus" Click="Navigate_Click" />
+                    <Button Style="{StaticResource NavButton}" Content="_Insights" Tag="Insights" Click="Navigate_Click" />
+                    <Button Style="{StaticResource NavButton}" Content="_Settings" Tag="Settings" Click="Navigate_Click" />
                 </StackPanel>
 
-                <Button Grid.Row="3" Style="{StaticResource NavButton}" Content="About" Tag="About"
+                <Button Grid.Row="3" Style="{StaticResource NavButton}" Content="A_bout" Tag="About"
                         Click="Navigate_Click" Margin="8,8,8,2" />
             </Grid>
         </Border>
@@ -51,7 +53,10 @@
             </Grid.RowDefinitions>
 
             <StackPanel>
-                <TextBlock x:Name="PageTitleText" Text="Apps" Style="{StaticResource PageTitle}" />
+                <TextBlock x:Name="PageTitleText"
+                           Text="Apps"
+                           Style="{StaticResource PageTitle}"
+                           AutomationProperties.LiveSetting="Polite" />
                 <TextBlock x:Name="PageSubtitleText" Text="Choose what STOW keeps quietly out of your way."
                            Style="{StaticResource PageSubtitle}" />
             </StackPanel>
