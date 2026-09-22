@@ -16,11 +16,11 @@ using Microsoft.Win32;
 [assembly: AssemblyCopyright("Copyright (c) 2026 Christian Velvet")]
 [assembly: AssemblyVersion("0.4.0.0")]
 [assembly: AssemblyFileVersion("0.4.0.0")]
-[assembly: AssemblyInformationalVersion("0.4.0-preview.5")]
+[assembly: AssemblyInformationalVersion("0.4.0-preview.6")]
 
 internal static class SetupConstants
 {
-    public const string Version = "0.4.0-preview.5";
+    public const string Version = "0.4.0-preview.6";
     public const string FileVersion = "0.4.0.0";
     public const string Publisher = "Christian Velvet";
     public const string ProductName = "STOW";
