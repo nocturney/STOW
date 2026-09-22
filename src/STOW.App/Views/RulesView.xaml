@@ -23,20 +23,43 @@
             </Border>
 
             <StackPanel Orientation="Horizontal" Margin="0,0,0,14">
-                <Button Style="{StaticResource SecondaryButton}" Content="All rules" Margin="0,0,8,0" />
-                <Button Style="{StaticResource SecondaryButton}" Content="App rules" Margin="0,0,8,0" />
-                <Button Style="{StaticResource SecondaryButton}" Content="Focus rules" Margin="0,0,8,0"
-                        IsEnabled="False" ToolTip="Available when Focus runtime is enabled." />
-                <Button Style="{StaticResource SecondaryButton}" Content="Startup rules"
-                        IsEnabled="False" ToolTip="Available when startup actions are enabled." />
+                <Button x:Name="AllRulesFilterButton"
+                        Style="{StaticResource SecondaryButton}"
+                        Content="All rules"
+                        Tag="All"
+                        Margin="0,0,8,0"
+                        Click="RulesFilter_Click" />
+                <Button x:Name="AppRulesFilterButton"
+                        Style="{StaticResource SecondaryButton}"
+                        Content="App rules"
+                        Tag="Minimize"
+                        Margin="0,0,8,0"
+                        Click="RulesFilter_Click" />
+                <Button x:Name="FocusRulesFilterButton"
+                        Style="{StaticResource SecondaryButton}"
+                        Content="Focus rules"
+                        Tag="Focus"
+                        Margin="0,0,8,0"
+                        Click="RulesFilter_Click" />
+                <Button Style="{StaticResource SecondaryButton}"
+                        Content="Startup rules"
+                        IsEnabled="False"
+                        ToolTip="Startup rule triggers are not enabled yet." />
             </StackPanel>
 
             <Border x:Name="EmptyRulesCard" Style="{StaticResource CardBorder}" Visibility="Collapsed">
                 <StackPanel HorizontalAlignment="Center" Margin="10,20">
-                    <TextBlock Text="No rules yet" FontSize="16" FontWeight="SemiBold" />
-                    <TextBlock Text="Create an app rule to override what happens when a managed app is minimized."
-                               Margin="0,6,0,0" TextAlignment="Center" TextWrapping="Wrap"
-                               Foreground="{DynamicResource TextSecondaryBrush}" MaxWidth="460" />
+                    <TextBlock x:Name="EmptyRulesTitleText"
+                               Text="No rules yet"
+                               FontSize="16"
+                               FontWeight="SemiBold" />
+                    <TextBlock x:Name="EmptyRulesBodyText"
+                               Text="Create an app or Focus rule for a managed application."
+                               Margin="0,6,0,0"
+                               TextAlignment="Center"
+                               TextWrapping="Wrap"
+                               Foreground="{DynamicResource TextSecondaryBrush}"
+                               MaxWidth="460" />
                 </StackPanel>
             </Border>
 
@@ -56,7 +79,7 @@
                                     <TextBlock Text="{Binding Summary}" FontSize="12" Margin="0,3,0,0"
                                                Foreground="{DynamicResource TextSecondaryBrush}" />
                                 </StackPanel>
-                                <TextBlock Grid.Column="1" Text="App rule" VerticalAlignment="Center"
+                                <TextBlock Grid.Column="1" Text="{Binding Type}" VerticalAlignment="Center"
                                            Foreground="{DynamicResource TextSecondaryBrush}" />
                                 <TextBlock Grid.Column="2" Text="{Binding Status}" VerticalAlignment="Center"
                                            Foreground="{DynamicResource AccentTealBrush}" />
@@ -90,10 +113,13 @@
                     <ComboBox x:Name="AppComboBox" Height="38" DisplayMemberPath="Name" Margin="0,6,0,14" />
 
                     <TextBlock Text="When" Foreground="{DynamicResource TextSecondaryBrush}" />
-                    <Border Style="{StaticResource CardBorder}" Padding="12" Margin="0,6,0,14"
-                            Background="{DynamicResource SurfaceElevatedBrush}">
-                        <TextBlock Text="The app is minimized" />
-                    </Border>
+                    <ComboBox x:Name="TriggerComboBox"
+                              Height="38"
+                              SelectedIndex="0"
+                              Margin="0,6,0,14">
+                        <ComboBoxItem Content="The app is minimized" />
+                        <ComboBoxItem Content="Focus starts" />
+                    </ComboBox>
 
                     <TextBlock Text="Action" Foreground="{DynamicResource TextSecondaryBrush}" />
                     <ComboBox x:Name="ActionComboBox" Height="38" SelectedIndex="0" Margin="0,6,0,14">

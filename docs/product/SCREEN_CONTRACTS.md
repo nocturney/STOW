@@ -18,14 +18,17 @@ Rules must describe automation intent in plain English and expose enabled state 
 Validation errors stay close to the edited condition/action.
 
 Current operational slice:
-- per-app rules for the `Minimize` trigger;
+- per-app rules for the `Minimize` and `Focus` triggers;
 - actions: `Stow` and `KeepVisible`;
 - enabled/disabled state;
-- 0-100 priority with the highest-priority matching enabled rule winning;
+- 0-100 priority with the highest-priority matching enabled rule winning independently for each trigger;
 - local atomic persistence in `%APPDATA%\\STOW\\rules.json`;
-- default/failure fallback remains `Stow`, preserving the Trayify v0.3.3 behavior contract.
+- Minimize rules preserve the existing behavior: `KeepVisible` prevents a minimized app from being stowed;
+- Focus rules are evaluated when a Focus session starts: `KeepVisible` adds that enabled managed app to the session's Keep visible set, while `Stow` preserves the normal Focus default;
+- an app explicitly selected by the current Focus setup/preset remains Keep visible even if a Focus rule says `Stow`;
+- rule-store failure/default fallback remains `Stow`, preserving the Trayify v0.3.3 safety contract.
 
-Focus and Startup rule categories remain visible in the information architecture but are intentionally disabled until those rule triggers are integrated with their corresponding runtimes. They must not appear functional before then.
+Startup rules remain visible in the information architecture but intentionally disabled until a separate startup-action runtime is defined. They must not appear functional before then.
 
 ## Focus
 
@@ -41,6 +44,7 @@ Current operational slice:
 - STOW tracks which apps were stowed specifically by the Focus session. End Focus restores only those apps; apps that were already stowed before Focus remain stowed.
 - If any Focus-hidden app cannot be restored, Focus remains active and keeps its tracking instead of orphaning the window.
 - Deep work and Keep all visible are temporary setup helpers only; they do not modify permanent app configuration.
+- Enabled Focus rules are applied when a session starts and can add managed apps to Keep visible; the current explicit Focus setup/preset remains authoritative when it explicitly keeps an app visible.
 - Saved presets are operational and persisted atomically in `%APPDATA%\STOW\focus-presets.json`; each preset stores only a user-visible name and the managed-app keys to keep visible.
 - Using a saved preset ignores app keys that are no longer enabled/managed instead of failing the Focus flow.
 - Saving/deleting presets never changes the permanent managed-app configuration.

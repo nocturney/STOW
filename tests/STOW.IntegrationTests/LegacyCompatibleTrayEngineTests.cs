@@ -199,6 +199,80 @@ public sealed class LegacyCompatibleTrayEngineTests
     }
 
     [Fact]
+    public void Focus_keep_visible_rule_augments_session_keep_visible_apps()
+    {
+        var store = new FakeStore(Grok, Editor);
+        var runtime = new FakeRuntime(
+            Window(101, 42, iconic: false),
+            EditorWindow(202, 84, iconic: false));
+        var icons = new FakeTrayIcons();
+        var rules = new FakeRuleStore(new RuleDefinition(
+            "focus-keep", "Keep Grok in Focus", Grok.Key,
+            RuleTrigger.Focus, RuleAction.KeepVisible, true, 80));
+        using var engine = NewEngine(store, runtime, icons, ruleStore: rules);
+
+        engine.Start();
+        Assert.True(engine.StartFocusSession(Array.Empty<string>()).Succeeded);
+
+        Assert.True(runtime.IsWindowVisible(101));
+        Assert.False(runtime.IsWindowVisible(202));
+        Assert.Contains(Grok.Key, engine.GetFocusSession().KeepVisibleAppKeys);
+        Assert.Contains(Editor.Key, engine.GetFocusSession().StowedByFocusAppKeys);
+    }
+
+    [Fact]
+    public void Minimize_keep_visible_rule_does_not_override_focus_stow()
+    {
+        var store = new FakeStore(Grok);
+        var runtime = new FakeRuntime(Window(101, 42, iconic: false));
+        var icons = new FakeTrayIcons();
+        var rules = new FakeRuleStore(new RuleDefinition(
+            "minimize-keep", "Keep on minimize", Grok.Key,
+            RuleTrigger.Minimize, RuleAction.KeepVisible, true, 100));
+        using var engine = NewEngine(store, runtime, icons, ruleStore: rules);
+
+        engine.Start();
+        Assert.True(engine.StartFocusSession(Array.Empty<string>()).Succeeded);
+
+        Assert.False(runtime.IsWindowVisible(101));
+        Assert.Contains(Grok.Key, engine.GetFocusSession().StowedByFocusAppKeys);
+    }
+
+    [Fact]
+    public void Explicit_focus_keep_visible_beats_focus_stow_rule()
+    {
+        var store = new FakeStore(Grok);
+        var runtime = new FakeRuntime(Window(101, 42, iconic: false));
+        var icons = new FakeTrayIcons();
+        var rules = new FakeRuleStore(new RuleDefinition(
+            "focus-stow", "Stow Grok in Focus", Grok.Key,
+            RuleTrigger.Focus, RuleAction.Stow, true, 100));
+        using var engine = NewEngine(store, runtime, icons, ruleStore: rules);
+
+        engine.Start();
+        Assert.True(engine.StartFocusSession(new[] { Grok.Key }).Succeeded);
+
+        Assert.True(runtime.IsWindowVisible(101));
+        Assert.Contains(Grok.Key, engine.GetFocusSession().KeepVisibleAppKeys);
+    }
+
+    [Fact]
+    public void Focus_rule_store_failure_falls_back_to_stow()
+    {
+        var store = new FakeStore(Grok);
+        var runtime = new FakeRuntime(Window(101, 42, iconic: false));
+        var icons = new FakeTrayIcons();
+        var rules = new FakeRuleStore { ThrowOnLoad = true };
+        using var engine = NewEngine(store, runtime, icons, ruleStore: rules);
+
+        engine.Start();
+        Assert.True(engine.StartFocusSession(Array.Empty<string>()).Succeeded);
+
+        Assert.False(runtime.IsWindowVisible(101));
+        Assert.Contains(Grok.Key, engine.GetFocusSession().StowedByFocusAppKeys);
+    }
+
+    [Fact]
     public void Focus_stows_non_keep_apps_and_end_restores_only_focus_hidden_apps()
     {
         var store = new FakeStore(Grok, Editor);

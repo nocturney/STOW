@@ -20,18 +20,23 @@ public sealed class JsonRuleStoreTests
                 new("one", "Keep editor visible", @"P|c:\apps\editor.exe",
                     RuleTrigger.Minimize, RuleAction.KeepVisible, true, 80),
                 new("two", "Stow chat", @"P|c:\apps\chat.exe",
-                    RuleTrigger.Minimize, RuleAction.Stow, false, 20)
+                    RuleTrigger.Minimize, RuleAction.Stow, false, 20),
+                new("three", "Keep editor during Focus", "P|editor",
+                    RuleTrigger.Focus, RuleAction.KeepVisible, true, 60)
             ];
 
             store.Save(expected);
             IReadOnlyList<RuleDefinition> loaded = store.Load();
 
-            Assert.Equal(2, loaded.Count);
+            Assert.Equal(3, loaded.Count);
             Assert.Equal("one", loaded[0].Id);
             Assert.Equal(RuleAction.KeepVisible, loaded[0].Action);
             Assert.Equal(80, loaded[0].Priority);
-            Assert.Equal("two", loaded[1].Id);
-            Assert.False(loaded[1].Enabled);
+            Assert.Equal("three", loaded[1].Id);
+            Assert.Equal(RuleTrigger.Focus, loaded[1].Trigger);
+            Assert.Equal(RuleAction.KeepVisible, loaded[1].Action);
+            Assert.Equal("two", loaded[2].Id);
+            Assert.False(loaded[2].Enabled);
         }
         finally
         {

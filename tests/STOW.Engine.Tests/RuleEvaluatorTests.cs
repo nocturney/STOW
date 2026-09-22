@@ -30,6 +30,23 @@ public sealed class RuleEvaluatorTests
     }
 
     [Fact]
+    public void Focus_trigger_only_matches_focus_rules()
+    {
+        RuleDefinition[] rules =
+        [
+            new("minimize", "Minimize", "app", RuleTrigger.Minimize, RuleAction.KeepVisible, true, 100),
+            new("focus", "Focus", "app", RuleTrigger.Focus, RuleAction.Stow, true, 50)
+        ];
+
+        Assert.Equal(
+            RuleAction.Stow,
+            RuleEvaluator.Resolve(rules, "app", RuleTrigger.Focus));
+        Assert.Equal(
+            RuleAction.KeepVisible,
+            RuleEvaluator.Resolve(rules, "app", RuleTrigger.Minimize));
+    }
+
+    [Fact]
     public void Disabled_rule_is_ignored()
     {
         RuleDefinition[] rules =

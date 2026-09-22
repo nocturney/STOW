@@ -242,8 +242,20 @@ public sealed class LegacyCompatibleTrayEngine : ITrayEngineRuntime
             focusKeepVisibleAppKeys.Clear();
             foreach (string key in keepVisibleAppKeys)
             {
-                if (managed.ContainsKey(key))
+                if (managed.TryGetValue(key, out ManagedAppDefinition? explicitApp) &&
+                    explicitApp.Enabled)
+                {
                     focusKeepVisibleAppKeys.Add(key);
+                }
+            }
+
+            foreach (ManagedAppDefinition app in managed.Values)
+            {
+                if (!app.Enabled || focusKeepVisibleAppKeys.Contains(app.Key))
+                    continue;
+
+                if (ResolveRuleAction(app.Key, RuleTrigger.Focus) == RuleAction.KeepVisible)
+                    focusKeepVisibleAppKeys.Add(app.Key);
             }
 
             focusHiddenAppKeys.Clear();

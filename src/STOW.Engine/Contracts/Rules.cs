@@ -2,7 +2,8 @@ namespace STOW.Engine.Contracts;
 
 public enum RuleTrigger
 {
-    Minimize
+    Minimize,
+    Focus
 }
 
 public enum RuleAction
@@ -25,11 +26,12 @@ public sealed record RuleDefinition(
         string appKey,
         RuleAction action,
         int priority = 50,
-        bool enabled = true) => new(
+        bool enabled = true,
+        RuleTrigger trigger = RuleTrigger.Minimize) => new(
             Guid.NewGuid().ToString("N"),
             name,
             appKey,
-            RuleTrigger.Minimize,
+            trigger,
             action,
             enabled,
             Math.Clamp(priority, 0, 100));
