@@ -253,5 +253,11 @@ $zip = Join-Path $dist "STOW-$version-win-x64.zip"
 $zipInputs = Get-ChildItem $dist -File | Where-Object { $_.FullName -ne $zip } | Select-Object -ExpandProperty FullName
 Compress-Archive -Path $zipInputs -DestinationPath $zip -CompressionLevel Optimal
 
+# The copy of SHA256SUMS.txt inside the release ZIP cannot contain the ZIP's
+# own hash without becoming self-referential. The external release checksum
+# file is therefore finalized only after the ZIP has been created.
+$zipHash = (Get-FileHash -Algorithm SHA256 $zip).Hash.ToLowerInvariant()
+Add-Content (Join-Path $dist 'SHA256SUMS.txt') "$zipHash  $(Split-Path $zip -Leaf)" -Encoding ascii
+
 Get-Item (Join-Path $dist 'STOW.exe'),(Join-Path $dist 'STOWSetup.exe'),$zip,(Join-Path $dist 'SHA256SUMS.txt') |
     Select-Object Name,Length,LastWriteTime

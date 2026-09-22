@@ -200,6 +200,19 @@ finally {
 
 $releaseZip = Join-Path $Dist "STOW-$version-win-x64.zip"
 Require-File $releaseZip
+
+$sumLines = Get-Content (Join-Path $Dist 'SHA256SUMS.txt')
+$zipName = Split-Path $releaseZip -Leaf
+$zipLine = $sumLines | Where-Object { $_ -match "^[0-9a-fA-F]{64}\s{2}$([regex]::Escape($zipName))$" } | Select-Object -First 1
+if (-not $zipLine) {
+    throw "SHA256SUMS.txt does not contain the release ZIP: $zipName"
+}
+$expectedZipHash = ($zipLine -split '\s+')[0].ToLowerInvariant()
+$actualZipHash = (Get-FileHash $releaseZip -Algorithm SHA256).Hash.ToLowerInvariant()
+if ($actualZipHash -ne $expectedZipHash) {
+    throw 'Release ZIP SHA-256 does not match SHA256SUMS.txt.'
+}
+
 $releaseArchive = [IO.Compression.ZipFile]::OpenRead($releaseZip)
 try {
     $releaseNames = $releaseArchive.Entries | Select-Object -ExpandProperty Name
