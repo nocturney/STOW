@@ -137,13 +137,19 @@ $releaseSummary = if ($isPrerelease -and -not $Sign) {
 } else {
     'Unsigned local release candidate. Stable publication requires Authenticode signing.'
 }
-@(
+$releaseNotes = @(
     "# STOW $version",
     "",
     $releaseSummary,
-    "",
-    'A calmer desktop starts here.'
-) | Set-Content (Join-Path $dist 'release-notes.md') -Encoding utf8
+    ""
+)
+$versionNotesPath = Join-Path $root "docs\release\$version.md"
+if (Test-Path $versionNotesPath) {
+    $releaseNotes += Get-Content $versionNotesPath
+} else {
+    $releaseNotes += 'A calmer desktop starts here.'
+}
+$releaseNotes | Set-Content (Join-Path $dist 'release-notes.md') -Encoding utf8
 
 $zip = Join-Path $dist "STOW-$version-win-x64.zip"
 $zipInputs = Get-ChildItem $dist -File | Where-Object { $_.FullName -ne $zip } | Select-Object -ExpandProperty FullName
