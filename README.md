@@ -9,9 +9,11 @@ It is the successor to Trayify and is currently in a controlled migration from t
 
 - Product name and visual direction: **STOW**.
 - Approved navigation: Apps, Rules, Focus, Insights, Settings; About is separate at the bottom.
-- New UI target: **WPF on modern .NET**; Electron is not used for UI.
-- Existing minimize-to-tray engine: Trayify v0.3.3 behavior is the protected compatibility baseline.
-- Runtime handoff, per-user installer migration and GitHub updater are validated; signing and package-manager transition are still gated.
+- UI/runtime: **WPF on modern .NET**; Electron is not used for UI.
+- Apps, Rules, Focus, Insights, Settings and About now have operational runtime-backed slices.
+- Existing minimize-to-tray engine: Trayify v0.3.3 behavior remains the protected compatibility baseline.
+- Per-user installer migration, unsigned Preview releases and the GitHub self-updater are validated end to end.
+- Stable Authenticode signing and final package-manager publication remain gated.
 
 The baseline source commit is `c4ab75082d1f7ecbeee32270cc01eea457a93276`.
 See [`docs/architecture/BASELINE_CONTRACT.md`](docs/architecture/BASELINE_CONTRACT.md) before changing window-management behavior.
@@ -19,7 +21,7 @@ See [`docs/architecture/BASELINE_CONTRACT.md`](docs/architecture/BASELINE_CONTRA
 ## Repository layout
 
 - `src/STOW.App` — new WPF presentation shell.
-- `src/STOW.Engine` — future extracted product engine.
+- `src/STOW.Engine` — product contracts, rules, settings and runtime state models.
 - `src/STOW.Platform.Windows` — Win32/window/tray implementation boundary.
 - `src/STOW.Infrastructure` — config, migration, updates, diagnostics and logging.
 - `tests` — regression and integration test projects plus the required test plan.
@@ -55,8 +57,10 @@ powershell -ExecutionPolicy Bypass -File scripts\build-stow.ps1 -Sign
 Silent install/upgrade:
 
 ```powershell
-STOWSetup.exe /VERYSILENT /NOLAUNCH
+STOWSetup.exe /VERYSILENT /NOLAUNCH /ACCEPTLICENSES=1
 ```
+
+For a first-time silent install, `/ACCEPTLICENSES=1` records explicit acceptance of STOW's MIT License and the applicable bundled third-party terms. Existing installed copies can upgrade silently without repeating that flag. STOW also checks the current legal-terms revision on application startup, so portable/package-manager installs and upgrades from older builds receive the same one-time acknowledgment flow.
 
 Silent uninstall (settings retained by default):
 
@@ -76,6 +80,22 @@ Do not rewrite the working minimize-to-tray engine merely to fit the new UI arch
 Extract behind interfaces, prove regression parity, then refactor only when a test demonstrates preserved behavior.
 See [`docs/migration/TRAYIFY_TO_STOW.md`](docs/migration/TRAYIFY_TO_STOW.md).
 
-## License
+## License, privacy and third-party terms
 
-MIT. See [`LICENSE`](LICENSE).
+STOW's own source code is MIT licensed. See [`LICENSE`](LICENSE).
+
+Self-contained Windows builds redistribute Microsoft .NET/WPF components under their applicable terms. Release packages include the exact runtime-pack licenses/notices, Windows-specific Microsoft license references, credits and a machine-generated `LEGAL_MANIFEST.txt`.
+
+See:
+
+- [Third-party notices](THIRD_PARTY_NOTICES.md)
+- [Credits and attributions](CREDITS.md)
+- [Privacy](PRIVACY.md)
+- [Security](SECURITY.md)
+- [Legal/release compliance checklist](docs/release/LEGAL_AND_RELEASE_COMPLIANCE.md)
+
+Release builds are checked with:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts\verify-release-legal.ps1
+```

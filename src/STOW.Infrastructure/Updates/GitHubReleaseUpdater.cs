@@ -38,10 +38,7 @@ public sealed class GitHubReleaseUpdater : IDisposable
         if (!SemanticVersion.TryParse(currentVersion, out SemanticVersion? current) || current is null)
             throw new InvalidOperationException($"Invalid current STOW version: {currentVersion}");
 
-        using HttpResponseMessage response = await http.GetAsync(ReleasesApi, cancellationToken);
-        response.EnsureSuccessStatusCode();
-        string json = await response.Content.ReadAsStringAsync(cancellationToken);
-        IReadOnlyList<ReleaseInfo> releases = ParseReleasesJson(json);
+        IReadOnlyList<ReleaseInfo> releases = await FetchReleasesAsync(cancellationToken);
 
         IEnumerable<ReleaseInfo> eligible = releases.Where(release =>
             channel == UpdateChannel.Preview || !release.IsPrerelease);
@@ -54,6 +51,26 @@ public sealed class GitHubReleaseUpdater : IDisposable
         if (latest.Version.CompareTo(current) > 0)
             return new(UpdateCheckStatus.UpdateAvailable, current, latest);
         return new(UpdateCheckStatus.UpToDate, current, latest);
+    }
+
+    public async Task<ReleaseInfo?> GetReleaseAsync(
+        string version,
+        CancellationToken cancellationToken = default)
+    {
+        if (!SemanticVersion.TryParse(version, out SemanticVersion? target) || target is null)
+            throw new InvalidOperationException($"Invalid STOW version: {version}");
+
+        IReadOnlyList<ReleaseInfo> releases = await FetchReleasesAsync(cancellationToken);
+        return releases.FirstOrDefault(release => release.Version.CompareTo(target) == 0);
+    }
+
+    private async Task<IReadOnlyList<ReleaseInfo>> FetchReleasesAsync(
+        CancellationToken cancellationToken)
+    {
+        using HttpResponseMessage response = await http.GetAsync(ReleasesApi, cancellationToken);
+        response.EnsureSuccessStatusCode();
+        string json = await response.Content.ReadAsStringAsync(cancellationToken);
+        return ParseReleasesJson(json);
     }
 
     internal static IReadOnlyList<ReleaseInfo> ParseReleasesJson(string json)
@@ -79,6 +96,17 @@ public sealed class GitHubReleaseUpdater : IDisposable
                 !Uri.TryCreate(htmlElement.GetString(), UriKind.Absolute, out Uri? htmlUri))
                 htmlUri = ReleasesUri;
 
+            string? releaseName = release.TryGetProperty("name", out JsonElement releaseNameElement)
+                ? releaseNameElement.GetString()
+                : null;
+            string? body = release.TryGetProperty("body", out JsonElement bodyElement)
+                ? bodyElement.GetString()
+                : null;
+            DateTimeOffset? publishedAt = null;
+            if (release.TryGetProperty("published_at", out JsonElement publishedElement) &&
+                DateTimeOffset.TryParse(publishedElement.GetString(), out DateTimeOffset parsedPublished))
+                publishedAt = parsedPublished;
+
             var assets = new Dictionary<string, ReleaseAsset>(StringComparer.OrdinalIgnoreCase);
             if (release.TryGetProperty("assets", out JsonElement assetsElement) &&
                 assetsElement.ValueKind == JsonValueKind.Array)
@@ -96,7 +124,7 @@ public sealed class GitHubReleaseUpdater : IDisposable
                 }
             }
 
-            releases.Add(new ReleaseInfo(tag!, version, prerelease, htmlUri, assets));
+            releases.Add(new ReleaseInfo(tag!, version, prerelease, htmlUri, assets, releaseName, body, publishedAt));
         }
         return releases;
     }

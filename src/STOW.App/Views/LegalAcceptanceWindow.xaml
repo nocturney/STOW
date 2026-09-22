@@ -1,0 +1,81 @@
+<Window x:Class="STOW.App.Views.LegalAcceptanceWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="STOW - License &amp; third-party terms"
+        Width="720" Height="560" MinWidth="620" MinHeight="500"
+        WindowStartupLocation="CenterScreen"
+        ResizeMode="CanMinimize"
+        Background="{DynamicResource CanvasBrush}">
+    <Grid Margin="28">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <StackPanel>
+            <TextBlock Text="Before you continue"
+                       FontSize="26" FontWeight="SemiBold"
+                       Foreground="{DynamicResource TextPrimaryBrush}" />
+            <TextBlock Text="STOW is MIT licensed. Self-contained Windows builds also include Microsoft/.NET components that retain their own applicable terms."
+                       Margin="0,10,0,0"
+                       TextWrapping="Wrap"
+                       FontSize="14"
+                       Foreground="{DynamicResource TextSecondaryBrush}" />
+        </StackPanel>
+
+        <Border Grid.Row="1" Style="{StaticResource CardBorder}" Margin="0,22,0,18">
+            <StackPanel>
+                <TextBlock Text="What you are agreeing to"
+                           Style="{StaticResource SectionTitle}" />
+                <TextBlock Margin="0,10,0,0" TextWrapping="Wrap"
+                           Foreground="{DynamicResource TextSecondaryBrush}">
+                    STOW's MIT License applies to STOW's own code. The bundled .NET/WPF runtime includes Microsoft components governed by the applicable Microsoft license terms and third-party notices. These documents are bundled for offline access and remain available later under About.
+                </TextBlock>
+
+                <StackPanel Orientation="Horizontal" Margin="0,18,0,0">
+                    <Button Style="{StaticResource SecondaryButton}"
+                            Content="STOW License"
+                            Margin="0,0,10,0"
+                            Click="License_Click" />
+                    <Button Style="{StaticResource SecondaryButton}"
+                            Content="Third-party terms &amp; credits"
+                            Margin="0,0,10,0"
+                            Click="Notices_Click" />
+                    <Button Style="{StaticResource SecondaryButton}"
+                            Content="Privacy"
+                            Click="Privacy_Click" />
+                </StackPanel>
+
+                <TextBlock x:Name="RevisionText"
+                           Margin="0,18,0,0"
+                           FontSize="12"
+                           Foreground="{DynamicResource MutedBrush}" />
+            </StackPanel>
+        </Border>
+
+        <CheckBox x:Name="AcceptCheckBox" Grid.Row="2"
+                  Margin="2,0,0,0"
+                  VerticalContentAlignment="Center"
+                  Checked="Acceptance_Changed"
+                  Unchecked="Acceptance_Changed">
+            <TextBlock TextWrapping="Wrap">
+                I have reviewed and agree to the STOW MIT License and the applicable third-party terms bundled with this copy.
+            </TextBlock>
+        </CheckBox>
+
+        <StackPanel Grid.Row="3" Orientation="Horizontal"
+                    HorizontalAlignment="Right" Margin="0,22,0,0">
+            <Button Style="{StaticResource SecondaryButton}"
+                    Content="Exit STOW"
+                    Margin="0,0,10,0"
+                    Click="Exit_Click" />
+            <Button x:Name="ContinueButton"
+                    Style="{StaticResource PrimaryButton}"
+                    Content="Agree &amp; Continue"
+                    IsEnabled="False"
+                    Click="Continue_Click" />
+        </StackPanel>
+    </Grid>
+</Window>

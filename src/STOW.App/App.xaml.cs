@@ -1,6 +1,7 @@
 using System.Windows;
 using System.Windows.Threading;
 using STOW.App.Themes;
+using STOW.App.Views;
 using STOW.Infrastructure.Configuration;
 using STOW.Infrastructure.Runtime;
 using STOW.Platform.Windows.Runtime;
@@ -37,6 +38,14 @@ public partial class App : Application
 
         try
         {
+            if (!EnsureLegalAcceptance())
+            {
+                singleInstance.Dispose();
+                singleInstance = null;
+                Shutdown(0);
+                return;
+            }
+
             managerWindow = new MainWindow();
             MainWindow = managerWindow;
             CreateMainTrayIcon();
@@ -67,6 +76,60 @@ public partial class App : Application
                 MessageBoxImage.Error);
             DisposeShell();
             Shutdown(1);
+        }
+    }
+
+    private bool EnsureLegalAcceptance()
+    {
+        var store = LegalAcceptanceStore.ForCurrentUser();
+        if (store.IsAccepted())
+            return true;
+
+        var window = new LegalAcceptanceWindow();
+        bool safeExitRequested = false;
+        var exitTimer = new DispatcherTimer
+        {
+            Interval = TimeSpan.FromMilliseconds(100)
+        };
+        exitTimer.Tick += (_, _) =>
+        {
+            if (singleInstance?.ConsumeExitRequest() != true)
+                return;
+
+            safeExitRequested = true;
+            foreach (Window owned in window.OwnedWindows.OfType<Window>().ToArray())
+                owned.Close();
+            window.Close();
+        };
+        exitTimer.Start();
+
+        bool accepted;
+        try
+        {
+            accepted = window.ShowDialog() == true;
+        }
+        finally
+        {
+            exitTimer.Stop();
+        }
+
+        if (safeExitRequested || !accepted)
+            return false;
+
+        try
+        {
+            store.Accept("in-app");
+            return true;
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(
+                "STOW could not save your license acceptance safely.\n\n" +
+                ex.Message,
+                "STOW",
+                MessageBoxButton.OK,
+                MessageBoxImage.Error);
+            return false;
         }
     }
 

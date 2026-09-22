@@ -49,6 +49,35 @@ public sealed class UpdaterTests
     }
 
     [Fact]
+    public async Task Exact_release_lookup_returns_body_name_and_publish_time()
+    {
+        string json = """
+        [
+          {
+            "tag_name":"v0.4.0-preview.3",
+            "name":"STOW 0.4.0-preview.3",
+            "body":"## Highlights\n- Operational UI",
+            "published_at":"2026-09-22T07:17:17Z",
+            "draft":false,
+            "prerelease":true,
+            "html_url":"https://example.test/p3",
+            "assets":[]
+          }
+        ]
+        """;
+        using var updater = new GitHubReleaseUpdater(
+            new HttpClient(new StaticJsonHandler(json)),
+            "0.4.0-preview.3");
+
+        ReleaseInfo? release = await updater.GetReleaseAsync("0.4.0-preview.3");
+
+        Assert.NotNull(release);
+        Assert.Equal("STOW 0.4.0-preview.3", release!.Name);
+        Assert.Contains("Operational UI", release.Body);
+        Assert.Equal(DateTimeOffset.Parse("2026-09-22T07:17:17Z"), release.PublishedAt);
+    }
+
+    [Fact]
     public async Task Stable_channel_ignores_semver_prerelease_even_if_github_flag_is_wrong()
     {
         string json = """

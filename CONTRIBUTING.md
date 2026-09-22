@@ -25,6 +25,12 @@ Build and test with:
 
 `dotnet test STOW.slnx -c Release --no-build`
 
+## Contribution licensing and provenance
+
+By submitting a contribution to STOW, you represent that you have the right to submit it and you agree that your contribution is licensed under the same MIT License that covers STOW, unless a different license is explicitly agreed in writing before submission.
+
+Do not copy code, fonts, icons, images, generated assets or other material from another project unless its license permits the intended use and the required attribution/notice material is included. If provenance is uncertain, do not include the material.
+
 ## Pull requests
 
 A pull request should:

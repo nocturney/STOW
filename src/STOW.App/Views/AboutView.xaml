@@ -22,7 +22,8 @@
                                    Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" />
                     </StackPanel>
                     <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                        <Button Style="{StaticResource SecondaryButton}" Content="What's New" Margin="0,0,10,0"
+                        <Button x:Name="WhatsNewButton" Style="{StaticResource SecondaryButton}"
+                                Content="Release Notes" Margin="0,0,10,0"
                                 Click="WhatsNew_Click" />
                         <Button x:Name="CheckUpdatesButton" Style="{StaticResource PrimaryButton}"
                                 Content="Check for Updates" Click="CheckUpdates_Click" />
@@ -33,6 +34,7 @@
             <TextBlock Text="More information" Style="{StaticResource SectionTitle}" Margin="0,8,0,10" />
             <UniformGrid Columns="2" Rows="3">
                 <Button Margin="0,0,10,10" Padding="0" BorderThickness="0" Background="Transparent"
+                        AutomationProperties.Name="Privacy"
                         HorizontalContentAlignment="Stretch" Click="Privacy_Click">
                     <Border Style="{StaticResource CardBorder}">
                         <StackPanel>
@@ -45,6 +47,7 @@
                 </Button>
 
                 <Button Margin="0,0,0,10" Padding="0" BorderThickness="0" Background="Transparent"
+                        AutomationProperties.Name="License"
                         HorizontalContentAlignment="Stretch" Click="License_Click">
                     <Border Style="{StaticResource CardBorder}">
                         <StackPanel>
@@ -57,6 +60,7 @@
                 </Button>
 
                 <Button Margin="0,0,10,10" Padding="0" BorderThickness="0" Background="Transparent"
+                        AutomationProperties.Name="Open-source notices"
                         HorizontalContentAlignment="Stretch" Click="Notices_Click">
                     <Border Style="{StaticResource CardBorder}">
                         <StackPanel>
@@ -69,6 +73,7 @@
                 </Button>
 
                 <Button Margin="0,0,0,10" Padding="0" BorderThickness="0" Background="Transparent"
+                        AutomationProperties.Name="Diagnostics"
                         HorizontalContentAlignment="Stretch" Click="Diagnostics_Click">
                     <Border Style="{StaticResource CardBorder}">
                         <StackPanel>
@@ -81,6 +86,7 @@
                 </Button>
 
                 <Button Margin="0,0,10,0" Padding="0" BorderThickness="0" Background="Transparent"
+                        AutomationProperties.Name="Support"
                         HorizontalContentAlignment="Stretch" Click="Support_Click">
                     <Border Style="{StaticResource CardBorder}">
                         <StackPanel>
@@ -93,6 +99,7 @@
                 </Button>
 
                 <Button Padding="0" BorderThickness="0" Background="Transparent"
+                        AutomationProperties.Name="GitHub &amp; Releases"
                         HorizontalContentAlignment="Stretch" Click="GitHubReleases_Click">
                     <Border Style="{StaticResource CardBorder}">
                         <StackPanel>

@@ -1,12 +1,18 @@
 param(
     [Parameter(Mandatory = $true)][string]$Version,
-    [string]$Dist = (Join-Path (Split-Path -Parent $PSScriptRoot) 'dist-stow'),
-    [string]$OutputRoot = (Join-Path (Split-Path -Parent $PSScriptRoot) 'packaging\generated'),
+    [string]$Dist = '',
+    [string]$OutputRoot = '',
     [switch]$AllowPrerelease
 )
 
 $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $PSScriptRoot
+if ([string]::IsNullOrWhiteSpace($Dist)) {
+    $Dist = Join-Path $root 'dist-stow'
+}
+if ([string]::IsNullOrWhiteSpace($OutputRoot)) {
+    $OutputRoot = Join-Path $root 'packaging\generated'
+}
 
 if ($Version -notmatch '^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$') { throw 'Version must be SemVer without a leading v.' }
 if ($Version.Contains('-') -and -not $AllowPrerelease) { throw 'Package-manager metadata defaults to stable releases. Pass -AllowPrerelease explicitly for a prerelease.' }
@@ -72,7 +78,13 @@ Tags:
 - productivity
 - utility
 - windows
+Documentations:
+- DocumentLabel: Third-party notices and credits
+  DocumentUrl: https://github.com/nocturney/STOW/blob/main/THIRD_PARTY_NOTICES.md
+- DocumentLabel: Privacy
+  DocumentUrl: https://github.com/nocturney/STOW/blob/main/PRIVACY.md
 ReleaseNotesUrl: https://github.com/nocturney/STOW/releases/tag/v$Version
+InstallationNotes: STOW shows a one-time first-run acknowledgment for its MIT License and applicable bundled third-party terms. The terms remain available offline from About.
 ManifestType: defaultLocale
 ManifestVersion: 1.12.0
 "@ | Set-Content (Join-Path $winget 'ChristianVelvet.STOW.locale.en-US.yaml') -Encoding utf8
@@ -87,7 +99,7 @@ $scoopManifest = [ordered]@{
     shortcuts = @(, @('STOW.exe','STOW'))
     checkver = @{ github = 'https://github.com/nocturney/STOW' }
     autoupdate = @{ url = 'https://github.com/nocturney/STOW/releases/download/v$version/STOW.exe' }
-    notes = "Scoop installs STOW in portable mode. Use 'scoop update stow' for upgrades."
+    notes = "Scoop installs STOW in portable mode. STOW shows a one-time first-run acknowledgment for its MIT License and applicable bundled third-party terms. Use 'scoop update stow' for upgrades. Third-party notices: https://github.com/nocturney/STOW/blob/main/THIRD_PARTY_NOTICES.md"
 }
 $scoopManifest | ConvertTo-Json -Depth 8 | Set-Content (Join-Path $scoop 'stow.json') -Encoding utf8
 

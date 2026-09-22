@@ -6,3 +6,4 @@ dist-stow/
 bin/
 obj/
 artifacts/
+src/STOW.App/GeneratedLegal/

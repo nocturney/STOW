@@ -11,9 +11,6 @@ namespace STOW.App.Views;
 public partial class AboutView : UserControl
 {
     private static readonly Uri RepositoryUri = new("https://github.com/nocturney/STOW");
-    private static readonly Uri PrivacyUri = new("https://github.com/nocturney/STOW/blob/main/PRIVACY.md");
-    private static readonly Uri LicenseUri = new("https://github.com/nocturney/STOW/blob/main/LICENSE");
-    private static readonly Uri NoticesUri = new("https://github.com/nocturney/STOW/blob/main/THIRD_PARTY_NOTICES.md");
     private static readonly Uri SupportUri = new("https://github.com/nocturney/STOW/issues");
 
     private readonly string currentVersion;
@@ -136,14 +133,82 @@ public partial class AboutView : UserControl
             OpenUri(GitHubReleaseUpdater.ReleasesUri);
     }
 
-    private void WhatsNew_Click(object sender, RoutedEventArgs e) =>
-        OpenUri(GitHubReleaseUpdater.ReleasesUri);
+    private async void WhatsNew_Click(object sender, RoutedEventArgs e)
+    {
+        WhatsNewButton.IsEnabled = false;
+        try
+        {
+            using var updater = new GitHubReleaseUpdater(userAgentVersion: currentVersion);
+            ReleaseInfo? release = await updater.GetReleaseAsync(currentVersion);
 
-    private void Privacy_Click(object sender, RoutedEventArgs e) => OpenUri(PrivacyUri);
+            if (release is null)
+            {
+                UpdateCheckResult fallback = await updater.CheckAsync(currentVersion, updateChannel);
+                release = fallback.Release;
+            }
 
-    private void License_Click(object sender, RoutedEventArgs e) => OpenUri(LicenseUri);
+            if (release is null)
+            {
+                MessageBox.Show(
+                    "No published release notes are available for this STOW build yet.",
+                    "STOW Release Notes",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Information);
+                return;
+            }
 
-    private void Notices_Click(object sender, RoutedEventArgs e) => OpenUri(NoticesUri);
+            var window = new ReleaseNotesWindow(release)
+            {
+                Owner = Window.GetWindow(this)
+            };
+            window.ShowDialog();
+        }
+        catch (Exception ex)
+        {
+            MessageBoxResult open = MessageBox.Show(
+                "STOW could not fetch release notes from GitHub.\n\n" +
+                ex.Message +
+                "\n\nOpen the Releases page in your browser instead?",
+                "STOW Release Notes",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Warning);
+            if (open == MessageBoxResult.Yes)
+                OpenUri(GitHubReleaseUpdater.ReleasesUri);
+        }
+        finally
+        {
+            WhatsNewButton.IsEnabled = true;
+        }
+    }
+
+    private void Privacy_Click(object sender, RoutedEventArgs e) =>
+        ShowBundledDocument(
+            "Privacy",
+            LegalDocumentWindow.ReadEmbedded("STOW.Legal.PRIVACY.md"));
+
+    private void License_Click(object sender, RoutedEventArgs e) =>
+        ShowBundledDocument(
+            "STOW License",
+            LegalDocumentWindow.ReadEmbedded("STOW.Legal.STOW_LICENSE.txt"));
+
+    private void Notices_Click(object sender, RoutedEventArgs e) =>
+        ShowBundledDocument(
+            "Open-source notices & credits",
+            LegalDocumentWindow.BuildNoticesBundle());
+
+    private void ShowBundledDocument(string title, string content)
+    {
+        string legalFolder = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            "STOW",
+            "legal");
+
+        var window = new LegalDocumentWindow(title, content, legalFolder)
+        {
+            Owner = Window.GetWindow(this)
+        };
+        window.ShowDialog();
+    }
 
     private void Support_Click(object sender, RoutedEventArgs e) => OpenUri(SupportUri);
 

@@ -91,15 +91,17 @@ jobs:
             './dist-stow/STOW.exe',
             './dist-stow/STOWSetup.exe',
             "./dist-stow/STOW-$version-win-x64.zip",
+            './dist-stow/STOW-Legal.zip',
+            './dist-stow/SBOM.spdx.json',
             './dist-stow/SHA256SUMS.txt',
-            './dist-stow/release-notes.md',
-            './dist-stow/DOTNET_RUNTIME_LICENSE.txt',
-            './dist-stow/DOTNET_RUNTIME_THIRD_PARTY_NOTICES.txt',
-            './dist-stow/DOTNET_WINDOWS_DESKTOP_LICENSE.txt',
-            './dist-stow/DOTNET_WINDOWS_DESKTOP_THIRD_PARTY_NOTICES.txt'
+            './dist-stow/release-notes.md'
           )
           foreach ($path in $required) { if (-not (Test-Path $path)) { throw "Missing STOW artifact: $path" } }
           Get-Content ./dist-stow/SHA256SUMS.txt
+
+      - name: Verify licenses, notices and credits
+        shell: powershell
+        run: ./scripts/verify-release-legal.ps1
 
       - name: Generate package-manager metadata candidate
         shell: powershell
@@ -135,7 +137,14 @@ jobs:
             './dist-stow/STOW.exe',
             './dist-stow/STOWSetup.exe',
             "./dist-stow/STOW-$version-win-x64.zip",
+            './dist-stow/STOW-Legal.zip',
+            './dist-stow/SBOM.spdx.json',
             './dist-stow/SHA256SUMS.txt',
+            './dist-stow/LICENSE',
+            './dist-stow/THIRD_PARTY_NOTICES.md',
+            './dist-stow/CREDITS.md',
+            './dist-stow/PRIVACY.md',
+            './dist-stow/LEGAL_MANIFEST.txt',
             '--repo',$env:GITHUB_REPOSITORY,
             '--target',$env:GITHUB_SHA,
             '--title',"STOW $version",

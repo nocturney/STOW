@@ -1,0 +1,59 @@
+<Window x:Class="STOW.App.Views.ReleaseNotesWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        AutomationProperties.AutomationId="STOWReleaseNotesWindow"
+        Title="STOW Release Notes"
+        Width="760" Height="650" MinWidth="600" MinHeight="460"
+        WindowStartupLocation="CenterOwner"
+        Background="{DynamicResource CanvasBrush}">
+    <Grid Margin="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <StackPanel>
+            <TextBlock x:Name="ReleaseTitleText"
+                       FontSize="24" FontWeight="SemiBold"
+                       Foreground="{DynamicResource TextPrimaryBrush}" />
+            <TextBlock x:Name="ReleaseMetaText"
+                       Margin="0,6,0,0"
+                       Foreground="{DynamicResource TextSecondaryBrush}" />
+        </StackPanel>
+
+        <Border Grid.Row="1" Style="{StaticResource CardBorder}"
+                Background="{DynamicResource SurfaceElevatedBrush}"
+                Margin="0,18,0,14" Padding="12">
+            <TextBlock Text="Fetched directly from the official STOW GitHub release. No release-note telemetry is sent."
+                       TextWrapping="Wrap"
+                       Foreground="{DynamicResource TextSecondaryBrush}" />
+        </Border>
+
+        <Border Grid.Row="2" Style="{StaticResource CardBorder}" Padding="8">
+            <FlowDocumentScrollViewer x:Name="NotesViewer"
+                                      AutomationProperties.Name="Release notes content"
+                                      IsToolBarVisible="False"
+                                      VerticalScrollBarVisibility="Auto"
+                                      Background="Transparent"
+                                      BorderThickness="0">
+                <FlowDocument x:Name="NotesDocument"
+                              PagePadding="12"
+                              FontSize="14"
+                              Foreground="{DynamicResource TextPrimaryBrush}" />
+            </FlowDocumentScrollViewer>
+        </Border>
+
+        <StackPanel Grid.Row="3" Orientation="Horizontal"
+                    HorizontalAlignment="Right" Margin="0,16,0,0">
+            <Button Style="{StaticResource SecondaryButton}"
+                    Content="View on GitHub"
+                    Margin="0,0,10,0"
+                    Click="OpenGitHub_Click" />
+            <Button Style="{StaticResource PrimaryButton}"
+                    Content="Close"
+                    Click="Close_Click" />
+        </StackPanel>
+    </Grid>
+</Window>

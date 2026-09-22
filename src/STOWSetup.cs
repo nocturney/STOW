@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
+using System.IO.Compression;
 using System.Reflection;
 using System.Text;
 using System.Threading;
@@ -23,8 +24,10 @@ internal static class SetupConstants
     public const string FileVersion = "0.4.0.0";
     public const string Publisher = "Christian Velvet";
     public const string ProductName = "STOW";
+    public const string LegalTermsRevision = "2026-09-22-v1";
     public const string RepoUrl = "https://github.com/nocturney/STOW";
     public const string PayloadResource = "STOW.Payload.exe";
+    public const string LegalResource = "STOW.Legal.zip";
     public const string UninstallKey = @"Software\Microsoft\Windows\CurrentVersion\Uninstall\STOW";
     public const string InstallerKey = @"Software\STOW\Installer";
 }
@@ -38,6 +41,8 @@ internal sealed class SetupOptions
     public bool PinAssist;
     public bool LaunchAfterInstall = true;
     public bool RemoveSettings;
+    public bool AcceptLicenses;
+    public bool ExistingInstall;
 }
 
 internal static class SetupUtil
@@ -60,6 +65,22 @@ internal static class SetupUtil
     public static string AppExe
     {
         get { return Path.Combine(InstallDir, "STOW.exe"); }
+    }
+
+    public static string LegalDir
+    {
+        get { return Path.Combine(InstallDir, "legal"); }
+    }
+
+    public static string LegalAcceptancePath
+    {
+        get
+        {
+            return Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                "STOW",
+                "legal-acceptance.txt");
+        }
     }
 
     public static string UninstallExe
@@ -142,6 +163,63 @@ internal static class SetupUtil
         }
     }
 
+    public static void ExtractLegalBundle()
+    {
+        ExtractLegalBundleTo(LegalDir);
+    }
+
+    public static void ExtractLegalBundleTo(string targetDirectory)
+    {
+        Assembly asm = Assembly.GetExecutingAssembly();
+        using (Stream input = asm.GetManifestResourceStream(SetupConstants.LegalResource))
+        {
+            if (input == null) throw new Exception("The STOW legal bundle is missing from this installer.");
+
+            if (Directory.Exists(targetDirectory))
+                Directory.Delete(targetDirectory, true);
+            Directory.CreateDirectory(targetDirectory);
+
+            string legalRoot = Path.GetFullPath(targetDirectory);
+            if (!legalRoot.EndsWith(Path.DirectorySeparatorChar.ToString()))
+                legalRoot += Path.DirectorySeparatorChar;
+
+            using (ZipArchive archive = new ZipArchive(input, ZipArchiveMode.Read, false))
+            {
+                foreach (ZipArchiveEntry entry in archive.Entries)
+                {
+                    if (String.IsNullOrWhiteSpace(entry.Name))
+                        continue;
+
+                    string destination = Path.GetFullPath(Path.Combine(targetDirectory, entry.FullName));
+                    if (!destination.StartsWith(legalRoot, StringComparison.OrdinalIgnoreCase))
+                        throw new Exception("The embedded legal bundle contains an invalid path.");
+
+                    string parent = Path.GetDirectoryName(destination);
+                    if (!String.IsNullOrWhiteSpace(parent))
+                        Directory.CreateDirectory(parent);
+
+                    entry.ExtractToFile(destination);
+                }
+            }
+        }
+    }
+
+    public static void OpenLegalTerms()
+    {
+        string preview = Path.Combine(
+            Path.GetTempPath(),
+            "STOW",
+            "legal-" + SetupConstants.Version.Replace(Path.DirectorySeparatorChar, '_'));
+
+        ExtractLegalBundleTo(preview);
+        Process.Start(new ProcessStartInfo
+        {
+            FileName = "explorer.exe",
+            Arguments = "\"" + preview + "\"",
+            UseShellExecute = true
+        });
+    }
+
     public static void CreateShortcut(string shortcutPath, string targetPath, string arguments, string description)
     {
         Directory.CreateDirectory(Path.GetDirectoryName(shortcutPath));
@@ -191,13 +269,78 @@ internal static class SetupUtil
         catch { return fallback; }
     }
 
+    public static bool HasRecordedLegalAcceptance()
+    {
+        try
+        {
+            if (!File.Exists(LegalAcceptancePath))
+                return false;
+
+            foreach (string line in File.ReadAllLines(LegalAcceptancePath))
+            {
+                if (String.Equals(
+                    line.Trim(),
+                    "REVISION=" + SetupConstants.LegalTermsRevision,
+                    StringComparison.Ordinal))
+                    return true;
+            }
+        }
+        catch { }
+
+        return false;
+    }
+
+    public static void RecordLegalAcceptance(string source)
+    {
+        string directory = Path.GetDirectoryName(LegalAcceptancePath);
+        if (String.IsNullOrWhiteSpace(directory))
+            throw new Exception("Could not resolve the STOW legal acceptance directory.");
+
+        Directory.CreateDirectory(directory);
+        string temp = LegalAcceptancePath + ".writing-" + Guid.NewGuid().ToString("N");
+
+        try
+        {
+            File.WriteAllLines(
+                temp,
+                new[]
+                {
+                    "REVISION=" + SetupConstants.LegalTermsRevision,
+                    "ACCEPTED_AT_UTC=" + DateTime.UtcNow.ToString("O"),
+                    "SOURCE=" + (source ?? "installer").Replace("\r", String.Empty).Replace("\n", String.Empty)
+                },
+                Encoding.UTF8);
+
+            if (File.Exists(LegalAcceptancePath))
+            {
+                File.Replace(temp, LegalAcceptancePath, null);
+            }
+            else
+            {
+                File.Move(temp, LegalAcceptancePath);
+            }
+        }
+        finally
+        {
+            try { if (File.Exists(temp)) File.Delete(temp); } catch { }
+        }
+    }
+
     public static void SaveInstallerOptions(SetupOptions o)
     {
         using (RegistryKey key = Registry.CurrentUser.CreateSubKey(SetupConstants.InstallerKey))
         {
             key.SetValue("DesktopShortcut", o.DesktopShortcut ? 1 : 0, RegistryValueKind.DWord);
             key.SetValue("StartMenuShortcut", o.StartMenuShortcut ? 1 : 0, RegistryValueKind.DWord);
+            if (o.AcceptLicenses)
+            {
+                key.SetValue("AcceptedLicensesVersion", SetupConstants.Version, RegistryValueKind.String);
+                key.SetValue("AcceptedLicensesAtUtc", DateTime.UtcNow.ToString("O"), RegistryValueKind.String);
+            }
         }
+
+        if (o.AcceptLicenses)
+            RecordLegalAcceptance("installer");
     }
 
     public static void RegisterUninstall()
@@ -245,6 +388,11 @@ internal static class SetupUtil
 
     public static void Install(SetupOptions o)
     {
+        if (!o.ExistingInstall && !o.AcceptLicenses && !HasRecordedLegalAcceptance())
+            throw new Exception(
+                "First-time installation requires acceptance of STOW's MIT License and applicable third-party terms. " +
+                "For silent installation, add /ACCEPTLICENSES=1.");
+
         EnsureLegacyTrayifyStopped();
         StopSTOWSafely();
         Directory.CreateDirectory(InstallDir);
@@ -275,6 +423,8 @@ internal static class SetupUtil
         string currentSetup = Application.ExecutablePath;
         if (!String.Equals(currentSetup, UninstallExe, StringComparison.OrdinalIgnoreCase))
             File.Copy(currentSetup, UninstallExe, true);
+
+        ExtractLegalBundle();
 
         SaveInstallerOptions(o);
         ConfigureShortcuts(o);
@@ -419,6 +569,7 @@ internal sealed class SetupForm : Form
     private readonly CheckBox startMenu;
     private readonly CheckBox pinAssist;
     private readonly CheckBox launch;
+    private readonly CheckBox acceptLicenses;
     private readonly Button installButton;
     private readonly Label status;
 
@@ -428,7 +579,7 @@ internal sealed class SetupForm : Form
         Font = new Font("Segoe UI", 9.5f);
         Text = "Install STOW";
         StartPosition = FormStartPosition.CenterScreen;
-        ClientSize = new Size(650, 470);
+        ClientSize = new Size(650, 585);
         FormBorderStyle = FormBorderStyle.FixedDialog;
         MaximizeBox = false;
         BackColor = Color.FromArgb(248, 249, 251);
@@ -492,11 +643,43 @@ internal sealed class SetupForm : Form
         Controls.Add(pinAssist);
         Controls.Add(launch);
 
+        acceptLicenses = NewCheck(
+            "I agree to STOW's MIT License and the applicable third-party terms.",
+            30,
+            378);
+        acceptLicenses.CheckedChanged += delegate { installButton.Enabled = acceptLicenses.Checked; };
+        Controls.Add(acceptLicenses);
+
+        Button reviewTerms = new Button();
+        reviewTerms.Text = "Review licenses & notices";
+        reviewTerms.FlatStyle = FlatStyle.Flat;
+        reviewTerms.SetBounds(30, 410, 210, 30);
+        reviewTerms.Click += delegate
+        {
+            try { SetupUtil.OpenLegalTerms(); }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    "Could not open the bundled legal terms.\n\n" + ex.Message,
+                    "STOW Setup",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
+            }
+        };
+        Controls.Add(reviewTerms);
+
+        Label legalNote = new Label();
+        legalNote.Text = "STOW code is MIT licensed. Bundled Microsoft/.NET components retain their own terms.";
+        legalNote.ForeColor = Color.FromArgb(95, 101, 112);
+        legalNote.AutoSize = true;
+        legalNote.Location = new Point(30, 450);
+        Controls.Add(legalNote);
+
         Label note = new Label();
         note.Text = "Per-user installation · No administrator permission required";
         note.ForeColor = Color.FromArgb(95, 101, 112);
         note.AutoSize = true;
-        note.Location = new Point(30, 374);
+        note.Location = new Point(30, 478);
         Controls.Add(note);
 
         installButton = new Button();
@@ -506,20 +689,24 @@ internal sealed class SetupForm : Form
         installButton.FlatAppearance.BorderSize = 0;
         installButton.BackColor = Color.FromArgb(0, 103, 192);
         installButton.ForeColor = Color.White;
-        installButton.SetBounds(500, 410, 120, 36);
+        installButton.Enabled = false;
+        bool alreadyAccepted = SetupUtil.HasRecordedLegalAcceptance();
+        acceptLicenses.Checked = alreadyAccepted;
+        installButton.Enabled = alreadyAccepted;
+        installButton.SetBounds(500, 520, 120, 36);
         installButton.Click += InstallClick;
         Controls.Add(installButton);
 
         Button cancel = new Button();
         cancel.Text = "Cancel";
         cancel.FlatStyle = FlatStyle.Flat;
-        cancel.SetBounds(372, 410, 116, 36);
+        cancel.SetBounds(372, 520, 116, 36);
         cancel.Click += delegate { Close(); };
         Controls.Add(cancel);
 
         status = new Label();
         status.AutoSize = true;
-        status.Location = new Point(30, 420);
+        status.Location = new Point(30, 530);
         status.ForeColor = Color.FromArgb(95, 101, 112);
         Controls.Add(status);
     }
@@ -544,6 +731,7 @@ internal sealed class SetupForm : Form
             options.StartMenuShortcut = startMenu.Checked;
             options.PinAssist = pinAssist.Checked;
             options.LaunchAfterInstall = launch.Checked;
+            options.AcceptLicenses = acceptLicenses.Checked;
 
             SetupUtil.Install(options);
             status.Text = "Installation complete.";
@@ -648,6 +836,7 @@ internal static class SetupProgram
     {
         SetupOptions o = new SetupOptions();
         bool hadExisting = File.Exists(SetupUtil.AppExe);
+        o.ExistingInstall = hadExisting;
         o.DesktopShortcut = SetupUtil.ReadInstallerBool("DesktopShortcut", false);
         o.StartMenuShortcut = SetupUtil.ReadInstallerBool("StartMenuShortcut", true);
         o.LaunchAfterInstall = !hadExisting;
@@ -678,6 +867,9 @@ internal static class SetupProgram
                 o.PinAssist = true;
             else if (String.Equals(a, "/REMOVESETTINGS=1", StringComparison.OrdinalIgnoreCase))
                 o.RemoveSettings = true;
+            else if (String.Equals(a, "/ACCEPTLICENSES=1", StringComparison.OrdinalIgnoreCase) ||
+                     String.Equals(a, "--accept-licenses", StringComparison.OrdinalIgnoreCase))
+                o.AcceptLicenses = true;
         }
         return o;
     }

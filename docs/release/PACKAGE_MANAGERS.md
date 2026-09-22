@@ -28,3 +28,11 @@ The generator reads the `STOW.exe` hash from `dist-stow\SHA256SUMS.txt`, then wr
 Prerelease metadata is blocked by default; use `-AllowPrerelease` only for an intentional preview-package submission.
 
 Do not submit generated metadata until the corresponding GitHub release assets exist at the generated URLs.
+
+## Legal/distribution behavior
+
+Portable WinGet/Scoop installs bypass `STOWSetup.exe`, so STOW itself enforces the current `LEGAL_TERMS_REVISION` before the runtime/tray engine starts. The first-run window provides offline access to the STOW MIT License, privacy notice, credits, runtime notices, Microsoft .NET Library License and Windows SDK License, and requires explicit acknowledgment before continuing.
+
+The generated WinGet metadata adds documentation links plus an installation note describing the one-time acknowledgment. The Scoop manifest includes the same disclosure in its notes. This avoids relying on WinGet's optional Agreements field, whose use in the community repository has publisher/verification constraints.
+
+Package-manager publication still requires the normal release gates: exact released asset URL/hash, legal/SBOM verification, applicable repository/store policy compliance, and Stable signing policy when publishing a Stable STOW release.

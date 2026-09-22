@@ -96,8 +96,10 @@ Current operational slice:
 - the last explicit update-check time is stored locally;
 - Check for Updates uses GitHub Releases and preserves package-manager ownership for package-managed copies;
 - standard installed copies can download `STOWSetup.exe` and `SHA256SUMS.txt`, verify SHA-256 plus installer version identity, and only then launch the installer;
-- What's New opens published releases;
-- Privacy, License and Open-source notices open the current STOW repository documents;
+- Release Notes opens an internal STOW window, fetches the exact current release body from the official GitHub Releases API, and renders it locally; GitHub is only a secondary opt-in link/fallback;
+- Privacy and License open copies embedded in the running STOW binary, so they remain available offline;
+- Open-source notices & credits opens the bundled notices/credits/runtime-license summary, including the applicable Microsoft .NET Library and Windows SDK terms, and can open the installed `%LOCALAPPDATA%\STOW\legal` folder for the full legal bundle;
+- before runtime/tray management begins, STOW enforces the current local legal-terms revision once per user; portable/package-manager copies use the same in-app acknowledgment path as installer copies;
 - Support opens the STOW issue tracker;
 - GitHub & Releases opens the STOW source repository;
 - Diagnostics creates a local summary of build/runtime/install-mode and STOW data-file presence, copies it to the clipboard, and performs no network upload;

@@ -38,6 +38,7 @@ Any mismatch aborts safely. The installed STOW binary is not replaced by the upd
 - The installer then requests STOW safe shutdown through `Local\STOWRequestExit` before replacement.
 - Portable or package-managed copies do not self-update through the installer path; their release page/package manager is used instead.
 - The last successful update check timestamp is stored locally under `%APPDATA%\STOW`.
+- About > Release Notes uses the same public GitHub Releases metadata endpoint to retrieve the exact current release name/body/date into an internal STOW window. That flow never downloads or launches an installer.
 - No telemetry or cloud account is required.
 
 ## Verified live update — 2026-09-22

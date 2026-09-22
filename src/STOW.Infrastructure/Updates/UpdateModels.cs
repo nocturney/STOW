@@ -20,7 +20,10 @@ public sealed record ReleaseInfo(
     SemanticVersion Version,
     bool IsPrerelease,
     Uri HtmlUri,
-    IReadOnlyDictionary<string, ReleaseAsset> Assets);
+    IReadOnlyDictionary<string, ReleaseAsset> Assets,
+    string? Name = null,
+    string? Body = null,
+    DateTimeOffset? PublishedAt = null);
 
 public sealed record UpdateCheckResult(
     UpdateCheckStatus Status,
