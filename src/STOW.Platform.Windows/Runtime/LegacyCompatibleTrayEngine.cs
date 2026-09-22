@@ -11,6 +11,7 @@ public sealed class LegacyCompatibleTrayEngine : ITrayEngineRuntime
     private readonly ITrayIconRegistry trayIcons;
     private readonly IStartupRegistration startupRegistration;
     private readonly IRuleStore? ruleStore;
+    private readonly IActivityStore? activityStore;
     private readonly bool useTimer;
     private readonly Dictionary<string, ManagedAppDefinition> managed = new(StringComparer.OrdinalIgnoreCase);
     private readonly Dictionary<string, HashSet<nint>> hiddenHandles = new(StringComparer.OrdinalIgnoreCase);
@@ -26,14 +27,18 @@ public sealed class LegacyCompatibleTrayEngine : ITrayEngineRuntime
     private bool exiting;
     private bool focusActive;
 
-    public LegacyCompatibleTrayEngine(IManagedAppStore store, IRuleStore? ruleStore = null)
+    public LegacyCompatibleTrayEngine(
+        IManagedAppStore store,
+        IRuleStore? ruleStore = null,
+        IActivityStore? activityStore = null)
         : this(
             store,
             new Win32TrayWindowRuntime(),
             new WinFormsTrayIconRegistry(),
             useTimer: true,
             startupRegistration: new WindowsStartupRegistration(),
-            ruleStore: ruleStore)
+            ruleStore: ruleStore,
+            activityStore: activityStore)
     {
     }
 
@@ -43,13 +48,15 @@ public sealed class LegacyCompatibleTrayEngine : ITrayEngineRuntime
         ITrayIconRegistry trayIcons,
         bool useTimer = true,
         IStartupRegistration? startupRegistration = null,
-        IRuleStore? ruleStore = null)
+        IRuleStore? ruleStore = null,
+        IActivityStore? activityStore = null)
     {
         this.store = store;
         this.runtime = runtime;
         this.trayIcons = trayIcons;
         this.startupRegistration = startupRegistration ?? new NoOpStartupRegistration();
         this.ruleStore = ruleStore;
+        this.activityStore = activityStore;
         this.useTimer = useTimer;
         ReloadManaged();
         UpdateStartupRegistration();
@@ -134,7 +141,7 @@ public sealed class LegacyCompatibleTrayEngine : ITrayEngineRuntime
             if (!managed.TryGetValue(appKey, out ManagedAppDefinition? app))
                 return new(EngineCommandStatus.NotFound);
 
-            if (IsManagedHidden(app) && !RestoreManaged(app, foreground: true))
+            if (IsManagedHidden(app) && !RestoreManaged(app, foreground: true, source: "Remove"))
                 return RestoreUnavailable(app);
 
             managed.Remove(appKey);
@@ -161,7 +168,7 @@ public sealed class LegacyCompatibleTrayEngine : ITrayEngineRuntime
             if (!managed.TryGetValue(appKey, out ManagedAppDefinition? app))
                 return new(EngineCommandStatus.NotFound);
 
-            if (!enabled && IsManagedHidden(app) && !RestoreManaged(app, foreground: true))
+            if (!enabled && IsManagedHidden(app) && !RestoreManaged(app, foreground: true, source: "Disable"))
                 return RestoreUnavailable(app);
 
             ManagedAppDefinition updated = app with { Enabled = enabled };
@@ -194,7 +201,7 @@ public sealed class LegacyCompatibleTrayEngine : ITrayEngineRuntime
             if (!IsManagedHidden(app))
                 return new(EngineCommandStatus.Succeeded);
 
-            if (!RestoreManaged(app, foreground: true))
+            if (!RestoreManaged(app, foreground: true, source: "Manual"))
                 return RestoreUnavailable(app);
 
             if (focusActive)
@@ -236,6 +243,7 @@ public sealed class LegacyCompatibleTrayEngine : ITrayEngineRuntime
 
             focusHiddenAppKeys.Clear();
             focusActive = true;
+            RecordActivity(ActivityEventType.FocusStarted, source: "Focus");
 
             IReadOnlyList<RuntimeWindow> windows = runtime.EnumerateUserFacingWindows();
             foreach (ManagedAppDefinition app in managed.Values)
@@ -257,7 +265,10 @@ public sealed class LegacyCompatibleTrayEngine : ITrayEngineRuntime
 
                 EnsureTrayIcon(app);
                 if (!wasHidden)
+                {
                     focusHiddenAppKeys.Add(app.Key);
+                    RecordActivity(ActivityEventType.AppStowed, app, "Focus");
+                }
             }
 
             return new(EngineCommandStatus.Succeeded);
@@ -297,7 +308,7 @@ public sealed class LegacyCompatibleTrayEngine : ITrayEngineRuntime
                     continue;
                 }
 
-                if (RestoreManaged(app, foreground: false))
+                if (RestoreManaged(app, foreground: false, source: "Focus"))
                     focusHiddenAppKeys.Remove(app.Key);
                 else
                     failures.Add(app.Name);
@@ -313,6 +324,7 @@ public sealed class LegacyCompatibleTrayEngine : ITrayEngineRuntime
             focusActive = false;
             focusKeepVisibleAppKeys.Clear();
             focusHiddenAppKeys.Clear();
+            RecordActivity(ActivityEventType.FocusEnded, source: "Focus");
             return new(EngineCommandStatus.Succeeded);
         }
     }
@@ -329,7 +341,7 @@ public sealed class LegacyCompatibleTrayEngine : ITrayEngineRuntime
 
             foreach (ManagedAppDefinition app in managed.Values.ToArray())
             {
-                if (IsManagedHidden(app) && !RestoreManaged(app, foreground: false))
+                if (IsManagedHidden(app) && !RestoreManaged(app, foreground: false, source: "Shutdown"))
                     failures.Add(app.Name);
             }
 
@@ -423,12 +435,15 @@ public sealed class LegacyCompatibleTrayEngine : ITrayEngineRuntime
                         if (focusKeepVisibleAppKeys.Contains(app.Key))
                             continue;
 
-                        bool wasHidden = IsManagedHidden(app);
+                        bool wasHiddenBeforeFocus = IsManagedHidden(app);
                         runtime.Hide(window.Handle);
                         TrackHidden(app, window);
                         EnsureTrayIcon(app);
-                        if (!wasHidden)
+                        if (!wasHiddenBeforeFocus)
+                        {
                             focusHiddenAppKeys.Add(app.Key);
+                            RecordActivity(ActivityEventType.AppStowed, app, "Focus");
+                        }
                         continue;
                     }
 
@@ -438,9 +453,12 @@ public sealed class LegacyCompatibleTrayEngine : ITrayEngineRuntime
                     if (ResolveRuleAction(app.Key, RuleTrigger.Minimize) == RuleAction.KeepVisible)
                         continue;
 
+                    bool wasHiddenBeforeMinimize = IsManagedHidden(app);
                     runtime.Hide(window.Handle);
                     TrackHidden(app, window);
                     EnsureTrayIcon(app);
+                    if (!wasHiddenBeforeMinimize)
+                        RecordActivity(ActivityEventType.AppStowed, app, "Minimize");
                 }
             }
 
@@ -504,7 +522,7 @@ public sealed class LegacyCompatibleTrayEngine : ITrayEngineRuntime
                (hiddenHandles.TryGetValue(app.Key, out HashSet<nint>? handles) && handles.Count > 0);
     }
 
-    private bool RestoreManaged(ManagedAppDefinition app, bool foreground)
+    private bool RestoreManaged(ManagedAppDefinition app, bool foreground, string source)
     {
         hiddenHandles.TryGetValue(app.Key, out HashSet<nint>? remembered);
         hiddenPids.TryGetValue(app.Key, out HashSet<int>? trackedPids);
@@ -533,6 +551,7 @@ public sealed class LegacyCompatibleTrayEngine : ITrayEngineRuntime
         if (restored)
         {
             trayIcons.Remove(app.Key);
+            RecordActivity(ActivityEventType.AppRestored, app, source);
             return true;
         }
 
@@ -603,6 +622,29 @@ public sealed class LegacyCompatibleTrayEngine : ITrayEngineRuntime
     private void UpdateStartupRegistration()
     {
         startupRegistration.Update(managed.Values.Any(app => app.Enabled));
+    }
+
+    private void RecordActivity(
+        ActivityEventType type,
+        ManagedAppDefinition? app = null,
+        string? source = null)
+    {
+        if (activityStore is null)
+            return;
+
+        try
+        {
+            activityStore.Append(new ActivityEvent(
+                DateTimeOffset.UtcNow,
+                type,
+                app?.Key,
+                app?.Name,
+                source));
+        }
+        catch
+        {
+            // Insights history is best-effort and must never affect tray safety.
+        }
     }
 
     private static EngineCommandResult RestoreUnavailable(ManagedAppDefinition app) => new(

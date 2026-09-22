@@ -16,6 +16,7 @@ public partial class MainWindow : Window
     private readonly IAppDiscovery appDiscovery = new Win32AppDiscovery();
     private readonly IManagedAppStore managedAppStore;
     private readonly IRuleStore ruleStore = JsonRuleStore.ForCurrentUser();
+    private readonly IActivityStore activityStore = JsonLinesActivityStore.ForCurrentUser();
     private readonly TrayifyMigrationResult? migrationResult;
     private ITrayEngineRuntime? trayEngine;
     private string? engineUnavailableReason;
@@ -60,7 +61,7 @@ public partial class MainWindow : Window
 
         try
         {
-            trayEngine = new LegacyCompatibleTrayEngine(managedAppStore, ruleStore);
+            trayEngine = new LegacyCompatibleTrayEngine(managedAppStore, ruleStore, activityStore);
         }
         catch (Exception ex)
         {
@@ -117,7 +118,7 @@ public partial class MainWindow : Window
             "Apps" => CreateAppsView(),
             "Rules" => new RulesView(ruleStore, managedAppStore, trayEngine is not null, engineUnavailableReason),
             "Focus" => new FocusView(trayEngine, engineUnavailableReason),
-            "Insights" => new InsightsView(),
+            "Insights" => new InsightsView(activityStore),
             "Settings" => new SettingsView(),
             "About" => new AboutView(),
             _ => CreateAppsView()

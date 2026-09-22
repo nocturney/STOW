@@ -51,6 +51,16 @@ Show useful desktop/tray behavior such as apps most often stowed, restored, or k
 Do not require telemetry or a cloud account.
 When insufficient local history exists, show an honest empty state rather than fabricated metrics.
 
+Current operational slice:
+- runtime activity is appended locally to `%APPDATA%\STOW\activity.jsonl`;
+- recorded event types are app stow, app restore, Focus start and Focus end;
+- event writes are best-effort observers and can never block or change tray/restore behavior;
+- malformed or partially written history lines are skipped rather than making Insights unusable;
+- the local history file is compacted when it grows beyond the bounded storage threshold;
+- Insights shows real 7-day stow/restore/Focus counts, most-stowed app, retained-history range and recent events;
+- restore events retain a local source label such as Manual, Focus, Shutdown, Disable or Remove;
+- when no history exists, the screen remains an honest local-only empty state.
+
 ## Settings
 
 Only mutable product settings belong here.

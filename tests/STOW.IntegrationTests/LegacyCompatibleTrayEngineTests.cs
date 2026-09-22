@@ -329,6 +329,72 @@ public sealed class LegacyCompatibleTrayEngineTests
     }
 
     [Fact]
+    public void Minimize_and_manual_restore_are_recorded_locally()
+    {
+        var store = new FakeStore(Grok);
+        var runtime = new FakeRuntime(Window(101, 42, iconic: true));
+        var icons = new FakeTrayIcons();
+        var activity = new FakeActivityStore();
+        using var engine = NewEngine(store, runtime, icons, activityStore: activity);
+
+        engine.Start();
+        TickFullScan(engine);
+
+        ActivityEvent stowed = Assert.Single(activity.Events);
+        Assert.Equal(ActivityEventType.AppStowed, stowed.Type);
+        Assert.Equal("Minimize", stowed.Source);
+        Assert.Equal(Grok.Name, stowed.AppName);
+
+        Assert.True(engine.Restore(Grok.Key).Succeeded);
+
+        Assert.Equal(2, activity.Events.Count);
+        Assert.Equal(ActivityEventType.AppRestored, activity.Events[1].Type);
+        Assert.Equal("Manual", activity.Events[1].Source);
+    }
+
+    [Fact]
+    public void Focus_records_session_and_app_activity()
+    {
+        var store = new FakeStore(Grok);
+        var runtime = new FakeRuntime(Window(101, 42, iconic: false));
+        var icons = new FakeTrayIcons();
+        var activity = new FakeActivityStore();
+        using var engine = NewEngine(store, runtime, icons, activityStore: activity);
+
+        engine.Start();
+        Assert.True(engine.StartFocusSession(Array.Empty<string>()).Succeeded);
+        Assert.True(engine.EndFocusSession().Succeeded);
+
+        Assert.Equal(
+            new[]
+            {
+                ActivityEventType.FocusStarted,
+                ActivityEventType.AppStowed,
+                ActivityEventType.AppRestored,
+                ActivityEventType.FocusEnded
+            },
+            activity.Events.Select(item => item.Type).ToArray());
+    }
+
+    [Fact]
+    public void Activity_store_failure_never_breaks_tray_behavior()
+    {
+        var store = new FakeStore(Grok);
+        var runtime = new FakeRuntime(Window(101, 42, iconic: true));
+        var icons = new FakeTrayIcons();
+        var activity = new FakeActivityStore { ThrowOnAppend = true };
+        using var engine = NewEngine(store, runtime, icons, activityStore: activity);
+
+        engine.Start();
+        TickFullScan(engine);
+
+        Assert.False(runtime.IsWindowVisible(101));
+        Assert.True(icons.Contains(Grok.Key));
+        Assert.True(engine.Restore(Grok.Key).Succeeded);
+        Assert.True(runtime.IsWindowVisible(101));
+    }
+
+    [Fact]
     public void Exited_hidden_process_is_removed_from_tracking_on_next_full_scan()
     {
         var store = new FakeStore(Grok);
@@ -350,14 +416,16 @@ public sealed class LegacyCompatibleTrayEngineTests
         FakeRuntime runtime,
         FakeTrayIcons icons,
         IStartupRegistration? startupRegistration = null,
-        IRuleStore? ruleStore = null) =>
+        IRuleStore? ruleStore = null,
+        IActivityStore? activityStore = null) =>
         new(
             store,
             runtime,
             icons,
             useTimer: false,
             startupRegistration: startupRegistration,
-            ruleStore: ruleStore);
+            ruleStore: ruleStore,
+            activityStore: activityStore);
 
     private static void TickFullScan(LegacyCompatibleTrayEngine engine)
     {
@@ -442,6 +510,22 @@ public sealed class LegacyCompatibleTrayEngineTests
         {
             this.rules = rules.ToArray();
         }
+    }
+
+    private sealed class FakeActivityStore : IActivityStore
+    {
+        public List<ActivityEvent> Events { get; } = new();
+        public bool ThrowOnAppend { get; set; }
+
+        public void Append(ActivityEvent activity)
+        {
+            if (ThrowOnAppend)
+                throw new IOException("simulated activity-store failure");
+            Events.Add(activity);
+        }
+
+        public IReadOnlyList<ActivityEvent> LoadRecent(int maxCount = 1000) =>
+            Events.TakeLast(Math.Max(0, maxCount)).ToArray();
     }
 
     private sealed class FakeTrayIcons : ITrayIconRegistry

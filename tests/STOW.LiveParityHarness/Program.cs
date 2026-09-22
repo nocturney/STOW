@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using STOW.Engine.Contracts;
+using StowActivityEvent = STOW.Engine.Contracts.ActivityEvent;
 using STOW.Platform.Windows.Runtime;
 using STOW.WindowTestTarget;
 
@@ -79,7 +80,13 @@ internal static class Program
         RuntimeWindow window = WaitForWindow(runtime, target.Pid);
         var store = new FakeStore(ToManaged(window));
         var icons = new FakeTrayIcons();
-        using var engine = new LegacyCompatibleTrayEngine(store, runtime, icons, useTimer: false);
+        var activity = new FakeActivityStore();
+        using var engine = new LegacyCompatibleTrayEngine(
+            store,
+            runtime,
+            icons,
+            useTimer: false,
+            activityStore: activity);
 
         engine.Start();
         ShowWindow(window.Handle, SwMinimize);
@@ -90,6 +97,9 @@ internal static class Program
         Ensure(engine.Restore(store.Apps[0].Key).Succeeded, "Restore command failed.");
         Ensure(runtime.IsWindowVisible(window.Handle), "Original HWND was not visible after restore.");
         Ensure(!runtime.IsIconic(window.Handle), "Original HWND remained minimized after restore.");
+        Ensure(activity.Events.Count == 2, "Expected stow and restore activity events.");
+        Ensure(activity.Events[0].Type == ActivityEventType.AppStowed, "First activity event was not AppStowed.");
+        Ensure(activity.Events[1].Type == ActivityEventType.AppRestored, "Second activity event was not AppRestored.");
     }
 
     private static void RunRecreatedHwndRestore()
@@ -254,6 +264,16 @@ internal static class Program
         {
             this.rules = rules.ToArray();
         }
+    }
+
+    private sealed class FakeActivityStore : IActivityStore
+    {
+        public List<StowActivityEvent> Events { get; } = new();
+
+        public void Append(StowActivityEvent activity) => Events.Add(activity);
+
+        public IReadOnlyList<StowActivityEvent> LoadRecent(int maxCount = 1000) =>
+            Events.TakeLast(Math.Max(0, maxCount)).ToArray();
     }
 
     private sealed class FakeTrayIcons : ITrayIconRegistry
