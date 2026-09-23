@@ -418,7 +418,8 @@
                                   Stretch="Uniform"
                                   Data="M2,1 L13,7.5 L2,14 Z" />
                             <TextBlock Text="Start focus mode"
-                                       FontWeight="SemiBold" />
+                                       FontWeight="SemiBold"
+                                       Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
                         </StackPanel>
                     </Button>
                 </Grid>
