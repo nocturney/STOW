@@ -22,9 +22,9 @@ public partial class AboutView : UserControl
     {
         InitializeComponent();
         (currentVersion, buildLabel, updateChannel) = ReadBuildIdentity();
-        VersionText.Text = "Version  " + currentVersion;
-        BuildText.Text = "Build  " + buildLabel;
-        ChannelText.Text = "Channel  " + updateChannel;
+        VersionText.Text = currentVersion;
+        BuildText.Text = buildLabel;
+        ChannelText.Text = updateChannel.ToString();
         DateTimeOffset? lastCheck = updateState.LoadLastCheck();
         if (lastCheck is not null)
             LastCheckText.Text = "Last update check  " + lastCheck.Value.LocalDateTime.ToString("g");

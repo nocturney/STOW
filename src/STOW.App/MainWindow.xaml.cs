@@ -2,6 +2,7 @@ using System.ComponentModel;
 using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Threading;
@@ -32,6 +33,7 @@ public partial class MainWindow : Window
     private ITrayEngineRuntime? trayEngine;
     private string? engineUnavailableReason;
     private Button? activeButton;
+    private string currentDestination = "Apps";
     private bool applicationExitRequested;
 
     public MainWindow(IUserNotificationSink? notificationSink = null)
@@ -53,13 +55,17 @@ public partial class MainWindow : Window
         }
 
         InitializeComponent();
-        SourceInitialized += (_, _) => ApplyNativeTitleBarTheme(ThemeManager.Current);
+        SourceInitialized += (_, _) =>
+        {
+            ApplyNativeWindowAttributes(ThemeManager.Current);
+            UpdateWindowFrameState();
+        };
+        StateChanged += (_, _) => UpdateWindowFrameState();
         ThemeManager.Applied += ThemeManager_Applied;
         Closed += MainWindow_Closed;
         StartRuntimeSafely();
         StartFocusScheduling();
-        activeButton = AppsNavButton;
-        PageHost.Content = CreateAppsView();
+        NavigateTo("Apps");
         Closing += MainWindow_Closing;
     }
 
@@ -130,15 +136,36 @@ public partial class MainWindow : Window
         if (sender is not Button button || button.Tag is not string destination)
             return;
 
+        NavigateTo(destination);
+    }
+
+    private void NavigateTo(string destination)
+    {
+        Button? nextButton = destination switch
+        {
+            "Apps" => AppsNavButton,
+            "Rules" => RulesNavButton,
+            "Focus" => FocusNavButton,
+            "Insights" => InsightsNavButton,
+            "Settings" => SettingsNavButton,
+            "About" => AboutNavButton,
+            _ => null
+        };
+
         if (activeButton is not null)
         {
             activeButton.Background = Brushes.Transparent;
             activeButton.Foreground = (Brush)FindResource("TextSecondaryBrush");
         }
 
-        activeButton = button;
-        activeButton.Background = (Brush)FindResource("SelectionBrush");
-        activeButton.Foreground = (Brush)FindResource("SelectionForegroundBrush");
+        activeButton = nextButton;
+        if (activeButton is not null)
+        {
+            activeButton.Background = (Brush)FindResource("SelectionBrush");
+            activeButton.Foreground = (Brush)FindResource("SelectionForegroundBrush");
+        }
+
+        currentDestination = destination;
 
         (PageTitleText.Text, PageSubtitleText.Text) = destination switch
         {
@@ -150,6 +177,15 @@ public partial class MainWindow : Window
             "About" => ("About STOW", "Version info, updates, privacy and more."),
             _ => (destination, string.Empty)
         };
+
+        ShellSearchBox.Tag = destination switch
+        {
+            "Apps" => "Search apps...",
+            "Rules" => "Search rules...",
+            "Settings" => "Search settings...",
+            _ => "Search apps, rules, or settings..."
+        };
+        ShellSearchBox.Text = string.Empty;
 
         PageHost.Content = destination switch
         {
@@ -169,16 +205,76 @@ public partial class MainWindow : Window
         };
     }
 
-    private AppsView CreateAppsView() => new(
-        trayEngine,
-        managedAppStore,
-        appDiscovery,
-        engineUnavailableReason);
+    private void ShellSearchBox_TextChanged(object sender, TextChangedEventArgs e)
+    {
+        string query = ShellSearchBox.Text ?? string.Empty;
+        switch (PageHost.Content)
+        {
+            case AppsView apps:
+                apps.SetSearchText(query);
+                break;
+            case RulesView rules:
+                rules.SetSearchText(query);
+                break;
+            case SettingsView settings:
+                settings.SetSearchText(query);
+                break;
+        }
+    }
+
+    private void ShellSearchBox_KeyDown(object sender, KeyEventArgs e)
+    {
+        if (e.Key != Key.Enter)
+            return;
+
+        string query = (ShellSearchBox.Text ?? string.Empty).Trim().ToLowerInvariant();
+        if (query.Length == 0)
+            return;
+
+        string? destination =
+            query.Contains("rule") ? "Rules" :
+            query.Contains("focus") || query.Contains("preset") || query.Contains("schedule") ? "Focus" :
+            query.Contains("insight") || query.Contains("activity") ? "Insights" :
+            query.Contains("setting") || query.Contains("theme") || query.Contains("access") ||
+            query.Contains("startup") || query.Contains("notification") ? "Settings" :
+            query.Contains("about") || query.Contains("update") || query.Contains("privacy") ||
+            query.Contains("license") || query.Contains("release") ? "About" :
+            query.Contains("app") ? "Apps" :
+            null;
+
+        if (destination is not null && !string.Equals(destination, currentDestination, StringComparison.Ordinal))
+        {
+            NavigateTo(destination);
+            e.Handled = true;
+        }
+    }
+
+    private void Minimize_Click(object sender, RoutedEventArgs e) =>
+        WindowState = WindowState.Minimized;
+
+    private void MaximizeRestore_Click(object sender, RoutedEventArgs e) =>
+        WindowState = WindowState == WindowState.Maximized
+            ? WindowState.Normal
+            : WindowState.Maximized;
+
+    private void CloseButton_Click(object sender, RoutedEventArgs e) =>
+        Close();
+
+    private AppsView CreateAppsView()
+    {
+        var view = new AppsView(
+            trayEngine,
+            managedAppStore,
+            appDiscovery,
+            engineUnavailableReason);
+        view.FocusRequested += (_, _) => NavigateTo("Focus");
+        return view;
+    }
 
     private void ThemeManager_Applied(STOW.App.Themes.ThemeMode mode) =>
-        Dispatcher.BeginInvoke(() => ApplyNativeTitleBarTheme(mode));
+        Dispatcher.BeginInvoke(() => ApplyNativeWindowAttributes(mode));
 
-    private void ApplyNativeTitleBarTheme(STOW.App.Themes.ThemeMode mode)
+    private void ApplyNativeWindowAttributes(STOW.App.Themes.ThemeMode mode)
     {
         IntPtr handle = new WindowInteropHelper(this).Handle;
         if (handle == IntPtr.Zero)
@@ -190,12 +286,35 @@ public partial class MainWindow : Window
             DwmWindowAttributeUseImmersiveDarkMode,
             ref enabled,
             sizeof(int));
+
+        int cornerPreference = DwmWindowCornerPreferenceRound;
+        _ = DwmSetWindowAttribute(
+            handle,
+            DwmWindowAttributeWindowCornerPreference,
+            ref cornerPreference,
+            sizeof(int));
+    }
+
+    private void UpdateWindowFrameState()
+    {
+        if (WindowFrame is null)
+            return;
+
+        bool maximized = WindowState == WindowState.Maximized;
+        WindowFrame.CornerRadius = maximized
+            ? new CornerRadius(0)
+            : new CornerRadius(12);
+        WindowFrame.BorderThickness = maximized
+            ? new Thickness(0)
+            : new Thickness(1);
     }
 
     private void MainWindow_Closed(object? sender, EventArgs e) =>
         ThemeManager.Applied -= ThemeManager_Applied;
 
     private const int DwmWindowAttributeUseImmersiveDarkMode = 20;
+    private const int DwmWindowAttributeWindowCornerPreference = 33;
+    private const int DwmWindowCornerPreferenceRound = 2;
 
     [DllImport("dwmapi.dll")]
     private static extern int DwmSetWindowAttribute(

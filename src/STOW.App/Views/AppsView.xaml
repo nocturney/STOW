@@ -1,212 +1,377 @@
-﻿<UserControl x:Class="STOW.App.Views.AppsView"
+<UserControl x:Class="STOW.App.Views.AppsView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+    <ScrollViewer VerticalScrollBarVisibility="Auto"
+                  HorizontalScrollBarVisibility="Disabled">
         <StackPanel>
-            <Grid Margin="0,0,0,14">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="Auto" />
-                </Grid.ColumnDefinitions>
-                <TextBox x:Name="SearchBox" Grid.Column="0" Style="{StaticResource SearchBox}"
-                         Tag="Search apps..."
-                         MaxWidth="560" HorizontalAlignment="Left" Width="500"
-                         AutomationProperties.Name="Search apps"
-                         AutomationProperties.HelpText="Filter managed and available applications."
-                         TextChanged="SearchBox_TextChanged" />
-                <Button Grid.Column="1" Style="{StaticResource PrimaryButton}" Content="Add app"
-                        IsEnabled="False" ToolTip="Use Add on a running app below."
-                        Margin="12,0,0,0" />
-            </Grid>
+            <TextBox x:Name="SearchBox"
+                     Visibility="Collapsed"
+                     TextChanged="SearchBox_TextChanged" />
 
-            <Border x:Name="EngineStatusBanner" Style="{StaticResource CardBorder}"
-                    Background="{DynamicResource SurfaceElevatedBrush}" Margin="0,0,0,18" Visibility="Collapsed">
-                <TextBlock x:Name="EngineStatusText" TextWrapping="Wrap"
+            <Border x:Name="EngineStatusBanner"
+                    Style="{StaticResource CardBorder}"
+                    Background="{DynamicResource SurfaceElevatedBrush}"
+                    Margin="0,0,0,14"
+                    Visibility="Collapsed">
+                <TextBlock x:Name="EngineStatusText"
+                           TextWrapping="Wrap"
                            AutomationProperties.LiveSetting="Polite"
                            Foreground="{DynamicResource TextSecondaryBrush}" />
             </Border>
 
             <Grid>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="1.25*" />
+                    <ColumnDefinition Width="1.3*" />
                     <ColumnDefinition Width="14" />
-                    <ColumnDefinition Width="0.85*" />
+                    <ColumnDefinition Width="0.9*" />
                 </Grid.ColumnDefinitions>
 
-                <Border Grid.Column="0" Style="{StaticResource CardBorder}" Padding="0">
-                    <StackPanel>
-                        <Grid Margin="18,16,18,8">
-                            <TextBlock Text="Managed apps" Style="{StaticResource SectionTitle}" />
-                            <TextBlock x:Name="ManagedSummaryText" HorizontalAlignment="Right"
-                                       Foreground="{DynamicResource TextSecondaryBrush}"
-                                       FontSize="{DynamicResource FontSize12}" />
+                <Border Grid.Column="0"
+                        Style="{StaticResource CardBorder}"
+                        Padding="0"
+                        MinHeight="382">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+
+                        <Grid Margin="18,16,18,6">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="Managed apps"
+                                           Style="{StaticResource SectionTitle}" />
+                                <Border Style="{StaticResource StatusChip}"
+                                        Margin="10,0,0,0"
+                                        VerticalAlignment="Center">
+                                    <TextBlock x:Name="ManagedSummaryText"
+                                               FontSize="{DynamicResource FontSize11}" />
+                                </Border>
+                            </StackPanel>
+                            <TextBlock Grid.Column="1"
+                                       Text="STOW keeps these within reach."
+                                       VerticalAlignment="Center"
+                                       FontSize="{DynamicResource FontSize11}"
+                                       Foreground="{DynamicResource TextSecondaryBrush}" />
                         </Grid>
-                        <TextBlock Text="These apps are hidden or limited on your desktop."
+
+                        <TextBlock Grid.Row="1"
+                                   Text="Hide distractions without closing them. Restore any app instantly."
                                    Margin="18,0,18,12"
                                    Foreground="{DynamicResource TextSecondaryBrush}"
                                    TextWrapping="Wrap" />
-                        <Border x:Name="NoManagedApps" Margin="18,0,18,18"
-                                Background="{DynamicResource SurfaceElevatedBrush}"
-                                CornerRadius="9" Padding="18" Visibility="Collapsed">
-                            <StackPanel>
-                                <TextBlock Text="No managed apps yet" FontWeight="SemiBold" />
-                                <TextBlock Text="Add a running desktop app to let STOW manage it."
-                                           Margin="0,5,0,0" TextWrapping="Wrap"
-                                           Foreground="{DynamicResource TextSecondaryBrush}" />
-                            </StackPanel>
-                        </Border>                        <ItemsControl x:Name="ManagedAppsList"
-                                      AutomationProperties.Name="Managed apps"
-                                      Margin="10,0,10,10">
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <Border BorderBrush="{DynamicResource BorderBrush}"
-                                            BorderThickness="0,1,0,0"
-                                            Padding="8,10">
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*" />
-                                                <ColumnDefinition Width="Auto" />
-                                                <ColumnDefinition Width="Auto" />
-                                                <ColumnDefinition Width="Auto" />
-                                                <ColumnDefinition Width="Auto" />
-                                            </Grid.ColumnDefinitions>
+
+                        <Grid Grid.Row="2"
+                              Margin="18,0,18,0"
+                              Height="28">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="92" />
+                                <ColumnDefinition Width="108" />
+                                <ColumnDefinition Width="92" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="App"
+                                       VerticalAlignment="Center"
+                                       FontSize="{DynamicResource FontSize11}"
+                                       Foreground="{DynamicResource TextSecondaryBrush}" />
+                            <TextBlock Grid.Column="1"
+                                       Text="Status"
+                                       VerticalAlignment="Center"
+                                       FontSize="{DynamicResource FontSize11}"
+                                       Foreground="{DynamicResource TextSecondaryBrush}" />
+                            <TextBlock Grid.Column="2"
+                                       Text="Manage"
+                                       VerticalAlignment="Center"
+                                       FontSize="{DynamicResource FontSize11}"
+                                       Foreground="{DynamicResource TextSecondaryBrush}" />
+                        </Grid>
+
+                        <Grid Grid.Row="3">
+                            <Border x:Name="NoManagedApps"
+                                    Margin="18,8,18,18"
+                                    Background="{DynamicResource SurfaceElevatedBrush}"
+                                    CornerRadius="10"
+                                    Padding="18"
+                                    Visibility="Collapsed">
+                                <StackPanel>
+                                    <TextBlock Text="No managed apps yet"
+                                               FontWeight="SemiBold" />
+                                    <TextBlock Text="Add a running desktop app from the Available list to let STOW manage it."
+                                               Margin="0,5,0,0"
+                                               TextWrapping="Wrap"
+                                               Foreground="{DynamicResource TextSecondaryBrush}" />
+                                </StackPanel>
+                            </Border>
+
+                            <ItemsControl x:Name="ManagedAppsList"
+                                          AutomationProperties.Name="Managed apps"
+                                          Margin="10,0,10,10">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border BorderBrush="{DynamicResource BorderBrush}"
+                                                BorderThickness="0,1,0,0"
+                                                Padding="8,9">
                                             <Grid>
                                                 <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="38" />
                                                     <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="92" />
+                                                    <ColumnDefinition Width="108" />
+                                                    <ColumnDefinition Width="92" />
                                                 </Grid.ColumnDefinitions>
-                                                <Border Width="32" Height="32"
-                                                        CornerRadius="7"
-                                                        Background="{DynamicResource SurfaceElevatedBrush}"
-                                                        VerticalAlignment="Center">
-                                                    <Image Source="{Binding Icon}"
-                                                           Width="24" Height="24"
-                                                           Stretch="Uniform" />
-                                                </Border>
-                                                <StackPanel Grid.Column="1"
+
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="42" />
+                                                        <ColumnDefinition Width="*" />
+                                                    </Grid.ColumnDefinitions>
+                                                    <Border Width="34"
+                                                            Height="34"
+                                                            CornerRadius="8"
+                                                            Background="{DynamicResource SurfaceElevatedBrush}"
                                                             VerticalAlignment="Center">
-                                                    <TextBlock Text="{Binding Name}"
-                                                               FontWeight="SemiBold"
-                                                               TextWrapping="Wrap" />
-                                                    <TextBlock Text="{Binding ProcessName}"
-                                                               Margin="0,2,0,0"
-                                                               FontSize="{DynamicResource FontSize11}"
-                                                               Foreground="{DynamicResource TextSecondaryBrush}" />
+                                                        <Image Source="{Binding Icon}"
+                                                               Width="25"
+                                                               Height="25"
+                                                               Stretch="Uniform" />
+                                                    </Border>
+                                                    <StackPanel Grid.Column="1"
+                                                                VerticalAlignment="Center">
+                                                        <TextBlock Text="{Binding Name}"
+                                                                   FontWeight="SemiBold"
+                                                                   TextWrapping="Wrap" />
+                                                        <TextBlock Text="{Binding ProcessName}"
+                                                                   Margin="0,2,0,0"
+                                                                   FontSize="{DynamicResource FontSize11}"
+                                                                   Foreground="{DynamicResource TextSecondaryBrush}" />
+                                                    </StackPanel>
+                                                </Grid>
+
+                                                <StackPanel Grid.Column="1"
+                                                            Orientation="Horizontal"
+                                                            VerticalAlignment="Center">
+                                                    <Ellipse Width="7"
+                                                             Height="7"
+                                                             Fill="{DynamicResource AccentTealBrush}"
+                                                             Margin="0,0,7,0" />
+                                                    <TextBlock Text="{Binding StatusText}"
+                                                               VerticalAlignment="Center"
+                                                               FontSize="{DynamicResource FontSize11}" />
+                                                </StackPanel>
+
+                                                <CheckBox Grid.Column="2"
+                                                          Style="{StaticResource ToggleSwitch}"
+                                                          AutomationProperties.Name="{Binding Name}"
+                                                          Tag="{Binding Key}"
+                                                          IsChecked="{Binding Enabled, Mode=OneWay}"
+                                                          IsEnabled="{Binding CanManage}"
+                                                          Click="ManagedEnabled_Click"
+                                                          VerticalAlignment="Center"
+                                                          HorizontalAlignment="Left" />
+
+                                                <StackPanel Grid.Column="3"
+                                                            Orientation="Horizontal"
+                                                            HorizontalAlignment="Right"
+                                                            VerticalAlignment="Center">
+                                                    <Button Style="{StaticResource SecondaryButton}"
+                                                            Content="↗"
+                                                            AutomationProperties.Name="Show app now"
+                                                            ToolTip="Show app now"
+                                                            Width="40"
+                                                            MinHeight="36"
+                                                            Tag="{Binding Key}"
+                                                            IsEnabled="{Binding CanRestore}"
+                                                            Click="Restore_Click"
+                                                            Margin="0,0,6,0"
+                                                            Padding="0" />
+                                                    <Button Style="{StaticResource SecondaryButton}"
+                                                            Content="⋯"
+                                                            AutomationProperties.Name="Remove managed app"
+                                                            ToolTip="Remove from managed apps"
+                                                            Width="40"
+                                                            MinHeight="36"
+                                                            Tag="{Binding Key}"
+                                                            IsEnabled="{Binding CanManage}"
+                                                            Click="Remove_Click"
+                                                            Padding="0" />
                                                 </StackPanel>
                                             </Grid>
-                                            <Border Grid.Column="1" Style="{StaticResource StatusChip}"
-                                                    Margin="8,0" VerticalAlignment="Center">
-                                                <TextBlock Text="{Binding StatusText}"
-                                                           FontSize="{DynamicResource FontSize11}" />
-                                            </Border>                                            <CheckBox Grid.Column="2"
-                                                      Style="{StaticResource ToggleSwitch}"
-                                                      AutomationProperties.Name="{Binding Name}"
-                                                      Tag="{Binding Key}"
-                                                      IsChecked="{Binding Enabled, Mode=OneWay}"
-                                                      IsEnabled="{Binding CanManage}"
-                                                      Click="ManagedEnabled_Click"
-                                                      VerticalAlignment="Center"
-                                                      Margin="0,0,8,0" />
-                                            <Button Grid.Column="3"
-                                                    Style="{StaticResource SecondaryButton}"
-                                                    Content="↗"
-                                                    AutomationProperties.Name="Show app now"
-                                                    ToolTip="Show app now"
-                                                    Width="44"
-                                                    Tag="{Binding Key}"
-                                                    IsEnabled="{Binding CanRestore}"
-                                                    Click="Restore_Click"
-                                                    Margin="0,0,6,0"
-                                                    Padding="0" />                                            <Button Grid.Column="4"
-                                                    Style="{StaticResource SecondaryButton}"
-                                                    Content="×"
-                                                    AutomationProperties.Name="Remove managed app"
-                                                    ToolTip="Remove from managed apps"
-                                                    Width="44"
-                                                    Tag="{Binding Key}"
-                                                    IsEnabled="{Binding CanManage}"
-                                                    Click="Remove_Click"
-                                                    Padding="0" />
-                                        </Grid>
-                                    </Border>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
-                    </StackPanel>
-                </Border>
-                <Border Grid.Column="2" Style="{StaticResource CardBorder}" Padding="0">
-                    <StackPanel>
-                        <Grid Margin="18,16,18,8">
-                            <TextBlock Text="Available apps" Style="{StaticResource SectionTitle}" />
-                            <TextBlock x:Name="AvailableSummaryText" HorizontalAlignment="Right"
-                                       Foreground="{DynamicResource TextSecondaryBrush}"
-                                       FontSize="{DynamicResource FontSize12}" />
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
                         </Grid>
-                        <TextBlock Text="Apps not currently managed by STOW."
+                    </Grid>
+                </Border>
+
+                <Border Grid.Column="2"
+                        Style="{StaticResource CardBorder}"
+                        Padding="0"
+                        MinHeight="382">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+
+                        <Grid Margin="18,16,18,6">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="Available apps"
+                                           Style="{StaticResource SectionTitle}" />
+                                <Border Style="{StaticResource StatusChip}"
+                                        Margin="10,0,0,0"
+                                        VerticalAlignment="Center">
+                                    <TextBlock x:Name="AvailableSummaryText"
+                                               FontSize="{DynamicResource FontSize11}" />
+                                </Border>
+                            </StackPanel>
+                        </Grid>
+
+                        <TextBlock Grid.Row="1"
+                                   Text="Running desktop apps that STOW is not managing yet."
                                    Margin="18,0,18,12"
                                    Foreground="{DynamicResource TextSecondaryBrush}"
-                                   TextWrapping="Wrap" />                        <Border x:Name="NoAvailableApps"
-                                Margin="18,0,18,18"
-                                Background="{DynamicResource SurfaceElevatedBrush}"
-                                CornerRadius="9"
-                                Padding="18"
-                                Visibility="Collapsed">
-                            <TextBlock Text="No desktop apps match this search."
-                                       Foreground="{DynamicResource TextSecondaryBrush}"
-                                       TextWrapping="Wrap" />
-                        </Border>                        <ItemsControl x:Name="AvailableAppsList"
-                                      AutomationProperties.Name="Available apps"
-                                      Margin="10,0,10,10">
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <Border BorderBrush="{DynamicResource BorderBrush}"
-                                            BorderThickness="0,1,0,0"
-                                            Padding="8,10">
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*" />
-                                                <ColumnDefinition Width="Auto" />
-                                            </Grid.ColumnDefinitions>
+                                   TextWrapping="Wrap" />
+
+                        <Grid Grid.Row="2"
+                              Margin="18,0,18,0"
+                              Height="28">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="72" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="App"
+                                       VerticalAlignment="Center"
+                                       FontSize="{DynamicResource FontSize11}"
+                                       Foreground="{DynamicResource TextSecondaryBrush}" />
+                            <TextBlock Grid.Column="1"
+                                       Text="Add"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"
+                                       FontSize="{DynamicResource FontSize11}"
+                                       Foreground="{DynamicResource TextSecondaryBrush}" />
+                        </Grid>
+
+                        <Grid Grid.Row="3">
+                            <Border x:Name="NoAvailableApps"
+                                    Margin="18,8,18,18"
+                                    Background="{DynamicResource SurfaceElevatedBrush}"
+                                    CornerRadius="10"
+                                    Padding="18"
+                                    Visibility="Collapsed">
+                                <TextBlock Text="No desktop apps match this search."
+                                           Foreground="{DynamicResource TextSecondaryBrush}"
+                                           TextWrapping="Wrap" />
+                            </Border>
+
+                            <ItemsControl x:Name="AvailableAppsList"
+                                          AutomationProperties.Name="Available apps"
+                                          Margin="10,0,10,10">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border BorderBrush="{DynamicResource BorderBrush}"
+                                                BorderThickness="0,1,0,0"
+                                                Padding="8,9">
                                             <Grid>
                                                 <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="38" />
                                                     <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="72" />
                                                 </Grid.ColumnDefinitions>
-                                                <Border Width="32" Height="32"
-                                                        CornerRadius="7"
-                                                        Background="{DynamicResource SurfaceElevatedBrush}"
-                                                        VerticalAlignment="Center">
-                                                    <Image Source="{Binding Icon}"
-                                                           Width="24" Height="24"
-                                                           Stretch="Uniform" />
-                                                </Border>
-                                                <StackPanel Grid.Column="1"
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="42" />
+                                                        <ColumnDefinition Width="*" />
+                                                    </Grid.ColumnDefinitions>
+                                                    <Border Width="34"
+                                                            Height="34"
+                                                            CornerRadius="8"
+                                                            Background="{DynamicResource SurfaceElevatedBrush}"
                                                             VerticalAlignment="Center">
-                                                    <TextBlock Text="{Binding DisplayName}"
-                                                               FontWeight="SemiBold"
-                                                               TextWrapping="Wrap" />
-                                                    <TextBlock Text="{Binding ProcessName}"
-                                                               Margin="0,2,0,0"
-                                                               FontSize="{DynamicResource FontSize11}"
-                                                               Foreground="{DynamicResource TextSecondaryBrush}" />
-                                                </StackPanel>
+                                                        <Image Source="{Binding Icon}"
+                                                               Width="25"
+                                                               Height="25"
+                                                               Stretch="Uniform" />
+                                                    </Border>
+                                                    <StackPanel Grid.Column="1"
+                                                                VerticalAlignment="Center">
+                                                        <TextBlock Text="{Binding DisplayName}"
+                                                                   FontWeight="SemiBold"
+                                                                   TextWrapping="Wrap" />
+                                                        <TextBlock Text="{Binding ProcessName}"
+                                                                   Margin="0,2,0,0"
+                                                                   FontSize="{DynamicResource FontSize11}"
+                                                                   Foreground="{DynamicResource TextSecondaryBrush}" />
+                                                    </StackPanel>
+                                                </Grid>
+                                                <Button Grid.Column="1"
+                                                        Style="{StaticResource SecondaryButton}"
+                                                        Content="+"
+                                                        AutomationProperties.Name="Add managed app"
+                                                        Tag="{Binding Key}"
+                                                        IsEnabled="{Binding CanAdd}"
+                                                        Click="AddApp_Click"
+                                                        Width="40"
+                                                        MinHeight="36"
+                                                        HorizontalAlignment="Center"
+                                                        VerticalAlignment="Center"
+                                                        Padding="0" />
                                             </Grid>
-                                            <Button Grid.Column="1"
-                                                    Style="{StaticResource SecondaryButton}"
-                                                    Content="Add"
-                                                    Tag="{Binding Key}"
-                                                    IsEnabled="{Binding CanAdd}"
-                                                    Click="AddApp_Click"
-                                                    VerticalAlignment="Center"
-                                                    Padding="12,4" />
-                                        </Grid>
-                                    </Border>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
-                    </StackPanel>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </Grid>
+                    </Grid>
                 </Border>
             </Grid>
+
+            <Border Style="{StaticResource CardBorder}"
+                    Background="{DynamicResource SurfaceElevatedBrush}"
+                    Margin="0,14,0,0"
+                    Padding="16,12">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="58" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <Border Width="44"
+                            Height="44"
+                            CornerRadius="10"
+                            Background="{DynamicResource SelectionBrush}">
+                        <Grid>
+                            <Path Width="22"
+                                  Height="22"
+                                  Stretch="Uniform"
+                                  Stroke="{DynamicResource AccentBlueStrongBrush}"
+                                  StrokeThickness="1.7"
+                                  Data="M3,6 L10,2 L17,6 L10,10 Z M3,10 L10,14 L17,10 M3,14 L10,18 L17,14" />
+                        </Grid>
+                    </Border>
+                    <StackPanel Grid.Column="1"
+                                VerticalAlignment="Center">
+                        <TextBlock Text="A more intentional desktop."
+                                   FontWeight="SemiBold"
+                                   FontSize="{DynamicResource FontSize16}" />
+                        <TextBlock Text="Keep what matters in view. Stow the rest when it is time to focus."
+                                   Margin="0,3,0,0"
+                                   Foreground="{DynamicResource TextSecondaryBrush}" />
+                    </StackPanel>
+                    <Button Grid.Column="2"
+                            Style="{StaticResource SecondaryButton}"
+                            AutomationProperties.Name="Open Focus mode"
+                            Content="Start focus mode"
+                            MinWidth="156"
+                            VerticalAlignment="Center"
+                            Click="StartFocus_Click" />
+                </Grid>
+            </Border>
         </StackPanel>
     </ScrollViewer>
 </UserControl>

@@ -24,6 +24,10 @@ $rootRequired = @(
     'SUPPORT.md',
     'THIRD_PARTY_NOTICES.md',
     'CREDITS.md',
+    'assets\README.md',
+    'assets\STOW.png',
+    'assets\STOW.ico',
+    'scripts\generate-stow-icon.py',
     'licenses\README.md',
     'licenses\MICROSOFT_DOTNET_LIBRARY_LICENSE.html',
     'licenses\MICROSOFT_WINDOWS_SDK_LICENSE.html'
@@ -42,6 +46,26 @@ $windowsSdkSnapshot = Get-Content (Join-Path $root 'licenses\MICROSOFT_WINDOWS_S
 if ($windowsSdkSnapshot -notmatch 'MICROSOFT\s+WINDOWS\s+SOFTWARE\s+DEVELOPMENT\s+KIT' -or
     $windowsSdkSnapshot -notmatch 'REDIST\.TXT') {
     throw 'Bundled Windows SDK License snapshot does not contain the expected Microsoft license terms.'
+}
+
+$creditsText = Get-Content (Join-Path $root 'CREDITS.md') -Raw
+$assetProvenance = Get-Content (Join-Path $root 'assets\README.md') -Raw
+if ($creditsText -notmatch 'original project artwork created specifically for STOW' -or
+    $assetProvenance -notmatch 'Third-party visual content:\s*none') {
+    throw 'STOW brand artwork provenance is not documented in CREDITS.md and assets/README.md.'
+}
+
+$appProjectText = Get-Content (Join-Path $root 'src\STOW.App\STOW.App.csproj') -Raw
+if ($appProjectText -notmatch '<ApplicationIcon>\.\.\\\.\.\\assets\\STOW\.ico</ApplicationIcon>') {
+    throw 'STOW.App must embed assets/STOW.ico as its application icon.'
+}
+if ($appProjectText -notmatch '<Resource Include="\.\.\\\.\.\\assets\\STOW\.png" Link="Assets\\STOW\.png"\s*/>') {
+    throw 'STOW.App must embed the reviewed assets/STOW.png brand artwork.'
+}
+
+$releaseBuildText = Get-Content (Join-Path $root 'scripts\build-stow.ps1') -Raw
+if ($releaseBuildText -notmatch '/win32icon:\$icon') {
+    throw 'STOWSetup must embed the reviewed STOW icon.'
 }
 
 # Shipping source projects currently have no external NuGet runtime dependency.

@@ -3,180 +3,372 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <ScrollViewer VerticalScrollBarVisibility="Auto"
                   HorizontalScrollBarVisibility="Disabled">
-    <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="1.55*" />
-            <ColumnDefinition Width="18" />
-            <ColumnDefinition Width="1*" />
-        </Grid.ColumnDefinitions>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1.62*" />
+                <ColumnDefinition Width="14" />
+                <ColumnDefinition Width="0.96*" />
+            </Grid.ColumnDefinitions>
 
-        <StackPanel Grid.Column="0">
-            <Grid Margin="0,0,0,14">
-                <TextBox x:Name="SearchBox" Style="{StaticResource SearchBox}" Width="420"
-                         Tag="Search rules..."
-                         HorizontalAlignment="Left"
-                         AutomationProperties.Name="Search rules"
-                         AutomationProperties.HelpText="Filter saved rules."
-                         TextChanged="SearchBox_TextChanged" />
-                <Button x:Name="NewRuleButton" Style="{StaticResource PrimaryButton}" Content="New rule"
-                        HorizontalAlignment="Right" Click="NewRule_Click" />
-            </Grid>
+            <TextBox x:Name="SearchBox"
+                     Visibility="Collapsed"
+                     TextChanged="SearchBox_TextChanged" />
 
-            <Border x:Name="RulesStatusBanner" Style="{StaticResource CardBorder}"
-                    Background="{DynamicResource SurfaceElevatedBrush}" Margin="0,0,0,14" Visibility="Collapsed">
-                <TextBlock x:Name="RulesStatusText" TextWrapping="Wrap"
-                           AutomationProperties.LiveSetting="Polite"
-                           Foreground="{DynamicResource TextSecondaryBrush}" />
-            </Border>
+            <StackPanel Grid.Column="0">
+                <Border x:Name="RulesStatusBanner"
+                        Style="{StaticResource CardBorder}"
+                        Background="{DynamicResource SurfaceElevatedBrush}"
+                        Margin="0,0,0,14"
+                        Visibility="Collapsed">
+                    <TextBlock x:Name="RulesStatusText"
+                               TextWrapping="Wrap"
+                               AutomationProperties.LiveSetting="Polite"
+                               Foreground="{DynamicResource TextSecondaryBrush}" />
+                </Border>
 
-            <StackPanel Orientation="Horizontal" Margin="0,0,0,14">
-                <Button x:Name="AllRulesFilterButton"
-                        Style="{StaticResource SecondaryButton}"
-                        Content="All rules"
-                        Tag="All"
-                        Margin="0,0,8,0"
-                        Click="RulesFilter_Click" />
-                <Button x:Name="AppRulesFilterButton"
-                        Style="{StaticResource SecondaryButton}"
-                        Content="App rules"
-                        Tag="Minimize"
-                        Margin="0,0,8,0"
-                        Click="RulesFilter_Click" />
-                <Button x:Name="FocusRulesFilterButton"
-                        Style="{StaticResource SecondaryButton}"
-                        Content="Focus rules"
-                        Tag="Focus"
-                        Margin="0,0,8,0"
-                        Click="RulesFilter_Click" />
-                <Button x:Name="StartupRulesFilterButton"
-                        Style="{StaticResource SecondaryButton}"
-                        Content="Startup rules"
-                        Tag="Startup"
-                        Click="RulesFilter_Click"
-                        ToolTip="Rules applied when a managed app process is first observed." />
+                <Border Style="{StaticResource CardBorder}"
+                        Padding="0"
+                        MinHeight="520">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+
+                        <Grid Margin="18,16,18,12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel>
+                                <TextBlock Text="Automation rules"
+                                           Style="{StaticResource SectionTitle}" />
+                                <TextBlock Text="Control what STOW does, when it does it, and which apps are affected."
+                                           Margin="0,3,0,0"
+                                           Foreground="{DynamicResource TextSecondaryBrush}" />
+                            </StackPanel>
+                            <Button x:Name="NewRuleButton"
+                                    Grid.Column="1"
+                                    Style="{StaticResource PrimaryButton}"
+                                    Content="+  Add rule"
+                                    MinHeight="40"
+                                    VerticalAlignment="Center"
+                                    Click="NewRule_Click" />
+                        </Grid>
+
+                        <StackPanel Grid.Row="1"
+                                    Orientation="Horizontal"
+                                    Margin="18,0,18,14">
+                            <Button x:Name="AllRulesFilterButton"
+                                    Style="{StaticResource FilterPillButton}"
+                                    Content="All rules"
+                                    Tag="All"
+                                    Margin="0,0,8,0"
+                                    Click="RulesFilter_Click" />
+                            <Button x:Name="AppRulesFilterButton"
+                                    Style="{StaticResource FilterPillButton}"
+                                    Content="App rules"
+                                    Tag="Minimize"
+                                    Margin="0,0,8,0"
+                                    Click="RulesFilter_Click" />
+                            <Button x:Name="FocusRulesFilterButton"
+                                    Style="{StaticResource FilterPillButton}"
+                                    Content="Focus rules"
+                                    Tag="Focus"
+                                    Margin="0,0,8,0"
+                                    Click="RulesFilter_Click" />
+                            <Button x:Name="StartupRulesFilterButton"
+                                    Style="{StaticResource FilterPillButton}"
+                                    Content="Startup rules"
+                                    Tag="Startup"
+                                    Click="RulesFilter_Click"
+                                    ToolTip="Rules applied when a managed app process is first observed." />
+                        </StackPanel>
+
+                        <Grid Grid.Row="2"
+                              Margin="18,0,18,0"
+                              Height="30">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="1.2*" />
+                                <ColumnDefinition Width="1.05*" />
+                                <ColumnDefinition Width="0.9*" />
+                                <ColumnDefinition Width="84" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Rule name"
+                                       VerticalAlignment="Center"
+                                       FontSize="{DynamicResource FontSize11}"
+                                       Foreground="{DynamicResource TextSecondaryBrush}" />
+                            <TextBlock Grid.Column="1"
+                                       Text="When"
+                                       VerticalAlignment="Center"
+                                       FontSize="{DynamicResource FontSize11}"
+                                       Foreground="{DynamicResource TextSecondaryBrush}" />
+                            <TextBlock Grid.Column="2"
+                                       Text="Do"
+                                       VerticalAlignment="Center"
+                                       FontSize="{DynamicResource FontSize11}"
+                                       Foreground="{DynamicResource TextSecondaryBrush}" />
+                            <TextBlock Grid.Column="3"
+                                       Text="Status"
+                                       VerticalAlignment="Center"
+                                       HorizontalAlignment="Center"
+                                       FontSize="{DynamicResource FontSize11}"
+                                       Foreground="{DynamicResource TextSecondaryBrush}" />
+                        </Grid>
+
+                        <Grid Grid.Row="3">
+                            <Border x:Name="EmptyRulesCard"
+                                    Margin="18,8,18,18"
+                                    Background="{DynamicResource SurfaceElevatedBrush}"
+                                    CornerRadius="10"
+                                    Padding="28"
+                                    Visibility="Collapsed">
+                                <StackPanel HorizontalAlignment="Center">
+                                    <Border Width="46" Height="46"
+                                            CornerRadius="10"
+                                            Background="{DynamicResource SelectionBrush}"
+                                            Margin="0,0,0,12">
+                                        <Path Width="24" Height="24"
+                                              Stretch="Uniform"
+                                              Stroke="{DynamicResource AccentBlueStrongBrush}"
+                                              StrokeThickness="1.7"
+                                              Data="M3,5 H17 V18 H3 Z M3,9 H17 M7,2 V7 M13,2 V7" />
+                                    </Border>
+                                    <TextBlock x:Name="EmptyRulesTitleText"
+                                               Text="No rules yet"
+                                               FontSize="{DynamicResource FontSize17}"
+                                               FontWeight="SemiBold" />
+                                    <TextBlock x:Name="EmptyRulesBodyText"
+                                               Text="Create an app, Focus or Startup rule for a managed application."
+                                               Margin="0,6,0,12"
+                                               TextAlignment="Center"
+                                               TextWrapping="Wrap"
+                                               Foreground="{DynamicResource TextSecondaryBrush}"
+                                               MaxWidth="460" />
+                                    <Button Style="{StaticResource SecondaryButton}"
+                                            Content="Create your first rule"
+                                            Click="NewRule_Click" />
+                                </StackPanel>
+                            </Border>
+
+                            <ListBox x:Name="RulesList"
+                                     AutomationProperties.Name="Saved rules"
+                                     Margin="10,0,10,10"
+                                     BorderThickness="0"
+                                     Background="Transparent"
+                                     SelectionChanged="RulesList_SelectionChanged">
+                                <ListBox.ItemContainerStyle>
+                                    <Style TargetType="ListBoxItem">
+                                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                                        <Setter Property="Padding" Value="0" />
+                                        <Setter Property="Margin" Value="0" />
+                                        <Setter Property="Background" Value="Transparent" />
+                                        <Setter Property="BorderThickness" Value="0" />
+                                        <Setter Property="FocusVisualStyle" Value="{StaticResource StowFocusVisual}" />
+                                    </Style>
+                                </ListBox.ItemContainerStyle>
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border BorderBrush="{DynamicResource BorderBrush}"
+                                                BorderThickness="0,1,0,0"
+                                                Padding="8,10">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="1.2*" />
+                                                    <ColumnDefinition Width="1.05*" />
+                                                    <ColumnDefinition Width="0.9*" />
+                                                    <ColumnDefinition Width="84" />
+                                                </Grid.ColumnDefinitions>
+                                                <StackPanel>
+                                                    <TextBlock Text="{Binding Name}"
+                                                               FontWeight="SemiBold" />
+                                                    <TextBlock Text="{Binding Type}"
+                                                               Margin="0,2,0,0"
+                                                               FontSize="{DynamicResource FontSize11}"
+                                                               Foreground="{DynamicResource TextSecondaryBrush}" />
+                                                </StackPanel>
+                                                <TextBlock Grid.Column="1"
+                                                           Text="{Binding WhenText}"
+                                                           VerticalAlignment="Center"
+                                                           TextWrapping="Wrap"
+                                                           Foreground="{DynamicResource TextSecondaryBrush}" />
+                                                <TextBlock Grid.Column="2"
+                                                           Text="{Binding ActionText}"
+                                                           VerticalAlignment="Center"
+                                                           TextWrapping="Wrap" />
+                                                <Border Grid.Column="3"
+                                                        Style="{StaticResource StatusChip}"
+                                                        HorizontalAlignment="Center"
+                                                        VerticalAlignment="Center">
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <Ellipse Width="7" Height="7"
+                                                                 Fill="{DynamicResource AccentTealBrush}"
+                                                                 Margin="0,0,6,0" />
+                                                        <TextBlock Text="{Binding Status}"
+                                                                   FontSize="{DynamicResource FontSize11}" />
+                                                    </StackPanel>
+                                                </Border>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </Grid>
+                    </Grid>
+                </Border>
             </StackPanel>
 
-            <Border x:Name="EmptyRulesCard" Style="{StaticResource CardBorder}" Visibility="Collapsed">
-                <StackPanel HorizontalAlignment="Center" Margin="10,20">
-                    <TextBlock x:Name="EmptyRulesTitleText"
-                               Text="No rules yet"
-                               FontSize="{DynamicResource FontSize16}"
-                               FontWeight="SemiBold" />
-                    <TextBlock x:Name="EmptyRulesBodyText"
-                               Text="Create an app, Focus or Startup rule for a managed application."
-                               Margin="0,6,0,0"
-                               TextAlignment="Center"
-                               TextWrapping="Wrap"
-                               Foreground="{DynamicResource TextSecondaryBrush}"
-                               MaxWidth="460" />
-                </StackPanel>
-            </Border>
+            <Border Grid.Column="2"
+                    Style="{StaticResource CardBorder}"
+                    Padding="0"
+                    MinHeight="520">
+                <Grid>
+                    <StackPanel x:Name="EditorPlaceholder"
+                                VerticalAlignment="Center"
+                                Margin="28">
+                        <Border Width="52" Height="52"
+                                CornerRadius="12"
+                                Background="{DynamicResource SelectionBrush}"
+                                HorizontalAlignment="Center"
+                                Margin="0,0,0,14">
+                            <Path Width="27" Height="27"
+                                  Stretch="Uniform"
+                                  Stroke="{DynamicResource AccentBlueStrongBrush}"
+                                  StrokeThickness="1.7"
+                                  Data="M10,2 A8,8 0 1 1 9.99,2 M10,6 A4,4 0 1 1 9.99,6 M10,9 A1,1 0 1 1 9.99,9" />
+                        </Border>
+                        <TextBlock Text="Select a rule"
+                                   FontSize="{DynamicResource FontSize18}"
+                                   FontWeight="SemiBold"
+                                   HorizontalAlignment="Center" />
+                        <TextBlock Text="Choose an existing rule or create a new one."
+                                   Margin="0,6,0,0"
+                                   TextAlignment="Center"
+                                   TextWrapping="Wrap"
+                                   Foreground="{DynamicResource TextSecondaryBrush}" />
+                    </StackPanel>
 
-            <ListBox x:Name="RulesList"
-                     AutomationProperties.Name="Saved rules"
-                     BorderThickness="0" Background="Transparent"
-                     SelectionChanged="RulesList_SelectionChanged">
-                <ListBox.ItemTemplate>
-                    <DataTemplate>
-                        <Border Style="{StaticResource CardBorder}" Padding="0" Margin="0,0,0,10">
-                            <Grid Margin="16,13">
+                    <StackPanel x:Name="EditorPanel"
+                                Visibility="Collapsed">
+                        <Grid Margin="18,16,18,12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel>
+                                <TextBlock x:Name="EditorTitleText"
+                                           Text="Rule"
+                                           FontSize="{DynamicResource FontSize20}"
+                                           FontWeight="SemiBold" />
+                                <TextBlock Text="Details, condition, action and priority"
+                                           Margin="0,3,0,0"
+                                           FontSize="{DynamicResource FontSize11}"
+                                           Foreground="{DynamicResource TextSecondaryBrush}" />
+                            </StackPanel>
+                            <CheckBox x:Name="EnabledCheckBox"
+                                      Grid.Column="1"
+                                      Style="{StaticResource ToggleSwitch}"
+                                      Content="Enabled"
+                                      VerticalAlignment="Center" />
+                        </Grid>
+
+                        <Border Height="1"
+                                Background="{DynamicResource BorderBrush}"
+                                Margin="0,0,0,14" />
+
+                        <StackPanel Margin="18,0,18,16">
+                            <TextBlock x:Name="RuleNameLabel"
+                                       Text="Rule name"
+                                       Foreground="{DynamicResource TextSecondaryBrush}" />
+                            <TextBox x:Name="RuleNameTextBox"
+                                     AutomationProperties.LabeledBy="{Binding ElementName=RuleNameLabel}"
+                                     Margin="0,6,0,14"
+                                     Padding="12,8"
+                                     MinHeight="42"
+                                     Background="{DynamicResource SurfaceBrush}"
+                                     Foreground="{DynamicResource TextPrimaryBrush}"
+                                     BorderBrush="{DynamicResource ControlBorderBrush}"
+                                     BorderThickness="1" />
+
+                            <TextBlock x:Name="RuleAppLabel"
+                                       Text="App"
+                                       Foreground="{DynamicResource TextSecondaryBrush}" />
+                            <ComboBox x:Name="AppComboBox"
+                                      DisplayMemberPath="Name"
+                                      AutomationProperties.LabeledBy="{Binding ElementName=RuleAppLabel}"
+                                      Margin="0,6,0,14" />
+
+                            <TextBlock x:Name="RuleTriggerLabel"
+                                       Text="When"
+                                       Foreground="{DynamicResource TextSecondaryBrush}" />
+                            <ComboBox x:Name="TriggerComboBox"
+                                      AutomationProperties.LabeledBy="{Binding ElementName=RuleTriggerLabel}"
+                                      SelectedIndex="0"
+                                      Margin="0,6,0,14">
+                                <ComboBoxItem Content="The app is minimized" />
+                                <ComboBoxItem Content="Focus starts" />
+                                <ComboBoxItem Content="The app starts" />
+                            </ComboBox>
+
+                            <TextBlock x:Name="RuleActionLabel"
+                                       Text="Do"
+                                       Foreground="{DynamicResource TextSecondaryBrush}" />
+                            <ComboBox x:Name="ActionComboBox"
+                                      AutomationProperties.LabeledBy="{Binding ElementName=RuleActionLabel}"
+                                      SelectedIndex="0"
+                                      Margin="0,6,0,14">
+                                <ComboBoxItem Content="Stow in system tray" />
+                                <ComboBoxItem Content="Keep visible on taskbar" />
+                            </ComboBox>
+
+                            <Grid Margin="0,0,0,4">
+                                <TextBlock x:Name="RulePriorityLabel"
+                                           Text="Priority"
+                                           Foreground="{DynamicResource TextSecondaryBrush}" />
+                                <TextBlock x:Name="PriorityValueText"
+                                           HorizontalAlignment="Right"
+                                           AutomationProperties.LiveSetting="Polite"
+                                           Foreground="{DynamicResource TextSecondaryBrush}" />
+                            </Grid>
+                            <Slider x:Name="PrioritySlider"
+                                    Minimum="0"
+                                    Maximum="100"
+                                    Value="50"
+                                    AutomationProperties.LabeledBy="{Binding ElementName=RulePriorityLabel}"
+                                    AutomationProperties.HelpText="Higher-priority matching rules win."
+                                    ValueChanged="PrioritySlider_ValueChanged"
+                                    Margin="0,4,0,20" />
+
+                            <Grid>
                                 <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="Auto" />
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
-                                <StackPanel>
-                                    <TextBlock Text="{Binding Name}" FontWeight="SemiBold" />
-                                    <TextBlock Text="{Binding Summary}" FontSize="{DynamicResource FontSize12}" Margin="0,3,0,0"
-                                               Foreground="{DynamicResource TextSecondaryBrush}" />
-                                </StackPanel>
-                                <TextBlock Grid.Column="1" Text="{Binding Type}"
-                                           VerticalAlignment="Center"
-                                           Margin="16,0,12,0"
-                                           TextWrapping="Wrap"
-                                           Foreground="{DynamicResource TextSecondaryBrush}" />
-                                <TextBlock Grid.Column="2" Text="{Binding Status}"
-                                           VerticalAlignment="Center"
-                                           TextWrapping="Wrap"
-                                           Foreground="{DynamicResource AccentTealBrush}" />
+                                <Button x:Name="DeleteRuleButton"
+                                        Style="{StaticResource DangerButton}"
+                                        Content="Delete"
+                                        Click="DeleteRule_Click"
+                                        Margin="0,0,8,0" />
+                                <Button x:Name="DuplicateRuleButton"
+                                        Grid.Column="2"
+                                        Style="{StaticResource SecondaryButton}"
+                                        Content="Duplicate"
+                                        Click="DuplicateRule_Click"
+                                        Margin="0,0,8,0" />
+                                <Button x:Name="SaveRuleButton"
+                                        Grid.Column="3"
+                                        Style="{StaticResource PrimaryButton}"
+                                        Content="Save changes"
+                                        Click="SaveRule_Click" />
                             </Grid>
-                        </Border>
-                    </DataTemplate>
-                </ListBox.ItemTemplate>
-            </ListBox>
-        </StackPanel>
-
-        <Border Grid.Column="2" Style="{StaticResource CardBorder}" Padding="20">
-            <Grid>
-                <StackPanel x:Name="EditorPlaceholder" VerticalAlignment="Center">
-                    <TextBlock Text="Select a rule" FontSize="{DynamicResource FontSize18}" FontWeight="SemiBold" HorizontalAlignment="Center" />
-                    <TextBlock Text="Choose an existing rule or create a new one."
-                               Margin="0,6,0,0" TextAlignment="Center"
-                               Foreground="{DynamicResource TextSecondaryBrush}" />
-                </StackPanel>
-
-                <StackPanel x:Name="EditorPanel" Visibility="Collapsed">
-                    <Grid Margin="0,0,0,16">
-                        <TextBlock x:Name="EditorTitleText" Text="Rule" FontSize="{DynamicResource FontSize19}" FontWeight="SemiBold" />
-                        <CheckBox x:Name="EnabledCheckBox" Style="{StaticResource ToggleSwitch}" Content="Enabled" HorizontalAlignment="Right"
-                                  VerticalAlignment="Center" />
-                    </Grid>
-
-                    <TextBlock x:Name="RuleNameLabel" Text="Name" Foreground="{DynamicResource TextSecondaryBrush}" />
-                    <TextBox x:Name="RuleNameTextBox" Style="{StaticResource SearchBox}"
-                             AutomationProperties.LabeledBy="{Binding ElementName=RuleNameLabel}"
-                             Margin="0,6,0,14" />
-
-                    <TextBlock x:Name="RuleAppLabel" Text="App" Foreground="{DynamicResource TextSecondaryBrush}" />
-                    <ComboBox x:Name="AppComboBox"
-                              MinHeight="44"
-                              DisplayMemberPath="Name"
-                              AutomationProperties.LabeledBy="{Binding ElementName=RuleAppLabel}"
-                              Margin="0,6,0,14" />
-
-                    <TextBlock x:Name="RuleTriggerLabel" Text="When" Foreground="{DynamicResource TextSecondaryBrush}" />
-                    <ComboBox x:Name="TriggerComboBox"
-                              MinHeight="44"
-                              AutomationProperties.LabeledBy="{Binding ElementName=RuleTriggerLabel}"
-                              SelectedIndex="0"
-                              Margin="0,6,0,14">
-                        <ComboBoxItem Content="The app is minimized" />
-                        <ComboBoxItem Content="Focus starts" />
-                        <ComboBoxItem Content="The app starts" />
-                    </ComboBox>
-
-                    <TextBlock x:Name="RuleActionLabel" Text="Action" Foreground="{DynamicResource TextSecondaryBrush}" />
-                    <ComboBox x:Name="ActionComboBox"
-                              MinHeight="44"
-                              AutomationProperties.LabeledBy="{Binding ElementName=RuleActionLabel}"
-                              SelectedIndex="0"
-                              Margin="0,6,0,14">
-                        <ComboBoxItem Content="Stow in system tray" />
-                        <ComboBoxItem Content="Keep visible on taskbar" />
-                    </ComboBox>
-
-                    <Grid Margin="0,0,0,4">
-                        <TextBlock x:Name="RulePriorityLabel" Text="Priority" Foreground="{DynamicResource TextSecondaryBrush}" />
-                        <TextBlock x:Name="PriorityValueText" HorizontalAlignment="Right"
-                                   AutomationProperties.LiveSetting="Polite"
-                                   Foreground="{DynamicResource TextSecondaryBrush}" />
-                    </Grid>
-                    <Slider x:Name="PrioritySlider" Minimum="0" Maximum="100" Value="50"
-                            AutomationProperties.LabeledBy="{Binding ElementName=RulePriorityLabel}"
-                            AutomationProperties.HelpText="Higher-priority matching rules win."
-                            ValueChanged="PrioritySlider_ValueChanged" Margin="0,4,0,20" />
-
-                    <WrapPanel HorizontalAlignment="Right">
-                        <Button x:Name="DeleteRuleButton" Style="{StaticResource SecondaryButton}" Content="Delete"
-                                Click="DeleteRule_Click" Margin="0,0,8,8" />
-                        <Button x:Name="DuplicateRuleButton" Style="{StaticResource SecondaryButton}" Content="Duplicate"
-                                Click="DuplicateRule_Click" Margin="0,0,8,8" />
-                        <Button x:Name="SaveRuleButton" Style="{StaticResource PrimaryButton}" Content="Save"
-                                Click="SaveRule_Click" Margin="0,0,0,8" />
-                    </WrapPanel>
-                </StackPanel>
-            </Grid>
-        </Border>
-    </Grid>
+                        </StackPanel>
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </Grid>
     </ScrollViewer>
 </UserControl>

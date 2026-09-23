@@ -11,6 +11,7 @@
     <EmbeddedResource Include="..\..\PRIVACY.md" LogicalName="STOW.Legal.PRIVACY.md" />
     <EmbeddedResource Include="..\..\THIRD_PARTY_NOTICES.md" LogicalName="STOW.Legal.THIRD_PARTY_NOTICES.md" />
     <EmbeddedResource Include="..\..\CREDITS.md" LogicalName="STOW.Legal.CREDITS.md" />
+    <Resource Include="..\..\assets\STOW.png" Link="Assets\STOW.png" />
     <EmbeddedResource Include="GeneratedLegal\*.*">
       <LogicalName>STOW.Legal.%(Filename)%(Extension)</LogicalName>
     </EmbeddedResource>
@@ -25,6 +26,7 @@
     <AssemblyVersion>0.4.0.0</AssemblyVersion>
     <FileVersion>0.4.0.0</FileVersion>
     <Description>A calmer desktop starts here.</Description>
+    <ApplicationIcon>..\..\assets\STOW.ico</ApplicationIcon>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>

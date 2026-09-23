@@ -19,6 +19,33 @@ public partial class SettingsView : UserControl
         LoadSettings();
     }
 
+    public void SetSearchText(string text)
+    {
+        string query = (text ?? string.Empty).Trim();
+        GeneralCard.Visibility = Matches(query, "general", "tray", "close", "running")
+            ? Visibility.Visible : Visibility.Collapsed;
+        AppearanceCard.Visibility = Matches(query, "appearance", "theme", "light", "dark", "system")
+            ? Visibility.Visible : Visibility.Collapsed;
+        AccessibilityCard.Visibility = Matches(query, "accessibility", "text", "font", "contrast", "screen reader", "keyboard")
+            ? Visibility.Visible : Visibility.Collapsed;
+        StartupCard.Visibility = Matches(query, "startup", "windows", "launch", "start")
+            ? Visibility.Visible : Visibility.Collapsed;
+        NotificationsCard.Visibility = Matches(query, "notification", "focus", "schedule")
+            ? Visibility.Visible : Visibility.Collapsed;
+        FocusBehaviorCard.Visibility = Matches(query, "focus", "restore", "stowed", "session")
+            ? Visibility.Visible : Visibility.Collapsed;
+    }
+
+    private static bool Matches(string query, params string[] terms)
+    {
+        if (string.IsNullOrWhiteSpace(query))
+            return true;
+
+        return terms.Any(term =>
+            term.Contains(query, StringComparison.CurrentCultureIgnoreCase) ||
+            query.Contains(term, StringComparison.CurrentCultureIgnoreCase));
+    }
+
     private void LoadSettings()
     {
         loading = true;

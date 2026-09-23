@@ -93,6 +93,7 @@ See:
 - [Privacy](PRIVACY.md)
 - [Security](SECURITY.md)
 - [Accessibility](docs/accessibility/ACCESSIBILITY.md)
+- [Visual system](docs/product/VISUAL_SYSTEM.md)
 - [Legal/release compliance checklist](docs/release/LEGAL_AND_RELEASE_COMPLIANCE.md)
 
 Release builds are checked with:

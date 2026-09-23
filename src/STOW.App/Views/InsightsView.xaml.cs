@@ -15,6 +15,11 @@ public partial class InsightsView : UserControl
         string Title,
         string Detail);
 
+    private sealed record DayBucket(
+        string Label,
+        double Height,
+        int Count);
+
     public InsightsView(IActivityStore activityStore)
     {
         this.activityStore = activityStore;
@@ -54,6 +59,24 @@ public partial class InsightsView : UserControl
             activity.Type == ActivityEventType.AppRestored).ToString();
         FocusCountText.Text = recentWeek.Count(activity =>
             activity.Type == ActivityEventType.FocusStarted).ToString();
+
+        DateTime today = DateTime.Today;
+        var dayCounts = Enumerable.Range(0, 7)
+            .Select(offset =>
+            {
+                DateTime day = today.AddDays(offset - 6);
+                int count = recentWeek.Count(activity =>
+                    activity.TimestampUtc.ToLocalTime().Date == day.Date);
+                return new { Day = day, Count = count };
+            })
+            .ToArray();
+        int maxDayCount = Math.Max(1, dayCounts.Max(item => item.Count));
+        ActivityChartList.ItemsSource = dayCounts
+            .Select(item => new DayBucket(
+                item.Day.ToString("ddd"),
+                16 + (74d * item.Count / maxDayCount),
+                item.Count))
+            .ToArray();
 
         bool hasHistory = events.Count > 0;
         EmptyHistoryCard.Visibility = hasHistory ? Visibility.Collapsed : Visibility.Visible;

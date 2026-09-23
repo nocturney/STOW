@@ -49,6 +49,9 @@ public static class AccessibilityManager
         Application.Current.Resources["StowFont"] = settings.UseSystemFont
             ? new FontFamily("Segoe UI Variable Text, Segoe UI")
             : new FontFamily("Inter, Segoe UI Variable Text, Segoe UI");
+        Application.Current.Resources["StowDisplayFont"] = settings.UseSystemFont
+            ? new FontFamily("Segoe UI Variable Display, Segoe UI")
+            : new FontFamily("Inter, Segoe UI Variable Display, Segoe UI");
 
         ThemeManager.ApplyPreference(settings.Theme, settings.EnhancedContrast);
     }

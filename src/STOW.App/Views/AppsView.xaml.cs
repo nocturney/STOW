@@ -12,6 +12,7 @@ namespace STOW.App.Views;
 
 public partial class AppsView : UserControl
 {
+    public event EventHandler? FocusRequested;
     private readonly ITrayEngine? engine;
     private readonly IManagedAppStore fallbackStore;
     private readonly IAppDiscovery appDiscovery;
@@ -58,6 +59,16 @@ public partial class AppsView : UserControl
         Loaded += (_, _) => refreshTimer.Start();
         Unloaded += (_, _) => refreshTimer.Stop();
         RefreshData();
+    }
+
+    public void SetSearchText(string text)
+    {
+        string value = text ?? string.Empty;
+        if (string.Equals(SearchBox?.Text, value, StringComparison.Ordinal))
+            return;
+
+        if (SearchBox is not null)
+            SearchBox.Text = value;
     }
 
     private void SearchBox_TextChanged(object sender, TextChangedEventArgs e) => RefreshData();
@@ -136,6 +147,9 @@ public partial class AppsView : UserControl
         EngineStatusBanner.Visibility = showBanner ? Visibility.Visible : Visibility.Collapsed;
         EngineStatusText.Text = runtimeUnavailableReason ?? string.Empty;
     }
+
+    private void StartFocus_Click(object sender, RoutedEventArgs e) =>
+        FocusRequested?.Invoke(this, EventArgs.Empty);
 
     private void AddApp_Click(object sender, RoutedEventArgs e)
     {

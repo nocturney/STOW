@@ -1,185 +1,478 @@
 <UserControl x:Class="STOW.App.Views.SettingsView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+    <ScrollViewer VerticalScrollBarVisibility="Auto"
+                  HorizontalScrollBarVisibility="Disabled">
         <StackPanel>
-            <Border x:Name="SettingsStatusBanner" Style="{StaticResource CardBorder}"
-                    Background="{DynamicResource SurfaceElevatedBrush}" Margin="0,0,0,12" Visibility="Collapsed">
-                <TextBlock x:Name="SettingsStatusText" TextWrapping="Wrap"
+            <Border x:Name="SettingsStatusBanner"
+                    Style="{StaticResource CardBorder}"
+                    Background="{DynamicResource SurfaceElevatedBrush}"
+                    Margin="0,0,0,12"
+                    Visibility="Collapsed">
+                <TextBlock x:Name="SettingsStatusText"
+                           TextWrapping="Wrap"
                            AutomationProperties.LiveSetting="Polite"
                            Foreground="{DynamicResource TextSecondaryBrush}" />
             </Border>
 
-            <WrapPanel ItemWidth="470">
-            <Border Style="{StaticResource CardBorder}" Margin="0,0,12,12">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
+            <WrapPanel ItemWidth="520">
+                <Border x:Name="GeneralCard"
+                        Style="{StaticResource CardBorder}"
+                        Margin="0,0,12,12">
                     <StackPanel>
-                        <TextBlock Text="General" Style="{StaticResource SectionTitle}" />
-                        <TextBlock Text="Choose what happens when you close the STOW window."
-                                   Margin="0,5,0,0" Foreground="{DynamicResource TextSecondaryBrush}" />
+                        <Grid Margin="0,0,0,14">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="46" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Border Width="36" Height="36"
+                                    CornerRadius="9"
+                                    Background="{DynamicResource SelectionBrush}">
+                                <Path Width="20" Height="20"
+                                      Stretch="Uniform"
+                                      Stroke="{DynamicResource AccentBlueStrongBrush}"
+                                      StrokeThickness="1.7"
+                                      Data="M10,6 A4,4 0 1 1 9.99,6 M10,1 V4 M10,16 V19 M1,10 H4 M16,10 H19" />
+                            </Border>
+                            <StackPanel Grid.Column="1"
+                                        VerticalAlignment="Center">
+                                <TextBlock Text="General"
+                                           Style="{StaticResource SectionTitle}" />
+                                <TextBlock Text="Core app behavior and experience."
+                                           Margin="0,2,0,0"
+                                           Foreground="{DynamicResource TextSecondaryBrush}" />
+                            </StackPanel>
+                        </Grid>
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel>
+                                <TextBlock Text="Keep STOW running in the tray"
+                                           FontWeight="SemiBold" />
+                                <TextBlock Text="Closing the window keeps STOW quietly available."
+                                           Margin="0,3,18,0"
+                                           TextWrapping="Wrap"
+                                           Foreground="{DynamicResource TextSecondaryBrush}" />
+                            </StackPanel>
+                            <CheckBox x:Name="KeepRunningCheckBox"
+                                      Grid.Column="1"
+                                      Style="{StaticResource ToggleSwitch}"
+                                      AutomationProperties.Name="Keep STOW running in the tray"
+                                      VerticalAlignment="Center"
+                                      Click="KeepRunning_Click" />
+                        </Grid>
                     </StackPanel>
-                    <CheckBox x:Name="KeepRunningCheckBox" Grid.Column="1"
-                              Style="{StaticResource ToggleSwitch}"
-                              Content="Keep STOW running in the tray"
-                              VerticalAlignment="Center"
-                              Click="KeepRunning_Click" />
-                </Grid>
-            </Border>
+                </Border>
 
-            <Border Style="{StaticResource CardBorder}" Margin="0,0,0,12">
-                <StackPanel>
-                    <TextBlock Text="Appearance" Style="{StaticResource SectionTitle}" />
-                    <TextBlock Text="Theme" Margin="0,14,0,8"
-                               Foreground="{DynamicResource TextSecondaryBrush}" />
-                    <Border Background="{DynamicResource SurfaceElevatedBrush}"
-                            BorderBrush="{DynamicResource BorderBrush}"
-                            BorderThickness="1"
-                            CornerRadius="9"
-                            HorizontalAlignment="Left"
-                            Padding="3">
-                        <StackPanel Orientation="Horizontal">
-                            <RadioButton x:Name="LightThemeRadio"
-                                         Style="{StaticResource ThemeSegmentRadio}"
-                                         GroupName="Theme"
-                                         Content="Light"
-                                         Tag="Light"
-                                         Click="Theme_Click" />
-                            <RadioButton x:Name="DarkThemeRadio"
-                                         Style="{StaticResource ThemeSegmentRadio}"
-                                         GroupName="Theme"
-                                         Content="Dark"
-                                         Tag="Dark"
-                                         Click="Theme_Click" />
-                            <RadioButton x:Name="SystemThemeRadio"
-                                         Style="{StaticResource ThemeSegmentRadio}"
-                                         GroupName="Theme"
-                                         Content="System"
-                                         Tag="System"
-                                         Click="Theme_Click" />
-                        </StackPanel>
-                    </Border>
-                </StackPanel>
-            </Border>
-
-            <Border Style="{StaticResource CardBorder}" Margin="0,0,0,12">
-                <StackPanel>
-                    <TextBlock Text="Accessibility" Style="{StaticResource SectionTitle}" />
-                    <TextBlock Text="Keyboard navigation and screen-reader support are always enabled. Windows contrast themes are followed automatically."
-                               Margin="0,5,0,14" TextWrapping="Wrap"
-                               Foreground="{DynamicResource TextSecondaryBrush}" />
-
-                    <Grid Margin="0,0,0,12">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-                        <StackPanel>
-                            <TextBlock x:Name="TextSizeLabel"
-                                       Text="Text size"
-                                       FontWeight="SemiBold" />
-                            <TextBlock Text="Increase STOW text without changing Windows display scaling."
-                                       Margin="0,4,20,0" TextWrapping="Wrap"
-                                       Foreground="{DynamicResource TextSecondaryBrush}" />
-                        </StackPanel>
-                        <ComboBox x:Name="TextScaleComboBox" Grid.Column="1"
-                                  MinHeight="44"
-                                  AutomationProperties.LabeledBy="{Binding ElementName=TextSizeLabel}"
-                                  SelectionChanged="TextScale_SelectionChanged">
-                            <ComboBoxItem Tag="100" Content="Standard (100%)" />
-                            <ComboBoxItem Tag="125" Content="Large (125%)" />
-                            <ComboBoxItem Tag="150" Content="Extra large (150%)" />
-                            <ComboBoxItem Tag="200" Content="Maximum (200%)" />
-                        </ComboBox>
-                    </Grid>
-
-                    <CheckBox x:Name="EnhancedContrastCheckBox"
-                              Style="{StaticResource ToggleSwitch}"
-                              Content="Increase contrast in STOW"
-                              Margin="0,2,0,8"
-                              Checked="Accessibility_Changed"
-                              Unchecked="Accessibility_Changed" />
-                    <CheckBox x:Name="UseSystemFontCheckBox"
-                              Style="{StaticResource ToggleSwitch}"
-                              Content="Use the Windows UI font"
-                              Margin="0,0,0,4"
-                              Checked="Accessibility_Changed"
-                              Unchecked="Accessibility_Changed" />
-                    <TextBlock x:Name="SystemContrastStatusText"
-                               Text="Windows contrast theme is active. STOW is following it."
-                               Margin="0,8,0,0" TextWrapping="Wrap"
-                               AutomationProperties.LiveSetting="Polite"
-                               Foreground="{DynamicResource TextSecondaryBrush}"
-                               Visibility="Collapsed" />
-                </StackPanel>
-            </Border>
-
-            <Border Style="{StaticResource CardBorder}" Margin="0,0,0,12">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
+                <Border x:Name="AppearanceCard"
+                        Style="{StaticResource CardBorder}"
+                        Margin="0,0,0,12">
                     <StackPanel>
-                        <TextBlock Text="Startup" Style="{StaticResource SectionTitle}" />
-                        <TextBlock Text="Start STOW quietly with Windows when at least one managed app is enabled."
-                                   Margin="0,5,0,0" TextWrapping="Wrap"
-                                   Foreground="{DynamicResource TextSecondaryBrush}" />
-                    </StackPanel>
-                    <CheckBox x:Name="StartWithWindowsCheckBox" Grid.Column="1"
-                              Style="{StaticResource ToggleSwitch}"
-                              Content="Start STOW with Windows"
-                              VerticalAlignment="Center"
-                              Click="StartWithWindows_Click" />
-                </Grid>
-            </Border>
+                        <Grid Margin="0,0,0,14">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="46" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Border Width="36" Height="36"
+                                    CornerRadius="9"
+                                    Background="{DynamicResource SelectionBrush}">
+                                <Path Width="20" Height="20"
+                                      Stretch="Uniform"
+                                      Stroke="{DynamicResource AccentBlueStrongBrush}"
+                                      StrokeThickness="1.7"
+                                      Data="M10,2 A8,8 0 1 1 9.99,2 M6,8 A2,2 0 1 1 5.99,8 M12,6 A1.5,1.5 0 1 1 11.99,6 M13,12 A1.5,1.5 0 1 1 12.99,12" />
+                            </Border>
+                            <StackPanel Grid.Column="1"
+                                        VerticalAlignment="Center">
+                                <TextBlock Text="Appearance"
+                                           Style="{StaticResource SectionTitle}" />
+                                <TextBlock Text="Customize how STOW looks and feels."
+                                           Margin="0,2,0,0"
+                                           Foreground="{DynamicResource TextSecondaryBrush}" />
+                            </StackPanel>
+                        </Grid>
 
-            <Border Style="{StaticResource CardBorder}" Margin="0,0,0,12">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-                    <StackPanel>
-                        <TextBlock Text="Notifications" Style="{StaticResource SectionTitle}" />
-                        <TextBlock Text="Show local Windows tray notifications when scheduled Focus sessions start or end."
-                                   Margin="0,5,0,0" TextWrapping="Wrap"
-                                   Foreground="{DynamicResource TextSecondaryBrush}" />
-                    </StackPanel>
-                    <CheckBox x:Name="NotificationsCheckBox"
-                              Grid.Column="1"
-                              Style="{StaticResource ToggleSwitch}"
-                              Content="Scheduled Focus notifications"
-                              VerticalAlignment="Center"
-                              Checked="Notifications_Changed"
-                              Unchecked="Notifications_Changed" />
-                </Grid>
-            </Border>
+                        <TextBlock Text="Theme"
+                                   FontWeight="SemiBold"
+                                   Margin="0,0,0,7" />
 
-            <Border Style="{StaticResource CardBorder}">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-                    <StackPanel>
-                        <TextBlock Text="Focus behavior" Style="{StaticResource SectionTitle}" />
-                        <TextBlock Text="Choose what STOW does with apps hidden by Focus when the session ends."
-                                   Margin="0,5,0,0" TextWrapping="Wrap"
-                                   Foreground="{DynamicResource TextSecondaryBrush}" />
+                        <Border Background="{DynamicResource SurfaceElevatedBrush}"
+                                BorderBrush="{DynamicResource BorderBrush}"
+                                BorderThickness="1"
+                                CornerRadius="9"
+                                HorizontalAlignment="Left"
+                                Padding="3">
+                            <StackPanel Orientation="Horizontal">
+                                <RadioButton x:Name="LightThemeRadio"
+                                             Style="{StaticResource ThemeSegmentRadio}"
+                                             GroupName="Theme"
+                                             Content="Light"
+                                             Tag="Light"
+                                             Click="Theme_Click" />
+                                <RadioButton x:Name="DarkThemeRadio"
+                                             Style="{StaticResource ThemeSegmentRadio}"
+                                             GroupName="Theme"
+                                             Content="Dark"
+                                             Tag="Dark"
+                                             Click="Theme_Click" />
+                                <RadioButton x:Name="SystemThemeRadio"
+                                             Style="{StaticResource ThemeSegmentRadio}"
+                                             GroupName="Theme"
+                                             Content="System"
+                                             Tag="System"
+                                             Click="Theme_Click" />
+                            </StackPanel>
+                        </Border>
+
+                        <Grid Margin="0,14,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="10" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+
+                            <Border Grid.Column="0"
+                                    Background="#F3F8FE"
+                                    BorderBrush="#D5E3F2"
+                                    BorderThickness="1"
+                                    CornerRadius="10"
+                                    Height="96">
+                                <Grid Margin="10">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="28" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <Border Background="#F6FAFF"
+                                            CornerRadius="6" />
+                                    <StackPanel Grid.Column="1"
+                                                Margin="9,5,4,0">
+                                        <Border Height="8"
+                                                Width="72"
+                                                HorizontalAlignment="Left"
+                                                Background="#D9EBFF"
+                                                CornerRadius="4" />
+                                        <Border Height="8"
+                                                Margin="0,10,0,0"
+                                                Background="#E7EEF8"
+                                                CornerRadius="4" />
+                                        <Border Height="8"
+                                                Margin="0,7,0,0"
+                                                Width="74"
+                                                HorizontalAlignment="Left"
+                                                Background="#E7EEF8"
+                                                CornerRadius="4" />
+                                    </StackPanel>
+                                    <Border Grid.Column="1"
+                                            Width="32"
+                                            Height="16"
+                                            HorizontalAlignment="Right"
+                                            VerticalAlignment="Bottom"
+                                            Background="#1677F8"
+                                            CornerRadius="8" />
+                                </Grid>
+                            </Border>
+
+                            <Border Grid.Column="2"
+                                    Background="#071523"
+                                    BorderBrush="#24415E"
+                                    BorderThickness="1"
+                                    CornerRadius="10"
+                                    Height="96">
+                                <Grid Margin="10">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="28" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <Border Background="#081829"
+                                            CornerRadius="6" />
+                                    <StackPanel Grid.Column="1"
+                                                Margin="9,5,4,0">
+                                        <Border Height="8"
+                                                Width="72"
+                                                HorizontalAlignment="Left"
+                                                Background="#153A68"
+                                                CornerRadius="4" />
+                                        <Border Height="8"
+                                                Margin="0,10,0,0"
+                                                Background="#102942"
+                                                CornerRadius="4" />
+                                        <Border Height="8"
+                                                Margin="0,7,0,0"
+                                                Width="74"
+                                                HorizontalAlignment="Left"
+                                                Background="#102942"
+                                                CornerRadius="4" />
+                                    </StackPanel>
+                                    <Border Grid.Column="1"
+                                            Width="32"
+                                            Height="16"
+                                            HorizontalAlignment="Right"
+                                            VerticalAlignment="Bottom"
+                                            Background="#1683FF"
+                                            CornerRadius="8" />
+                                </Grid>
+                            </Border>
+                        </Grid>
                     </StackPanel>
-                    <ComboBox x:Name="FocusEndComboBox" Grid.Column="1"
-                              MinHeight="44" VerticalAlignment="Center"
-                              AutomationProperties.Name="Focus end behavior"
-                              SelectionChanged="FocusEnd_SelectionChanged">
-                        <ComboBoxItem Tag="RestorePreviousDesktop" Content="Restore previous desktop" />
-                        <ComboBoxItem Tag="KeepAppsStowed" Content="Keep Focus apps stowed" />
-                    </ComboBox>
-                </Grid>
-            </Border>
+                </Border>
+
+                <Border x:Name="AccessibilityCard"
+                        Style="{StaticResource CardBorder}"
+                        Margin="0,0,12,12">
+                    <StackPanel>
+                        <Grid Margin="0,0,0,14">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="46" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Border Width="36" Height="36"
+                                    CornerRadius="9"
+                                    Background="{DynamicResource SelectionBrush}">
+                                <Path Width="20" Height="20"
+                                      Stretch="Uniform"
+                                      Stroke="{DynamicResource AccentTealBrush}"
+                                      StrokeThickness="1.7"
+                                      Data="M10,2 A3,3 0 1 1 9.99,2 M3,7 H17 M10,7 V18 M5,10 L10,14 L15,10" />
+                            </Border>
+                            <StackPanel Grid.Column="1"
+                                        VerticalAlignment="Center">
+                                <TextBlock Text="Accessibility"
+                                           Style="{StaticResource SectionTitle}" />
+                                <TextBlock Text="Readable, keyboard-friendly and screen-reader aware."
+                                           Margin="0,2,0,0"
+                                           Foreground="{DynamicResource TextSecondaryBrush}" />
+                            </StackPanel>
+                        </Grid>
+
+                        <Grid Margin="0,0,0,12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel>
+                                <TextBlock x:Name="TextSizeLabel"
+                                           Text="Text size"
+                                           FontWeight="SemiBold" />
+                                <TextBlock Text="Scale STOW text without changing Windows display scaling."
+                                           Margin="0,3,18,0"
+                                           TextWrapping="Wrap"
+                                           Foreground="{DynamicResource TextSecondaryBrush}" />
+                            </StackPanel>
+                            <ComboBox x:Name="TextScaleComboBox"
+                                      Grid.Column="1"
+                                      MinWidth="150"
+                                      AutomationProperties.LabeledBy="{Binding ElementName=TextSizeLabel}"
+                                      SelectionChanged="TextScale_SelectionChanged">
+                                <ComboBoxItem Tag="100" Content="Standard (100%)" />
+                                <ComboBoxItem Tag="125" Content="Large (125%)" />
+                                <ComboBoxItem Tag="150" Content="Extra large (150%)" />
+                                <ComboBoxItem Tag="200" Content="Maximum (200%)" />
+                            </ComboBox>
+                        </Grid>
+
+                        <Grid Margin="0,4,0,8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Increase contrast in STOW"
+                                       FontWeight="SemiBold"
+                                       VerticalAlignment="Center" />
+                            <CheckBox x:Name="EnhancedContrastCheckBox"
+                                      Grid.Column="1"
+                                      Style="{StaticResource ToggleSwitch}"
+                                      AutomationProperties.Name="Increase contrast in STOW"
+                                      Checked="Accessibility_Changed"
+                                      Unchecked="Accessibility_Changed" />
+                        </Grid>
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Use the Windows UI font"
+                                       FontWeight="SemiBold"
+                                       VerticalAlignment="Center" />
+                            <CheckBox x:Name="UseSystemFontCheckBox"
+                                      Grid.Column="1"
+                                      Style="{StaticResource ToggleSwitch}"
+                                      AutomationProperties.Name="Use the Windows UI font"
+                                      Checked="Accessibility_Changed"
+                                      Unchecked="Accessibility_Changed" />
+                        </Grid>
+
+                        <TextBlock x:Name="SystemContrastStatusText"
+                                   Text="Windows contrast theme is active. STOW is following it."
+                                   Margin="0,10,0,0"
+                                   TextWrapping="Wrap"
+                                   AutomationProperties.LiveSetting="Polite"
+                                   Foreground="{DynamicResource TextSecondaryBrush}"
+                                   Visibility="Collapsed" />
+                    </StackPanel>
+                </Border>
+
+                <Border x:Name="StartupCard"
+                        Style="{StaticResource CardBorder}"
+                        Margin="0,0,0,12">
+                    <StackPanel>
+                        <Grid Margin="0,0,0,14">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="46" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Border Width="36" Height="36"
+                                    CornerRadius="9"
+                                    Background="{DynamicResource SelectionBrush}">
+                                <Path Width="20" Height="20"
+                                      Stretch="Uniform"
+                                      Stroke="{DynamicResource AccentBlueStrongBrush}"
+                                      StrokeThickness="1.7"
+                                      Data="M4,3 L17,10 L4,17 Z" />
+                            </Border>
+                            <StackPanel Grid.Column="1"
+                                        VerticalAlignment="Center">
+                                <TextBlock Text="Startup"
+                                           Style="{StaticResource SectionTitle}" />
+                                <TextBlock Text="Control what happens when Windows starts."
+                                           Margin="0,2,0,0"
+                                           Foreground="{DynamicResource TextSecondaryBrush}" />
+                            </StackPanel>
+                        </Grid>
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel>
+                                <TextBlock Text="Start STOW with Windows"
+                                           FontWeight="SemiBold" />
+                                <TextBlock Text="Launch quietly when at least one managed app is enabled."
+                                           Margin="0,3,18,0"
+                                           TextWrapping="Wrap"
+                                           Foreground="{DynamicResource TextSecondaryBrush}" />
+                            </StackPanel>
+                            <CheckBox x:Name="StartWithWindowsCheckBox"
+                                      Grid.Column="1"
+                                      Style="{StaticResource ToggleSwitch}"
+                                      AutomationProperties.Name="Start STOW with Windows"
+                                      VerticalAlignment="Center"
+                                      Click="StartWithWindows_Click" />
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <Border x:Name="NotificationsCard"
+                        Style="{StaticResource CardBorder}"
+                        Margin="0,0,12,12">
+                    <StackPanel>
+                        <Grid Margin="0,0,0,14">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="46" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Border Width="36" Height="36"
+                                    CornerRadius="9"
+                                    Background="{DynamicResource SelectionBrush}">
+                                <Path Width="20" Height="20"
+                                      Stretch="Uniform"
+                                      Stroke="{DynamicResource AccentBlueStrongBrush}"
+                                      StrokeThickness="1.7"
+                                      Data="M5,14 H15 M7,16 C8,18 12,18 13,16 M6,14 V8 C6,3 14,3 14,8 V14" />
+                            </Border>
+                            <StackPanel Grid.Column="1"
+                                        VerticalAlignment="Center">
+                                <TextBlock Text="Notifications"
+                                           Style="{StaticResource SectionTitle}" />
+                                <TextBlock Text="Choose when STOW keeps you informed."
+                                           Margin="0,2,0,0"
+                                           Foreground="{DynamicResource TextSecondaryBrush}" />
+                            </StackPanel>
+                        </Grid>
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel>
+                                <TextBlock Text="Scheduled Focus notifications"
+                                           FontWeight="SemiBold" />
+                                <TextBlock Text="Show local Windows notifications when scheduled sessions start or end."
+                                           Margin="0,3,18,0"
+                                           TextWrapping="Wrap"
+                                           Foreground="{DynamicResource TextSecondaryBrush}" />
+                            </StackPanel>
+                            <CheckBox x:Name="NotificationsCheckBox"
+                                      Grid.Column="1"
+                                      Style="{StaticResource ToggleSwitch}"
+                                      AutomationProperties.Name="Scheduled Focus notifications"
+                                      VerticalAlignment="Center"
+                                      Checked="Notifications_Changed"
+                                      Unchecked="Notifications_Changed" />
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <Border x:Name="FocusBehaviorCard"
+                        Style="{StaticResource CardBorder}"
+                        Margin="0,0,0,12">
+                    <StackPanel>
+                        <Grid Margin="0,0,0,14">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="46" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Border Width="36" Height="36"
+                                    CornerRadius="9"
+                                    Background="{DynamicResource SelectionBrush}">
+                                <Path Width="20" Height="20"
+                                      Stretch="Uniform"
+                                      Stroke="{DynamicResource AccentTealBrush}"
+                                      StrokeThickness="1.7"
+                                      Data="M10,2 A8,8 0 1 1 9.99,2 M10,6 A4,4 0 1 1 9.99,6 M10,9 A1,1 0 1 1 9.99,9" />
+                            </Border>
+                            <StackPanel Grid.Column="1"
+                                        VerticalAlignment="Center">
+                                <TextBlock Text="Focus behavior"
+                                           Style="{StaticResource SectionTitle}" />
+                                <TextBlock Text="Choose what happens when a Focus session ends."
+                                           Margin="0,2,0,0"
+                                           Foreground="{DynamicResource TextSecondaryBrush}" />
+                            </StackPanel>
+                        </Grid>
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel>
+                                <TextBlock Text="When Focus ends"
+                                           FontWeight="SemiBold" />
+                                <TextBlock Text="Control whether the previous desktop state is restored."
+                                           Margin="0,3,18,0"
+                                           TextWrapping="Wrap"
+                                           Foreground="{DynamicResource TextSecondaryBrush}" />
+                            </StackPanel>
+                            <ComboBox x:Name="FocusEndComboBox"
+                                      Grid.Column="1"
+                                      MinWidth="190"
+                                      VerticalAlignment="Center"
+                                      AutomationProperties.Name="Focus end behavior"
+                                      SelectionChanged="FocusEnd_SelectionChanged">
+                                <ComboBoxItem Tag="RestorePreviousDesktop"
+                                              Content="Restore previous desktop" />
+                                <ComboBoxItem Tag="KeepAppsStowed"
+                                              Content="Keep Focus apps stowed" />
+                            </ComboBox>
+                        </Grid>
+                    </StackPanel>
+                </Border>
             </WrapPanel>
         </StackPanel>
     </ScrollViewer>

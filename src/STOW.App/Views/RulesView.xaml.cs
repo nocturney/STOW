@@ -22,7 +22,9 @@ public partial class RulesView : UserControl
         string Name,
         string Summary,
         string Type,
-        string Status);
+        string Status,
+        string WhenText,
+        string ActionText);
 
     public RulesView(
         IRuleStore ruleStore,
@@ -140,17 +142,39 @@ public partial class RulesView : UserControl
             _ => "App rule"
         };
 
+        string whenText = rule.Trigger switch
+        {
+            RuleTrigger.Focus => "Focus starts",
+            RuleTrigger.Startup => $"{appName} starts",
+            _ => $"{appName} is minimized"
+        };
+        string actionText = rule.Action == RuleAction.KeepVisible
+            ? "Keep visible"
+            : "Stow in tray";
+
         return new RuleRow(
             rule.Id,
             rule.Name,
             summary,
             type,
-            rule.Enabled ? "Enabled" : "Off");
+            rule.Enabled ? "Enabled" : "Off",
+            whenText,
+            actionText);
     }
 
     private string AppName(string key) =>
         apps.FirstOrDefault(app => app.Key.Equals(key, StringComparison.OrdinalIgnoreCase))?.Name
         ?? "Unknown app";
+
+    public void SetSearchText(string text)
+    {
+        string value = text ?? string.Empty;
+        if (string.Equals(SearchBox?.Text, value, StringComparison.Ordinal))
+            return;
+
+        if (SearchBox is not null)
+            SearchBox.Text = value;
+    }
 
     private void SearchBox_TextChanged(object sender, TextChangedEventArgs e) => RefreshRules();
 

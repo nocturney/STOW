@@ -76,7 +76,7 @@ public sealed class MainTrayIconHost : IUserNotificationSink, IDisposable
         }
         catch { }
 
-        // Temporary fallback until the final approved STOW .ico is wired into the build.
+        // Defensive fallback only. Release builds embed the reviewed STOW application icon.
         return SystemIcons.Application;
     }
 

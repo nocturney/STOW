@@ -18,6 +18,11 @@
     <Color x:Key="HoverForegroundColor">#E5E7EB</Color>
     <Color x:Key="MutedColor">#8190A5</Color>
 
+    <LinearGradientBrush x:Key="ShellBackdropBrush" StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Color="#071523" Offset="0" />
+        <GradientStop Color="#081A2C" Offset="0.55" />
+        <GradientStop Color="#06111E" Offset="1" />
+    </LinearGradientBrush>
     <SolidColorBrush x:Key="CanvasBrush" Color="{StaticResource CanvasColor}" />
     <SolidColorBrush x:Key="SurfaceBrush" Color="{StaticResource SurfaceColor}" />
     <SolidColorBrush x:Key="SidebarBrush" Color="{StaticResource SidebarColor}" />

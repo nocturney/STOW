@@ -9,6 +9,7 @@ $root = Split-Path -Parent $PSScriptRoot
 $version = (Get-Content (Join-Path $root 'STOW_VERSION') -Raw).Trim()
 $legalRevision = (Get-Content (Join-Path $root 'LEGAL_TERMS_REVISION') -Raw).Trim()
 $project = Join-Path $root 'src\STOW.App\STOW.App.csproj'
+$icon = Join-Path $root 'assets\STOW.ico'
 $legalStoreSrc = Join-Path $root 'src\STOW.Infrastructure\Configuration\LegalAcceptanceStore.cs'
 $setupSrc = Join-Path $root 'src\STOWSetup.cs'
 $dist = Join-Path $root 'dist-stow'
@@ -17,6 +18,9 @@ $generatedLegal = Join-Path $root 'src\STOW.App\GeneratedLegal'
 
 if ($version -notmatch '^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$') {
     throw 'STOW_VERSION must use semantic version format.'
+}
+if (-not (Test-Path $icon)) {
+    throw "STOW application icon is missing: $icon"
 }
 
 $projectText = Get-Content $project -Raw
@@ -187,7 +191,7 @@ if (-not $csc) { throw 'Could not find the .NET Framework C# compiler for STOWSe
 $setup = Join-Path $dist 'STOWSetup.exe'
 $payloadResourceArg = '/resource:' + (Join-Path $dist 'STOW.exe') + ',STOW.Payload.exe'
 $legalResourceArg = '/resource:' + $legalZip + ',STOW.Legal.zip'
-& $csc /nologo /target:winexe /platform:anycpu /optimize+ /out:$setup /reference:System.Windows.Forms.dll /reference:System.Drawing.dll /reference:System.IO.Compression.dll /reference:System.IO.Compression.FileSystem.dll $payloadResourceArg $legalResourceArg $setupSrc
+& $csc /nologo /target:winexe /platform:anycpu /optimize+ /win32icon:$icon /out:$setup /reference:System.Windows.Forms.dll /reference:System.Drawing.dll /reference:System.IO.Compression.dll /reference:System.IO.Compression.FileSystem.dll $payloadResourceArg $legalResourceArg $setupSrc
 if ($LASTEXITCODE -ne 0) { throw "STOWSetup compilation failed with exit code $LASTEXITCODE" }
 
 $setupInfo = (Get-Item $setup).VersionInfo

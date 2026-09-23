@@ -1,176 +1,389 @@
 <UserControl x:Class="STOW.App.Views.FocusView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+    <ScrollViewer VerticalScrollBarVisibility="Auto"
+                  HorizontalScrollBarVisibility="Disabled">
         <StackPanel>
-            <Border Style="{StaticResource CardBorder}"
-                    BorderBrush="{DynamicResource AccentBlueBrush}"
-                    BorderThickness="1"
-                    Margin="0,0,0,14">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-                    <StackPanel>
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="Find your focus" FontSize="{DynamicResource FontSize20}" FontWeight="SemiBold" />
-                            <Border x:Name="SessionStatusChip" Style="{StaticResource StatusChip}"
-                                    Margin="10,0,0,0" VerticalAlignment="Center">
-                                <TextBlock x:Name="SessionStatusText"
-                                           Text="Inactive"
-                                           AutomationProperties.LiveSetting="Polite" />
-                            </Border>
-                        </StackPanel>
-                        <TextBlock Text="Temporarily stow distractions without changing your permanent app setup."
-                                   Margin="0,6,0,0" Foreground="{DynamicResource TextSecondaryBrush}" />
-                    </StackPanel>
-                    <Button x:Name="FocusActionButton" Grid.Column="1" Style="{StaticResource PrimaryButton}"
-                            Content="Start Focus" VerticalAlignment="Center" Click="FocusAction_Click" />
-                </Grid>
-            </Border>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1.08*" />
+                    <ColumnDefinition Width="14" />
+                    <ColumnDefinition Width="0.98*" />
+                    <ColumnDefinition Width="14" />
+                    <ColumnDefinition Width="1.05*" />
+                </Grid.ColumnDefinitions>
 
-            <Border x:Name="FocusStatusBanner" Style="{StaticResource CardBorder}"
-                    Background="{DynamicResource SurfaceElevatedBrush}" Margin="0,0,0,14" Visibility="Collapsed">
-                <TextBlock x:Name="FocusStatusText" TextWrapping="Wrap"
+                <Border Grid.Column="0"
+                        Style="{StaticResource CardBorder}"
+                        BorderBrush="{DynamicResource AccentBlueBrush}"
+                        BorderThickness="1"
+                        Padding="18"
+                        MinHeight="278">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Current session"
+                                       FontWeight="SemiBold"
+                                       FontSize="{DynamicResource FontSize16}" />
+                            <Border x:Name="SessionStatusChip"
+                                    Grid.Column="1"
+                                    Style="{StaticResource StatusChip}">
+                                <StackPanel Orientation="Horizontal">
+                                    <Ellipse Width="7" Height="7"
+                                             Fill="{DynamicResource AccentTealBrush}"
+                                             Margin="0,0,6,0" />
+                                    <TextBlock x:Name="SessionStatusText"
+                                               Text="Inactive"
+                                               AutomationProperties.LiveSetting="Polite" />
+                                </StackPanel>
+                            </Border>
+                        </Grid>
+
+                        <Grid Grid.Row="1"
+                              Margin="0,12,0,14">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="150" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock Text="Find your focus"
+                                           FontSize="{DynamicResource FontSize26}"
+                                           FontWeight="SemiBold" />
+                                <TextBlock Text="Stow distractions for this session while keeping the apps that matter visible."
+                                           Margin="0,8,0,0"
+                                           TextWrapping="Wrap"
+                                           Foreground="{DynamicResource TextSecondaryBrush}" />
+                            </StackPanel>
+                            <Control Grid.Column="1"
+                                     Width="142"
+                                     Height="112"
+                                     HorizontalAlignment="Right"
+                                     VerticalAlignment="Center"
+                                     Template="{StaticResource StowHeroTemplate}"
+                                     IsHitTestVisible="False"
+                                     Focusable="False" />
+                        </Grid>
+
+                        <Button x:Name="FocusActionButton"
+                                Grid.Row="2"
+                                Style="{StaticResource PrimaryButton}"
+                                Content="Start focus mode"
+                                HorizontalAlignment="Stretch"
+                                Click="FocusAction_Click" />
+                    </Grid>
+                </Border>
+
+                <Border Grid.Column="2"
+                        Style="{StaticResource CardBorder}"
+                        Padding="16"
+                        MinHeight="278">
+                    <StackPanel>
+                        <Grid Margin="0,0,0,12">
+                            <TextBlock Text="Quick presets"
+                                       Style="{StaticResource SectionTitle}" />
+                            <TextBlock Text="Instant setups"
+                                       HorizontalAlignment="Right"
+                                       VerticalAlignment="Center"
+                                       FontSize="{DynamicResource FontSize11}"
+                                       Foreground="{DynamicResource TextSecondaryBrush}" />
+                        </Grid>
+
+                        <Border Background="{DynamicResource SurfaceElevatedBrush}"
+                                CornerRadius="9"
+                                Padding="12"
+                                Margin="0,0,0,8">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="38" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <Border Width="30" Height="30"
+                                        CornerRadius="7"
+                                        Background="{DynamicResource SelectionBrush}">
+                                    <Path Width="17" Height="17"
+                                          Stretch="Uniform"
+                                          Stroke="{DynamicResource AccentBlueStrongBrush}"
+                                          StrokeThickness="1.7"
+                                          Data="M2,4 H16 V14 H2 Z M0,16 H18" />
+                                </Border>
+                                <StackPanel Grid.Column="1"
+                                            Margin="8,0,8,0"
+                                            VerticalAlignment="Center">
+                                    <TextBlock Text="Deep work"
+                                               FontWeight="SemiBold" />
+                                    <TextBlock Text="Maximum focus, minimal apps"
+                                               FontSize="{DynamicResource FontSize11}"
+                                               Foreground="{DynamicResource TextSecondaryBrush}" />
+                                </StackPanel>
+                                <Button x:Name="DeepWorkButton"
+                                        Grid.Column="2"
+                                        Style="{StaticResource SecondaryButton}"
+                                        Content="Use"
+                                        MinHeight="34"
+                                        Padding="10,3"
+                                        Click="DeepWork_Click" />
+                            </Grid>
+                        </Border>
+
+                        <Border Background="{DynamicResource SurfaceElevatedBrush}"
+                                CornerRadius="9"
+                                Padding="12"
+                                Margin="0,0,0,8">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="38" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <Border Width="30" Height="30"
+                                        CornerRadius="7"
+                                        Background="{DynamicResource SelectionBrush}">
+                                    <Path Width="17" Height="17"
+                                          Stretch="Uniform"
+                                          Stroke="{DynamicResource AccentTealBrush}"
+                                          StrokeThickness="1.7"
+                                          Data="M2,9 C5,4 11,4 16,9 C11,14 5,14 2,9 M7,9 A2,2 0 1 1 6.99,9" />
+                                </Border>
+                                <StackPanel Grid.Column="1"
+                                            Margin="8,0,8,0"
+                                            VerticalAlignment="Center">
+                                    <TextBlock Text="Keep all visible"
+                                               FontWeight="SemiBold" />
+                                    <TextBlock Text="Focus without stowing apps"
+                                               FontSize="{DynamicResource FontSize11}"
+                                               Foreground="{DynamicResource TextSecondaryBrush}" />
+                                </StackPanel>
+                                <Button x:Name="KeepAllButton"
+                                        Grid.Column="2"
+                                        Style="{StaticResource SecondaryButton}"
+                                        Content="Use"
+                                        MinHeight="34"
+                                        Padding="10,3"
+                                        Click="KeepAll_Click" />
+                            </Grid>
+                        </Border>
+
+                        <Border Background="{DynamicResource SurfaceElevatedBrush}"
+                                CornerRadius="9"
+                                Padding="12">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="38" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <Border Width="30" Height="30"
+                                        CornerRadius="7"
+                                        Background="{DynamicResource SelectionBrush}">
+                                    <Path Width="17" Height="17"
+                                          Stretch="Uniform"
+                                          Stroke="{DynamicResource AccentBlueStrongBrush}"
+                                          StrokeThickness="1.7"
+                                          Data="M3,3 H15 V15 H3 Z M6,3 V8 H12 V3 M6,12 H12" />
+                                </Border>
+                                <StackPanel Grid.Column="1"
+                                            Margin="8,0,8,0"
+                                            VerticalAlignment="Center">
+                                    <TextBlock Text="Custom"
+                                               FontWeight="SemiBold" />
+                                    <TextBlock Text="Save your current selection"
+                                               FontSize="{DynamicResource FontSize11}"
+                                               Foreground="{DynamicResource TextSecondaryBrush}" />
+                                </StackPanel>
+                                <Button x:Name="SavePresetButton"
+                                        Grid.Column="2"
+                                        Style="{StaticResource SecondaryButton}"
+                                        Content="Save"
+                                        MinHeight="34"
+                                        Padding="10,3"
+                                        Click="SavePreset_Click" />
+                            </Grid>
+                        </Border>
+                    </StackPanel>
+                </Border>
+
+                <Border Grid.Column="4"
+                        Style="{StaticResource CardBorder}"
+                        Padding="16"
+                        MinHeight="278">
+                    <StackPanel>
+                        <Grid Margin="0,0,0,10">
+                            <TextBlock Text="Focus schedule"
+                                       Style="{StaticResource SectionTitle}" />
+                            <TextBlock x:Name="SchedulesSummaryText"
+                                       HorizontalAlignment="Right"
+                                       VerticalAlignment="Center"
+                                       FontSize="{DynamicResource FontSize11}"
+                                       Foreground="{DynamicResource TextSecondaryBrush}" />
+                        </Grid>
+
+                        <TextBlock x:Name="ScheduleStatusText"
+                                   Margin="0,0,0,8"
+                                   TextWrapping="Wrap"
+                                   AutomationProperties.LiveSetting="Polite"
+                                   FontSize="{DynamicResource FontSize11}"
+                                   Foreground="{DynamicResource TextSecondaryBrush}"
+                                   Visibility="Collapsed" />
+
+                        <TextBlock x:Name="NoSchedulesText"
+                                   Text="No Focus schedules yet."
+                                   Margin="0,4,0,10"
+                                   TextWrapping="Wrap"
+                                   Foreground="{DynamicResource TextSecondaryBrush}" />
+
+                        <ItemsControl x:Name="ScheduleList"
+                                      AutomationProperties.Name="Focus schedules">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border BorderBrush="{DynamicResource BorderBrush}"
+                                            BorderThickness="1"
+                                            CornerRadius="8"
+                                            Padding="10"
+                                            Margin="0,0,0,7">
+                                        <StackPanel>
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Text="{Binding Name}"
+                                                           FontWeight="SemiBold"
+                                                           TextWrapping="Wrap" />
+                                                <CheckBox Grid.Column="1"
+                                                          Style="{StaticResource ToggleSwitch}"
+                                                          Tag="{Binding Id}"
+                                                          IsChecked="{Binding Enabled, Mode=OneWay}"
+                                                          IsEnabled="{Binding CanManage}"
+                                                          Click="ScheduleEnabled_Click" />
+                                            </Grid>
+                                            <TextBlock Text="{Binding Details}"
+                                                       Margin="0,3,0,0"
+                                                       TextWrapping="Wrap"
+                                                       FontSize="{DynamicResource FontSize11}"
+                                                       Foreground="{DynamicResource TextSecondaryBrush}" />
+                                            <TextBlock Text="{Binding Status}"
+                                                       Margin="0,2,0,6"
+                                                       TextWrapping="Wrap"
+                                                       FontSize="{DynamicResource FontSize11}"
+                                                       Foreground="{DynamicResource AccentTealBrush}" />
+                                            <StackPanel Orientation="Horizontal">
+                                                <Button Style="{StaticResource SecondaryButton}"
+                                                        Content="Edit"
+                                                        AutomationProperties.Name="Edit Focus schedule"
+                                                        Tag="{Binding Id}"
+                                                        IsEnabled="{Binding CanManage}"
+                                                        MinHeight="32"
+                                                        Padding="9,2"
+                                                        Margin="0,0,6,0"
+                                                        Click="EditSchedule_Click" />
+                                                <Button Style="{StaticResource SecondaryButton}"
+                                                        Content="Delete"
+                                                        AutomationProperties.Name="Delete Focus schedule"
+                                                        Tag="{Binding Id}"
+                                                        IsEnabled="{Binding CanManage}"
+                                                        MinHeight="32"
+                                                        Padding="9,2"
+                                                        Click="DeleteSchedule_Click" />
+                                            </StackPanel>
+                                        </StackPanel>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+
+                        <Button x:Name="AddScheduleButton"
+                                Style="{StaticResource SecondaryButton}"
+                                Content="+  Add focus block"
+                                HorizontalAlignment="Stretch"
+                                Margin="0,8,0,0"
+                                Click="AddSchedule_Click" />
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <Border x:Name="FocusStatusBanner"
+                    Style="{StaticResource CardBorder}"
+                    Background="{DynamicResource SurfaceElevatedBrush}"
+                    Margin="0,14,0,0"
+                    Visibility="Collapsed">
+                <TextBlock x:Name="FocusStatusText"
+                           TextWrapping="Wrap"
                            AutomationProperties.LiveSetting="Polite"
                            Foreground="{DynamicResource TextSecondaryBrush}" />
             </Border>
 
-            <TextBlock Text="Quick setup" Style="{StaticResource SectionTitle}" Margin="0,2,0,10" />
-            <UniformGrid Columns="3" Margin="0,0,0,14">
-                <Border Style="{StaticResource CardBorder}" Margin="0,0,10,0"
-                        Background="{DynamicResource SurfaceElevatedBrush}">
-                    <StackPanel>
-                        <TextBlock Text="Deep work" FontWeight="SemiBold"
-                                   Foreground="{DynamicResource AccentBlueStrongBrush}" />
-                        <TextBlock Text="Stow every enabled managed app for a blank-slate desktop."
-                                   Margin="0,5,0,10" TextWrapping="Wrap"
-                                   Foreground="{DynamicResource TextSecondaryBrush}" />
-                        <Button x:Name="DeepWorkButton" Style="{StaticResource SecondaryButton}"
-                                Content="Use preset" HorizontalAlignment="Left" Click="DeepWork_Click" />
-                    </StackPanel>
-                </Border>
-                <Border Style="{StaticResource CardBorder}" Margin="0,0,10,0"
-                        Background="{DynamicResource SurfaceElevatedBrush}">
-                    <StackPanel>
-                        <TextBlock Text="Keep all visible" FontWeight="SemiBold"
-                                   Foreground="{DynamicResource AccentTealBrush}" />
-                        <TextBlock Text="Select every managed app as visible before starting a session."
-                                   Margin="0,5,0,10" TextWrapping="Wrap"
-                                   Foreground="{DynamicResource TextSecondaryBrush}" />
-                        <Button x:Name="KeepAllButton" Style="{StaticResource SecondaryButton}"
-                                Content="Use preset" HorizontalAlignment="Left" Click="KeepAll_Click" />
-                    </StackPanel>
-                </Border>
-                <Border Style="{StaticResource CardBorder}">
-                    <StackPanel>
-                        <TextBlock Text="Saved presets" FontWeight="SemiBold" />
-                        <TextBlock Text="Save the current Keep visible selection for reuse."
-                                   Margin="0,5,0,10" TextWrapping="Wrap"
-                                   Foreground="{DynamicResource TextSecondaryBrush}" />
-                        <Button x:Name="SavePresetButton"
-                                Style="{StaticResource SecondaryButton}"
-                                Content="Save current"
-                                HorizontalAlignment="Left"
-                                Click="SavePreset_Click" />
-                    </StackPanel>
-                </Border>
-            </UniformGrid>
-
-            <Border x:Name="SavedPresetsCard"
-                    Style="{StaticResource CardBorder}"
-                    Margin="0,0,0,14">
-                <StackPanel>
-                    <Grid Margin="0,0,0,8">
-                        <TextBlock Text="Saved presets" Style="{StaticResource SectionTitle}" />
-                        <TextBlock x:Name="SavedPresetsSummaryText"
-                                   HorizontalAlignment="Right"
-                                   Foreground="{DynamicResource TextSecondaryBrush}"
-                                   FontSize="{DynamicResource FontSize12}" />
-                    </Grid>
-                    <TextBlock x:Name="NoSavedPresetsText"
-                               Text="No saved Focus presets yet."
-                               Foreground="{DynamicResource TextSecondaryBrush}"
-                               Margin="0,4,0,2" />
-                    <ItemsControl x:Name="SavedPresetsList"
-                                  AutomationProperties.Name="Saved Focus presets">
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <Grid Margin="0,7">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="Auto" />
-                                    </Grid.ColumnDefinitions>
-                                    <StackPanel>
-                                        <TextBlock Text="{Binding Name}" FontWeight="SemiBold" />
-                                        <TextBlock Text="{Binding Summary}"
-                                                   Margin="0,2,0,0"
-                                                   FontSize="{DynamicResource FontSize11}"
-                                                   Foreground="{DynamicResource TextSecondaryBrush}" />
-                                    </StackPanel>
-                                    <StackPanel Grid.Column="1"
-                                                Orientation="Horizontal"
-                                                VerticalAlignment="Center">
-                                        <Button Style="{StaticResource SecondaryButton}"
-                                                Content="Use"
-                                                Tag="{Binding Id}"
-                                                IsEnabled="{Binding CanUse}"
-                                                Margin="0,0,8,0"
-                                                Click="UsePreset_Click" />
-                                        <Button Style="{StaticResource SecondaryButton}"
-                                                Content="Delete"
-                                                Tag="{Binding Id}"
-                                                Click="DeletePreset_Click" />
-                                    </StackPanel>
-                                </Grid>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-                </StackPanel>
-            </Border>
-
-            <Grid>
+            <Grid Margin="0,14,0,0">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="1.4*" />
+                    <ColumnDefinition Width="1.42*" />
                     <ColumnDefinition Width="14" />
-                    <ColumnDefinition Width="0.8*" />
+                    <ColumnDefinition Width="0.78*" />
                 </Grid.ColumnDefinitions>
 
-                <Border Grid.Column="0" Style="{StaticResource CardBorder}">
+                <Border Grid.Column="0"
+                        Style="{StaticResource CardBorder}"
+                        MinHeight="280">
                     <StackPanel>
-                        <Grid Margin="0,0,0,12">
-                            <TextBlock Text="Apps during Focus" Style="{StaticResource SectionTitle}" />
-                            <TextBlock x:Name="ManagedAppsSummaryText" HorizontalAlignment="Right"
-                                       Foreground="{DynamicResource TextSecondaryBrush}" FontSize="{DynamicResource FontSize12}" />
+                        <Grid Margin="0,0,0,10">
+                            <StackPanel>
+                                <TextBlock Text="Apps during Focus"
+                                           Style="{StaticResource SectionTitle}" />
+                                <TextBlock Text="Choose which managed apps stay visible during this session."
+                                           Margin="0,3,0,0"
+                                           Foreground="{DynamicResource TextSecondaryBrush}" />
+                            </StackPanel>
+                            <TextBlock x:Name="ManagedAppsSummaryText"
+                                       HorizontalAlignment="Right"
+                                       VerticalAlignment="Top"
+                                       Foreground="{DynamicResource TextSecondaryBrush}"
+                                       FontSize="{DynamicResource FontSize11}" />
                         </Grid>
+
                         <TextBlock x:Name="NoManagedAppsText"
                                    Text="No enabled managed apps are available. Add and enable apps from Apps first."
-                                   TextWrapping="Wrap" Foreground="{DynamicResource TextSecondaryBrush}"
-                                   Visibility="Collapsed" Margin="0,4,0,4" />
+                                   TextWrapping="Wrap"
+                                   Foreground="{DynamicResource TextSecondaryBrush}"
+                                   Visibility="Collapsed"
+                                   Margin="0,4,0,4" />
+
                         <ItemsControl x:Name="FocusAppsList"
                                       AutomationProperties.Name="Apps during Focus">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
-                                    <Grid Margin="0,7">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*" />
-                                            <ColumnDefinition Width="Auto" />
-                                        </Grid.ColumnDefinitions>
-                                        <StackPanel>
-                                            <TextBlock Text="{Binding Name}" FontWeight="SemiBold" />
-                                            <TextBlock Text="{Binding ProcessName}" FontSize="{DynamicResource FontSize11}" Margin="0,2,0,0"
-                                                       Foreground="{DynamicResource TextSecondaryBrush}" />
-                                        </StackPanel>
-                                        <CheckBox Grid.Column="1"
-                                                  Style="{StaticResource ToggleSwitch}"
-                                                  Content="Keep visible"
-                                                  Tag="{Binding Key}"
-                                                  IsChecked="{Binding KeepVisible, Mode=OneWay}"
-                                                  IsEnabled="{Binding CanEdit}"
-                                                  Click="KeepVisible_Click"
-                                                  VerticalAlignment="Center" />
-                                    </Grid>
+                                    <Border BorderBrush="{DynamicResource BorderBrush}"
+                                            BorderThickness="0,1,0,0"
+                                            Padding="0,10">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel>
+                                                <TextBlock Text="{Binding Name}"
+                                                           FontWeight="SemiBold" />
+                                                <TextBlock Text="{Binding ProcessName}"
+                                                           FontSize="{DynamicResource FontSize11}"
+                                                           Margin="0,2,0,0"
+                                                           Foreground="{DynamicResource TextSecondaryBrush}" />
+                                            </StackPanel>
+                                            <CheckBox Grid.Column="1"
+                                                      Style="{StaticResource ToggleSwitch}"
+                                                      Content="Keep visible"
+                                                      Tag="{Binding Key}"
+                                                      IsChecked="{Binding KeepVisible, Mode=OneWay}"
+                                                      IsEnabled="{Binding CanEdit}"
+                                                      Click="KeepVisible_Click"
+                                                      VerticalAlignment="Center" />
+                                        </Grid>
+                                    </Border>
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
@@ -178,112 +391,155 @@
                 </Border>
 
                 <StackPanel Grid.Column="2">
-                    <Border Style="{StaticResource CardBorder}" Margin="0,0,0,12">
+                    <Border x:Name="SavedPresetsCard"
+                            Style="{StaticResource CardBorder}"
+                            Margin="0,0,0,14">
                         <StackPanel>
-                            <TextBlock Text="Session" Style="{StaticResource SectionTitle}" />
+                            <Grid Margin="0,0,0,8">
+                                <TextBlock Text="Saved presets"
+                                           Style="{StaticResource SectionTitle}" />
+                                <TextBlock x:Name="SavedPresetsSummaryText"
+                                           HorizontalAlignment="Right"
+                                           Foreground="{DynamicResource TextSecondaryBrush}"
+                                           FontSize="{DynamicResource FontSize11}" />
+                            </Grid>
+                            <TextBlock x:Name="NoSavedPresetsText"
+                                       Text="No saved Focus presets yet."
+                                       Foreground="{DynamicResource TextSecondaryBrush}"
+                                       Margin="0,4,0,2" />
+                            <ItemsControl x:Name="SavedPresetsList"
+                                          AutomationProperties.Name="Saved Focus presets">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border BorderBrush="{DynamicResource BorderBrush}"
+                                                BorderThickness="0,1,0,0"
+                                                Padding="0,8">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+                                                <StackPanel>
+                                                    <TextBlock Text="{Binding Name}"
+                                                               FontWeight="SemiBold" />
+                                                    <TextBlock Text="{Binding Summary}"
+                                                               Margin="0,2,0,0"
+                                                               FontSize="{DynamicResource FontSize11}"
+                                                               Foreground="{DynamicResource TextSecondaryBrush}" />
+                                                </StackPanel>
+                                                <StackPanel Grid.Column="1"
+                                                            Orientation="Horizontal"
+                                                            VerticalAlignment="Center">
+                                                    <Button Style="{StaticResource SecondaryButton}"
+                                                            Content="Use"
+                                                            Tag="{Binding Id}"
+                                                            IsEnabled="{Binding CanUse}"
+                                                            MinHeight="32"
+                                                            Padding="9,2"
+                                                            Margin="0,0,6,0"
+                                                            Click="UsePreset_Click" />
+                                                    <Button Style="{StaticResource SecondaryButton}"
+                                                            Content="×"
+                                                            AutomationProperties.Name="Delete Focus preset"
+                                                            Tag="{Binding Id}"
+                                                            Width="34"
+                                                            MinHeight="32"
+                                                            Padding="0"
+                                                            Click="DeletePreset_Click" />
+                                                </StackPanel>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </Border>
+
+                    <Border Style="{StaticResource CardBorder}">
+                        <StackPanel>
+                            <TextBlock Text="Session"
+                                       Style="{StaticResource SectionTitle}" />
                             <Grid Margin="0,12,0,0">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
-                                <TextBlock Text="Stowed by Focus" Foreground="{DynamicResource TextSecondaryBrush}" />
-                                <TextBlock x:Name="StowedCountText" Grid.Column="1" Text="0" FontWeight="SemiBold" />
+                                <TextBlock Text="Stowed by Focus"
+                                           Foreground="{DynamicResource TextSecondaryBrush}" />
+                                <TextBlock x:Name="StowedCountText"
+                                           Grid.Column="1"
+                                           Text="0"
+                                           FontWeight="SemiBold" />
                             </Grid>
                             <Grid Margin="0,8,0,0">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
-                                <TextBlock Text="Kept visible" Foreground="{DynamicResource TextSecondaryBrush}" />
-                                <TextBlock x:Name="VisibleCountText" Grid.Column="1" Text="0" FontWeight="SemiBold" />
+                                <TextBlock Text="Kept visible"
+                                           Foreground="{DynamicResource TextSecondaryBrush}" />
+                                <TextBlock x:Name="VisibleCountText"
+                                           Grid.Column="1"
+                                           Text="0"
+                                           FontWeight="SemiBold" />
                             </Grid>
-                        </StackPanel>
-                    </Border>
-                    <Border Style="{StaticResource CardBorder}">
-                        <StackPanel>
-                            <Grid Margin="0,0,0,8">
-                                <TextBlock Text="Schedule" Style="{StaticResource SectionTitle}" />
-                                <TextBlock x:Name="SchedulesSummaryText"
-                                           HorizontalAlignment="Right"
-                                           Foreground="{DynamicResource TextSecondaryBrush}"
-                                           FontSize="{DynamicResource FontSize12}" />
-                            </Grid>
-                            <TextBlock x:Name="ScheduleStatusText"
-                                       Margin="0,0,0,8"
-                                       TextWrapping="Wrap"
-                                       AutomationProperties.LiveSetting="Polite"
-                                       FontSize="{DynamicResource FontSize11}"
-                                       Foreground="{DynamicResource TextSecondaryBrush}"
-                                       Visibility="Collapsed" />
-                            <TextBlock x:Name="NoSchedulesText"
-                                       Text="No Focus schedules yet."
-                                       Margin="0,2,0,8"
-                                       TextWrapping="Wrap"
-                                       Foreground="{DynamicResource TextSecondaryBrush}" />
-                            <ItemsControl x:Name="ScheduleList"
-                                          AutomationProperties.Name="Focus schedules">
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate>
-                                        <Border BorderBrush="{DynamicResource BorderBrush}"
-                                                BorderThickness="0,1,0,0"
-                                                Padding="0,9,0,8">
-                                            <StackPanel>
-                                                <Grid>
-                                                    <Grid.ColumnDefinitions>
-                                                        <ColumnDefinition Width="*" />
-                                                        <ColumnDefinition Width="Auto" />
-                                                    </Grid.ColumnDefinitions>
-                                                    <TextBlock Text="{Binding Name}"
-                                                               FontWeight="SemiBold"
-                                                               TextWrapping="Wrap" />
-                                                    <CheckBox Grid.Column="1"
-                                                              Content="On"
-                                                              Tag="{Binding Id}"
-                                                              IsChecked="{Binding Enabled, Mode=OneWay}"
-                                                              IsEnabled="{Binding CanManage}"
-                                                              Click="ScheduleEnabled_Click"
-                                                              Margin="8,0,0,0" />
-                                                </Grid>
-                                                <TextBlock Text="{Binding Details}"
-                                                           Margin="0,3,0,0"
-                                                           TextWrapping="Wrap"
-                                                           FontSize="{DynamicResource FontSize11}"
-                                                           Foreground="{DynamicResource TextSecondaryBrush}" />
-                                                <TextBlock Text="{Binding Status}"
-                                                           Margin="0,2,0,7"
-                                                           TextWrapping="Wrap"
-                                                           FontSize="{DynamicResource FontSize11}"
-                                                           Foreground="{DynamicResource TextSecondaryBrush}" />
-                                                <StackPanel Orientation="Horizontal">
-                                                    <Button Style="{StaticResource SecondaryButton}"
-                                                            Content="Edit"
-                                                            AutomationProperties.Name="Edit Focus schedule"
-                                                            Tag="{Binding Id}"
-                                                            IsEnabled="{Binding CanManage}"
-                                                            Margin="0,0,6,0"
-                                                            Click="EditSchedule_Click" />
-                                                    <Button Style="{StaticResource SecondaryButton}"
-                                                            Content="Delete"
-                                                            AutomationProperties.Name="Delete Focus schedule"
-                                                            Tag="{Binding Id}"
-                                                            IsEnabled="{Binding CanManage}"
-                                                            Click="DeleteSchedule_Click" />
-                                                </StackPanel>
-                                            </StackPanel>
-                                        </Border>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
-                            <Button x:Name="AddScheduleButton"
-                                    Style="{StaticResource SecondaryButton}"
-                                    Content="Add schedule"
-                                    HorizontalAlignment="Left"
-                                    Margin="0,8,0,0"
-                                    Click="AddSchedule_Click" />
                         </StackPanel>
                     </Border>
                 </StackPanel>
             </Grid>
+
+            <Border Style="{StaticResource CardBorder}"
+                    Background="{DynamicResource SurfaceElevatedBrush}"
+                    Margin="0,14,0,0"
+                    Padding="14,10">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="48" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="1" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="1" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <Border Width="36" Height="36"
+                            CornerRadius="8"
+                            Background="{DynamicResource SelectionBrush}">
+                        <Path Width="20" Height="20"
+                              Stretch="Uniform"
+                              Stroke="{DynamicResource AccentTealBrush}"
+                              StrokeThickness="1.7"
+                              Data="M3,6 L10,2 L17,6 L10,10 Z M3,10 L10,14 L17,10 M3,14 L10,18 L17,14" />
+                    </Border>
+                    <StackPanel Grid.Column="1"
+                                VerticalAlignment="Center">
+                        <TextBlock Text="A more intentional desktop."
+                                   FontWeight="SemiBold" />
+                        <TextBlock Text="Hide what distracts you. Keep what moves you forward."
+                                   FontSize="{DynamicResource FontSize11}"
+                                   Foreground="{DynamicResource TextSecondaryBrush}" />
+                    </StackPanel>
+                    <TextBlock Grid.Column="2"
+                               Text="Less noise."
+                               Margin="18,0"
+                               VerticalAlignment="Center"
+                               Foreground="{DynamicResource TextSecondaryBrush}" />
+                    <Border Grid.Column="3"
+                            Background="{DynamicResource BorderBrush}" />
+                    <TextBlock Grid.Column="4"
+                               Text="More focus."
+                               Margin="18,0"
+                               VerticalAlignment="Center"
+                               Foreground="{DynamicResource TextSecondaryBrush}" />
+                    <Border Grid.Column="5"
+                            Background="{DynamicResource BorderBrush}" />
+                    <TextBlock Grid.Column="6"
+                               Text="A brighter day."
+                               Margin="18,0,4,0"
+                               VerticalAlignment="Center"
+                               Foreground="{DynamicResource TextSecondaryBrush}" />
+                </Grid>
+            </Border>
         </StackPanel>
     </ScrollViewer>
 </UserControl>
