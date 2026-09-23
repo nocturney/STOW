@@ -6,6 +6,7 @@ using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
+using STOW.App.Themes;
 using STOW.Engine.Contracts;
 
 namespace STOW.App.Views;
@@ -53,12 +54,30 @@ public partial class AppsView : UserControl
         this.runtimeUnavailableReason = runtimeUnavailableReason;
         runtimeHealthy = engine is not null;
         InitializeComponent();
+        ApplyAccessibleLayout();
 
         refreshTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(1500) };
         refreshTimer.Tick += (_, _) => RefreshData();
         Loaded += (_, _) => refreshTimer.Start();
         Unloaded += (_, _) => refreshTimer.Stop();
         RefreshData();
+    }
+
+    private void ApplyAccessibleLayout()
+    {
+        bool stackCards = AccessibilityManager.CurrentTextScalePercent >= 150;
+
+        Grid.SetRow(ManagedAppsCard, 0);
+        Grid.SetColumn(ManagedAppsCard, 0);
+        Grid.SetColumnSpan(ManagedAppsCard, stackCards ? 3 : 1);
+        ManagedAppsCard.Margin = new Thickness(0);
+
+        Grid.SetRow(AvailableAppsCard, stackCards ? 1 : 0);
+        Grid.SetColumn(AvailableAppsCard, stackCards ? 0 : 2);
+        Grid.SetColumnSpan(AvailableAppsCard, stackCards ? 3 : 1);
+        AvailableAppsCard.Margin = stackCards
+            ? new Thickness(0, 14, 0, 0)
+            : new Thickness(0);
     }
 
     public void SetSearchText(string text)

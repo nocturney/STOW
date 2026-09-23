@@ -19,14 +19,20 @@
                            Foreground="{DynamicResource TextSecondaryBrush}" />
             </Border>
 
-            <Grid>
+            <Grid x:Name="AppsCardsGrid">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="1.3*" />
                     <ColumnDefinition Width="14" />
                     <ColumnDefinition Width="0.9*" />
                 </Grid.ColumnDefinitions>
 
-                <Border Grid.Column="0"
+                <Border x:Name="ManagedAppsCard"
+                        Grid.Row="0"
+                        Grid.Column="0"
                         Style="{StaticResource CardBorder}"
                         Padding="0"
                         MinHeight="292">
@@ -235,7 +241,9 @@
                     </Grid>
                 </Border>
 
-                <Border Grid.Column="2"
+                <Border x:Name="AvailableAppsCard"
+                        Grid.Row="0"
+                        Grid.Column="2"
                         Style="{StaticResource CardBorder}"
                         Padding="0"
                         MinHeight="292">
