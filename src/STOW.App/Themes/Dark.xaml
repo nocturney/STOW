@@ -27,6 +27,15 @@
         <GradientStop Color="#081A2C" Offset="0.55" />
         <GradientStop Color="#06111E" Offset="1" />
     </LinearGradientBrush>
+    <RadialGradientBrush x:Key="ShellAmbientBlueBrush">
+        <GradientStop Color="#283B82F6" Offset="0" />
+        <GradientStop Color="#0C3B82F6" Offset="0.58" />
+        <GradientStop Color="#003B82F6" Offset="1" />
+    </RadialGradientBrush>
+    <RadialGradientBrush x:Key="ShellAmbientTealBrush">
+        <GradientStop Color="#1614B8A6" Offset="0" />
+        <GradientStop Color="#0014B8A6" Offset="1" />
+    </RadialGradientBrush>
     <SolidColorBrush x:Key="CanvasBrush" Color="{StaticResource CanvasColor}" />
     <SolidColorBrush x:Key="SurfaceBrush" Color="{StaticResource SurfaceColor}" />
     <LinearGradientBrush x:Key="CardSurfaceBrush" StartPoint="0,0" EndPoint="1,1">

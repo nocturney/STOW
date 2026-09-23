@@ -31,6 +31,23 @@
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
 
+            <Grid Grid.ColumnSpan="3"
+                  IsHitTestVisible="False"
+                  ClipToBounds="True">
+                <Ellipse Width="640"
+                         Height="430"
+                         HorizontalAlignment="Right"
+                         VerticalAlignment="Top"
+                         Margin="0,-170,-170,0"
+                         Fill="{DynamicResource ShellAmbientBlueBrush}" />
+                <Ellipse Width="500"
+                         Height="340"
+                         HorizontalAlignment="Left"
+                         VerticalAlignment="Bottom"
+                         Margin="160,0,0,-170"
+                         Fill="{DynamicResource ShellAmbientTealBrush}" />
+            </Grid>
+
             <Border Grid.Column="0"
                     Background="{DynamicResource SidebarBrush}"
                     CornerRadius="12,0,0,12">

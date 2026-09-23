@@ -2,6 +2,8 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <SolidColorBrush x:Key="ShellBackdropBrush"
                      Color="{DynamicResource {x:Static SystemColors.WindowColorKey}}" />
+    <SolidColorBrush x:Key="ShellAmbientBlueBrush" Color="Transparent" />
+    <SolidColorBrush x:Key="ShellAmbientTealBrush" Color="Transparent" />
     <SolidColorBrush x:Key="CanvasBrush"
                      Color="{DynamicResource {x:Static SystemColors.WindowColorKey}}" />
     <SolidColorBrush x:Key="SurfaceBrush"
