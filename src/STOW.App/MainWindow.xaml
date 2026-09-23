@@ -26,7 +26,8 @@
             CornerRadius="12">
         <Grid>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="228" />
+                <ColumnDefinition x:Name="SidebarColumn"
+                                  Width="228" />
                 <ColumnDefinition Width="1" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>

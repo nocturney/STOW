@@ -55,6 +55,7 @@ public partial class MainWindow : Window
         }
 
         InitializeComponent();
+        ApplyAdaptiveShellLayout();
         SourceInitialized += (_, _) =>
         {
             ApplyNativeWindowAttributes(ThemeManager.Current);
@@ -282,7 +283,25 @@ public partial class MainWindow : Window
         new(settingsStore, trayEngine);
 
     private void ThemeManager_Applied(STOW.App.Themes.ThemeMode mode) =>
-        Dispatcher.BeginInvoke(() => ApplyNativeWindowAttributes(mode));
+        Dispatcher.BeginInvoke(() =>
+        {
+            ApplyNativeWindowAttributes(mode);
+            ApplyAdaptiveShellLayout();
+        });
+
+    private void ApplyAdaptiveShellLayout()
+    {
+        if (SidebarColumn is null)
+            return;
+
+        double width = AccessibilityManager.CurrentTextScalePercent switch
+        {
+            >= 200 => 286,
+            >= 150 => 252,
+            _ => 228
+        };
+        SidebarColumn.Width = new GridLength(width);
+    }
 
     private void ApplyNativeWindowAttributes(STOW.App.Themes.ThemeMode mode)
     {
