@@ -332,14 +332,14 @@
     <Style x:Key="NavIconPath" TargetType="Path">
         <Setter Property="Width" Value="22" />
         <Setter Property="Height" Value="22" />
-        <Setter Property="Margin" Value="0,0,10,0" />
+        <Setter Property="Margin" Value="0,0,12,0" />
         <Setter Property="Stretch" Value="Uniform" />
-        <Setter Property="StrokeThickness" Value="1.7" />
+        <Setter Property="StrokeThickness" Value="1.9" />
         <Setter Property="StrokeStartLineCap" Value="Round" />
         <Setter Property="StrokeEndLineCap" Value="Round" />
         <Setter Property="StrokeLineJoin" Value="Round" />
         <Setter Property="Stroke"
-                Value="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                Value="{Binding BorderBrush, RelativeSource={RelativeSource AncestorType=Button}}" />
     </Style>
 
     <Style x:Key="ShellCaptionButton" TargetType="Button">
@@ -408,31 +408,62 @@
     <Style x:Key="NavButton" TargetType="Button">
         <Setter Property="FocusVisualStyle" Value="{StaticResource StowFocusVisual}" />
         <Setter Property="MinHeight" Value="48" />
-        <Setter Property="Margin" Value="8,2" />
+        <Setter Property="Margin" Value="8,3" />
         <Setter Property="Padding" Value="14,0" />
         <Setter Property="HorizontalContentAlignment" Value="Left" />
         <Setter Property="Background" Value="Transparent" />
-        <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource NavForegroundBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource NavIconBrush}" />
         <Setter Property="BorderThickness" Value="0" />
         <Setter Property="FontSize" Value="{DynamicResource FontSize15}" />
-        <Setter Property="FontWeight" Value="Medium" />
+        <Setter Property="FontWeight" Value="SemiBold" />
         <Setter Property="Cursor" Value="Hand" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
-                    <Border x:Name="Chrome"
-                            Background="{TemplateBinding Background}"
-                            BorderBrush="{TemplateBinding BorderBrush}"
-                            BorderThickness="{TemplateBinding BorderThickness}"
-                            CornerRadius="8">
+                    <Grid>
+                        <Border x:Name="Chrome"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{DynamicResource NavHoverBorderBrush}"
+                                BorderThickness="0"
+                                CornerRadius="10" />
+                        <Border x:Name="ActiveIndicator"
+                                Width="4"
+                                Height="27"
+                                Margin="1,0,0,0"
+                                HorizontalAlignment="Left"
+                                VerticalAlignment="Center"
+                                Background="{DynamicResource AccentBlueStrongBrush}"
+                                CornerRadius="2"
+                                Opacity="0" />
                         <ContentPresenter Margin="{TemplateBinding Padding}"
                                           VerticalAlignment="Center"
                                           RecognizesAccessKey="True" />
-                    </Border>
+                    </Grid>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource HoverBrush}" />
-                            <Setter Property="Foreground" Value="{DynamicResource HoverForegroundBrush}" />
+                            <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource NavHoverBrush}" />
+                            <Setter TargetName="Chrome" Property="BorderThickness" Value="1" />
+                            <Setter TargetName="Chrome" Property="Effect" Value="{DynamicResource NavHoverEffect}" />
+                            <Setter TargetName="ActiveIndicator" Property="Opacity" Value="0.34" />
+                            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+                            <Setter Property="BorderBrush" Value="{DynamicResource NavHoverIconBrush}" />
+                        </Trigger>
+                        <Trigger Property="Tag" Value="Selected">
+                            <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource NavSelectionBrush}" />
+                            <Setter TargetName="Chrome" Property="BorderThickness" Value="0" />
+                            <Setter TargetName="ActiveIndicator" Property="Opacity" Value="1" />
+                        </Trigger>
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition Property="IsMouseOver" Value="True" />
+                                <Condition Property="Tag" Value="Selected" />
+                            </MultiTrigger.Conditions>
+                            <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource NavSelectionHoverBrush}" />
+                            <Setter TargetName="Chrome" Property="Effect" Value="{DynamicResource NavHoverEffect}" />
+                        </MultiTrigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="Chrome" Property="Opacity" Value="0.82" />
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -480,7 +511,8 @@
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="Chrome" Property="Opacity" Value="0.9" />
+                            <Setter TargetName="Chrome" Property="Opacity" Value="0.97" />
+                            <Setter TargetName="Chrome" Property="Effect" Value="{DynamicResource NavHoverEffect}" />
                         </Trigger>
                         <Trigger Property="IsPressed" Value="True">
                             <Setter TargetName="Chrome" Property="Opacity" Value="0.78" />
@@ -519,7 +551,9 @@
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource HoverBrush}" />
+                            <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource NavHoverBrush}" />
+                            <Setter TargetName="Chrome" Property="BorderBrush" Value="{DynamicResource AccentBlueBrush}" />
+                            <Setter TargetName="Chrome" Property="Effect" Value="{DynamicResource NavHoverEffect}" />
                         </Trigger>
                         <Trigger Property="IsPressed" Value="True">
                             <Setter TargetName="Chrome" Property="Opacity" Value="0.78" />
@@ -564,7 +598,9 @@
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource HoverBrush}" />
+                            <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource NavHoverBrush}" />
+                            <Setter TargetName="Chrome" Property="BorderBrush" Value="{DynamicResource AccentBlueBrush}" />
+                            <Setter TargetName="Chrome" Property="Effect" Value="{DynamicResource NavHoverEffect}" />
                             <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
                         </Trigger>
                         <Trigger Property="IsPressed" Value="True">
@@ -711,6 +747,10 @@
                             <Setter TargetName="Track" Property="BorderBrush" Value="{DynamicResource AccentBlueStrongBrush}" />
                             <Setter TargetName="Thumb" Property="HorizontalAlignment" Value="Right" />
                             <Setter TargetName="Thumb" Property="Fill" Value="{DynamicResource AccentForegroundBrush}" />
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Track" Property="BorderBrush" Value="{DynamicResource AccentBlueBrush}" />
+                            <Setter TargetName="Track" Property="Effect" Value="{DynamicResource NavHoverEffect}" />
                         </Trigger>
                         <Trigger Property="IsEnabled" Value="False">
                             <Setter TargetName="Track" Property="Opacity" Value="0.45" />

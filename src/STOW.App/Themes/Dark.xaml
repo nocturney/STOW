@@ -21,6 +21,15 @@
     <Color x:Key="HoverColor">#162942</Color>
     <Color x:Key="HoverForegroundColor">#E5E7EB</Color>
     <Color x:Key="MutedColor">#8190A5</Color>
+    <Color x:Key="NavForegroundColor">#D3DEEA</Color>
+    <Color x:Key="NavIconColor">#B4C6D8</Color>
+    <Color x:Key="NavHoverIconColor">#47A8FF</Color>
+    <Color x:Key="NavHoverColor">#102B47</Color>
+    <Color x:Key="NavHoverBorderColor">#28547E</Color>
+    <Color x:Key="NavSelectionColor">#123D70</Color>
+    <Color x:Key="NavSelectionHoverColor">#164A83</Color>
+    <Color x:Key="NavSelectionForegroundColor">#F3F7FC</Color>
+    <Color x:Key="NavSelectedIconColor">#47A8FF</Color>
 
     <LinearGradientBrush x:Key="ShellBackdropBrush" StartPoint="0,0" EndPoint="1,1">
         <GradientStop Color="#071523" Offset="0" />
@@ -28,8 +37,8 @@
         <GradientStop Color="#06111E" Offset="1" />
     </LinearGradientBrush>
     <RadialGradientBrush x:Key="ShellAmbientBlueBrush">
-        <GradientStop Color="#283B82F6" Offset="0" />
-        <GradientStop Color="#0C3B82F6" Offset="0.58" />
+        <GradientStop Color="#343B82F6" Offset="0" />
+        <GradientStop Color="#123B82F6" Offset="0.58" />
         <GradientStop Color="#003B82F6" Offset="1" />
     </RadialGradientBrush>
     <RadialGradientBrush x:Key="ShellAmbientTealBrush">
@@ -42,7 +51,11 @@
         <GradientStop Color="#0D2238" Offset="0" />
         <GradientStop Color="#091A2C" Offset="1" />
     </LinearGradientBrush>
-    <SolidColorBrush x:Key="SidebarBrush" Color="{StaticResource SidebarColor}" />
+    <LinearGradientBrush x:Key="SidebarBrush" StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Color="#081829" Offset="0" />
+        <GradientStop Color="#081A2D" Offset="0.58" />
+        <GradientStop Color="#0A2238" Offset="1" />
+    </LinearGradientBrush>
     <SolidColorBrush x:Key="SurfaceElevatedBrush" Color="{StaticResource SurfaceElevatedColor}" />
     <SolidColorBrush x:Key="TextPrimaryBrush" Color="{StaticResource TextPrimaryColor}" />
     <SolidColorBrush x:Key="TextSecondaryBrush" Color="{StaticResource TextSecondaryColor}" />
@@ -65,4 +78,27 @@
     <SolidColorBrush x:Key="HoverBrush" Color="{StaticResource HoverColor}" />
     <SolidColorBrush x:Key="HoverForegroundBrush" Color="{StaticResource HoverForegroundColor}" />
     <SolidColorBrush x:Key="MutedBrush" Color="{StaticResource MutedColor}" />
+    <SolidColorBrush x:Key="NavForegroundBrush" Color="{StaticResource NavForegroundColor}" />
+    <SolidColorBrush x:Key="NavIconBrush" Color="{StaticResource NavIconColor}" />
+    <SolidColorBrush x:Key="NavHoverIconBrush" Color="{StaticResource NavHoverIconColor}" />
+    <LinearGradientBrush x:Key="NavHoverBrush" StartPoint="0,0" EndPoint="1,0">
+        <GradientStop Color="#0E2944" Offset="0" />
+        <GradientStop Color="#123858" Offset="1" />
+    </LinearGradientBrush>
+    <SolidColorBrush x:Key="NavHoverBorderBrush" Color="{StaticResource NavHoverBorderColor}" />
+    <LinearGradientBrush x:Key="NavSelectionBrush" StartPoint="0,0" EndPoint="1,0">
+        <GradientStop Color="#123966" Offset="0" />
+        <GradientStop Color="#194D83" Offset="1" />
+    </LinearGradientBrush>
+    <LinearGradientBrush x:Key="NavSelectionHoverBrush" StartPoint="0,0" EndPoint="1,0">
+        <GradientStop Color="#164476" Offset="0" />
+        <GradientStop Color="#1C5896" Offset="1" />
+    </LinearGradientBrush>
+    <SolidColorBrush x:Key="NavSelectionForegroundBrush" Color="{StaticResource NavSelectionForegroundColor}" />
+    <SolidColorBrush x:Key="NavSelectedIconBrush" Color="{StaticResource NavSelectedIconColor}" />
+    <DropShadowEffect x:Key="NavHoverEffect"
+                      BlurRadius="16"
+                      ShadowDepth="0"
+                      Opacity="0.22"
+                      Color="#238CFF" />
 </ResourceDictionary>

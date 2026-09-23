@@ -134,7 +134,7 @@ public partial class MainWindow : Window
 
     private void Navigate_Click(object sender, RoutedEventArgs e)
     {
-        if (sender is not Button button || button.Tag is not string destination)
+        if (sender is not Button button || button.CommandParameter is not string destination)
             return;
 
         NavigateTo(destination);
@@ -155,19 +155,19 @@ public partial class MainWindow : Window
 
         if (activeButton is not null)
         {
-            activeButton.Background = Brushes.Transparent;
-            activeButton.Foreground = (Brush)FindResource("TextSecondaryBrush");
-            activeButton.BorderBrush = Brushes.Transparent;
-            activeButton.BorderThickness = new Thickness(0);
+            activeButton.ClearValue(Control.BackgroundProperty);
+            activeButton.ClearValue(Control.ForegroundProperty);
+            activeButton.ClearValue(Control.BorderBrushProperty);
+            activeButton.ClearValue(FrameworkElement.TagProperty);
         }
 
         activeButton = nextButton;
         if (activeButton is not null)
         {
-            activeButton.Background = (Brush)FindResource("SelectionBrush");
-            activeButton.Foreground = (Brush)FindResource("SelectionForegroundBrush");
-            activeButton.BorderBrush = (Brush)FindResource("AccentBlueStrongBrush");
-            activeButton.BorderThickness = new Thickness(3, 0, 0, 0);
+            activeButton.SetResourceReference(Control.BackgroundProperty, "NavSelectionBrush");
+            activeButton.SetResourceReference(Control.ForegroundProperty, "NavSelectionForegroundBrush");
+            activeButton.SetResourceReference(Control.BorderBrushProperty, "NavSelectedIconBrush");
+            activeButton.Tag = "Selected";
         }
 
         currentDestination = destination;

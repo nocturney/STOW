@@ -50,4 +50,27 @@
                      Color="{DynamicResource {x:Static SystemColors.HighlightTextColorKey}}" />
     <SolidColorBrush x:Key="MutedBrush"
                      Color="{DynamicResource {x:Static SystemColors.GrayTextColorKey}}" />
+    <SolidColorBrush x:Key="NavForegroundBrush"
+                     Color="{DynamicResource {x:Static SystemColors.WindowTextColorKey}}" />
+    <SolidColorBrush x:Key="NavIconBrush"
+                     Color="{DynamicResource {x:Static SystemColors.WindowTextColorKey}}" />
+    <SolidColorBrush x:Key="NavHoverIconBrush"
+                     Color="{DynamicResource {x:Static SystemColors.HighlightTextColorKey}}" />
+    <SolidColorBrush x:Key="NavHoverBrush"
+                     Color="{DynamicResource {x:Static SystemColors.HighlightColorKey}}" />
+    <SolidColorBrush x:Key="NavHoverBorderBrush"
+                     Color="{DynamicResource {x:Static SystemColors.WindowTextColorKey}}" />
+    <SolidColorBrush x:Key="NavSelectionBrush"
+                     Color="{DynamicResource {x:Static SystemColors.HighlightColorKey}}" />
+    <SolidColorBrush x:Key="NavSelectionHoverBrush"
+                     Color="{DynamicResource {x:Static SystemColors.HighlightColorKey}}" />
+    <SolidColorBrush x:Key="NavSelectionForegroundBrush"
+                     Color="{DynamicResource {x:Static SystemColors.HighlightTextColorKey}}" />
+    <SolidColorBrush x:Key="NavSelectedIconBrush"
+                     Color="{DynamicResource {x:Static SystemColors.HighlightTextColorKey}}" />
+    <DropShadowEffect x:Key="NavHoverEffect"
+                      BlurRadius="0"
+                      ShadowDepth="0"
+                      Opacity="0"
+                      Color="Transparent" />
 </ResourceDictionary>
