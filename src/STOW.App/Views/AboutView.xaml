@@ -96,6 +96,40 @@
                                         Margin="0,0,0,8"
                                         Click="WhatsNew_Click" />
                             </WrapPanel>
+
+                            <Border x:Name="UpdateStatusCard"
+                                    Margin="0,4,0,0"
+                                    Padding="10"
+                                    CornerRadius="9"
+                                    Background="{DynamicResource AccentTealSoftBrush}"
+                                    Visibility="Collapsed">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="28" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <Border Width="22"
+                                            Height="22"
+                                            CornerRadius="11"
+                                            Background="{DynamicResource SurfaceBrush}">
+                                        <Ellipse x:Name="UpdateStatusDot"
+                                                 Width="8"
+                                                 Height="8"
+                                                 Fill="{DynamicResource AccentTealBrush}" />
+                                    </Border>
+                                    <StackPanel Grid.Column="1"
+                                                VerticalAlignment="Center">
+                                        <TextBlock x:Name="UpdateStatusTitleText"
+                                                   FontWeight="SemiBold"
+                                                   Foreground="{DynamicResource AccentTealBrush}" />
+                                        <TextBlock x:Name="UpdateStatusDetailText"
+                                                   Margin="0,2,0,0"
+                                                   TextWrapping="Wrap"
+                                                   FontSize="{DynamicResource FontSize11}"
+                                                   Foreground="{DynamicResource TextSecondaryBrush}" />
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
                         </StackPanel>
                     </Grid>
                 </Border>

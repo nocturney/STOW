@@ -19,6 +19,13 @@ public partial class AboutView : UserControl
     private readonly UpdateChannel updateChannel;
     private readonly UpdateCheckStateStore updateState = UpdateCheckStateStore.ForCurrentUser();
 
+    private enum UpdateStatusTone
+    {
+        Info,
+        Success,
+        Warning
+    }
+
     public AboutView()
     {
         InitializeComponent();
@@ -72,6 +79,10 @@ public partial class AboutView : UserControl
     {
         CheckUpdatesButton.IsEnabled = false;
         LastCheckText.Text = "Last update check  Checking…";
+        ShowUpdateStatus(
+            "Checking for updates…",
+            $"Looking for eligible {updateChannel} releases on GitHub.",
+            UpdateStatusTone.Info);
 
         try
         {
@@ -83,12 +94,20 @@ public partial class AboutView : UserControl
 
             if (result.Status == UpdateCheckStatus.NoEligibleRelease)
             {
+                ShowUpdateStatus(
+                    $"No published {updateChannel} release yet",
+                    "This build has no eligible published release on the selected channel.",
+                    UpdateStatusTone.Warning);
                 ShowNoRelease();
                 return;
             }
 
             if (result.Status == UpdateCheckStatus.UpToDate)
             {
+                ShowUpdateStatus(
+                    "You're up to date",
+                    $"STOW {currentVersion} is the latest eligible {updateChannel} release.",
+                    UpdateStatusTone.Success);
                 MessageBox.Show(
                     $"STOW {currentVersion} is up to date on the {updateChannel} channel.",
                     "STOW Update",
@@ -98,6 +117,11 @@ public partial class AboutView : UserControl
             }
 
             ReleaseInfo release = result.Release!;
+            ShowUpdateStatus(
+                $"STOW {release.Tag} is available",
+                $"Installed: {currentVersion}. Review the release before updating.",
+                UpdateStatusTone.Info);
+
             if (!GitHubReleaseUpdater.IsStandardInstalledLocation(Environment.ProcessPath))
             {
                 MessageBoxResult open = MessageBox.Show(
@@ -119,13 +143,25 @@ public partial class AboutView : UserControl
                 return;
 
             LastCheckText.Text = "Last update check  Downloading and verifying…";
+            ShowUpdateStatus(
+                $"Downloading STOW {release.Tag}",
+                "The installer will be launched only after verification succeeds.",
+                UpdateStatusTone.Info);
             PreparedUpdate prepared = await updater.PrepareAsync(release);
             LastCheckText.Text = "Last update check  Verified — starting installer…";
+            ShowUpdateStatus(
+                "Update verified",
+                "The verified installer is ready to start.",
+                UpdateStatusTone.Success);
             GitHubReleaseUpdater.LaunchInstaller(prepared);
         }
         catch (Exception ex)
         {
             LastCheckText.Text = "Last update check  Failed";
+            ShowUpdateStatus(
+                "Update check failed safely",
+                "Nothing was downloaded or installed.",
+                UpdateStatusTone.Warning);
             MessageBoxResult open = MessageBox.Show(
                 "The update check failed safely. Nothing was installed.\n\n" +
                 ex.Message + "\n\nOpen GitHub Releases instead?",
@@ -139,6 +175,30 @@ public partial class AboutView : UserControl
         {
             CheckUpdatesButton.IsEnabled = true;
         }
+    }
+
+    private void ShowUpdateStatus(
+        string title,
+        string detail,
+        UpdateStatusTone tone)
+    {
+        (string accentKey, string softKey) = tone switch
+        {
+            UpdateStatusTone.Success => ("AccentTealBrush", "AccentTealSoftBrush"),
+            UpdateStatusTone.Warning => ("AccentAmberBrush", "AccentAmberSoftBrush"),
+            _ => ("AccentBlueStrongBrush", "AccentBlueSoftBrush")
+        };
+
+        UpdateStatusCard.SetResourceReference(Border.BackgroundProperty, softKey);
+        UpdateStatusDot.SetResourceReference(
+            System.Windows.Shapes.Shape.FillProperty,
+            accentKey);
+        UpdateStatusTitleText.SetResourceReference(
+            TextBlock.ForegroundProperty,
+            accentKey);
+        UpdateStatusTitleText.Text = title;
+        UpdateStatusDetailText.Text = detail;
+        UpdateStatusCard.Visibility = Visibility.Visible;
     }
 
     private void ShowNoRelease()
