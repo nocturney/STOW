@@ -275,11 +275,42 @@
                                    Foreground="{DynamicResource TextSecondaryBrush}"
                                    Visibility="Collapsed" />
 
-                        <TextBlock x:Name="NoSchedulesText"
-                                   Text="No Focus schedules yet."
-                                   Margin="0,4,0,10"
-                                   TextWrapping="Wrap"
-                                   Foreground="{DynamicResource TextSecondaryBrush}" />
+                        <Border Background="{DynamicResource SurfaceElevatedBrush}"
+                                BorderBrush="{DynamicResource BorderBrush}"
+                                BorderThickness="1"
+                                CornerRadius="9"
+                                Padding="12"
+                                Margin="0,4,0,10"
+                                Visibility="{Binding Visibility, ElementName=NoSchedulesText}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="38" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Border Width="30" Height="30"
+                                        CornerRadius="7"
+                                        Background="{DynamicResource AccentBlueSoftBrush}"
+                                        VerticalAlignment="Top">
+                                    <Path Width="17" Height="17"
+                                          Stretch="Uniform"
+                                          Stroke="{DynamicResource AccentBlueStrongBrush}"
+                                          StrokeThickness="1.7"
+                                          Data="M3,5 H17 V18 H3 Z M3,9 H17 M7,2 V7 M13,2 V7" />
+                                </Border>
+                                <StackPanel Grid.Column="1"
+                                            Margin="8,0,0,0">
+                                    <TextBlock x:Name="NoSchedulesText"
+                                               Text="No schedule blocks yet."
+                                               FontWeight="SemiBold"
+                                               TextWrapping="Wrap" />
+                                    <TextBlock Text="Saved presets can be placed on a schedule when you are ready."
+                                               Margin="0,3,0,0"
+                                               TextWrapping="Wrap"
+                                               FontSize="{DynamicResource FontSize11}"
+                                               Foreground="{DynamicResource TextSecondaryBrush}" />
+                                </StackPanel>
+                            </Grid>
+                        </Border>
 
                         <ItemsControl x:Name="ScheduleList"
                                       AutomationProperties.Name="Focus schedules">
@@ -463,10 +494,40 @@
                                            Foreground="{DynamicResource TextSecondaryBrush}"
                                            FontSize="{DynamicResource FontSize11}" />
                             </Grid>
-                            <TextBlock x:Name="NoSavedPresetsText"
-                                       Text="No saved Focus presets yet."
-                                       Foreground="{DynamicResource TextSecondaryBrush}"
-                                       Margin="0,4,0,2" />
+                            <Border Background="{DynamicResource SurfaceElevatedBrush}"
+                                    CornerRadius="9"
+                                    Padding="10"
+                                    Margin="0,4,0,2"
+                                    Visibility="{Binding Visibility, ElementName=NoSavedPresetsText}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="34" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <Border Width="26" Height="26"
+                                            CornerRadius="7"
+                                            Background="{DynamicResource AccentTealSoftBrush}"
+                                            VerticalAlignment="Top">
+                                        <Path Width="15" Height="15"
+                                              Stretch="Uniform"
+                                              Stroke="{DynamicResource AccentTealBrush}"
+                                              StrokeThickness="1.7"
+                                              Data="M3,3 H15 V15 H3 Z M6,3 V8 H12 V3 M6,12 H12" />
+                                    </Border>
+                                    <StackPanel Grid.Column="1"
+                                                Margin="7,0,0,0">
+                                        <TextBlock x:Name="NoSavedPresetsText"
+                                                   Text="No saved presets yet."
+                                                   FontWeight="SemiBold"
+                                                   TextWrapping="Wrap" />
+                                        <TextBlock Text="Use Custom above to save this Focus setup for later."
+                                                   Margin="0,2,0,0"
+                                                   TextWrapping="Wrap"
+                                                   FontSize="{DynamicResource FontSize11}"
+                                                   Foreground="{DynamicResource TextSecondaryBrush}" />
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
                             <ItemsControl x:Name="SavedPresetsList"
                                           AutomationProperties.Name="Saved Focus presets">
                                 <ItemsControl.ItemTemplate>

@@ -237,7 +237,8 @@
 
                         <Border Background="{DynamicResource SurfaceElevatedBrush}"
                                 CornerRadius="10"
-                                Padding="16">
+                                Padding="16"
+                                MinHeight="210">
                             <StackPanel>
                                 <Grid Margin="0,0,0,10">
                                     <Grid.ColumnDefinitions>

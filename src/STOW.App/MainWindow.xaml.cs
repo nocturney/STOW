@@ -182,7 +182,7 @@ public partial class MainWindow : Window
             "Focus" => ("Focus", "Block distractions. Make space for what matters."),
             "Insights" => ("Insights", "See local desktop patterns without telemetry."),
             "Settings" => ("Settings", "Customize STOW to fit your workflow."),
-            "About" => ("About STOW", "Version info, updates, privacy and more."),
+            "About" => ("About & Updates", "Version info, updates, privacy and more."),
             _ => (destination, string.Empty)
         };
 
