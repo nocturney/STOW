@@ -452,6 +452,7 @@
                         <Trigger Property="Tag" Value="Selected">
                             <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource NavSelectionBrush}" />
                             <Setter TargetName="Chrome" Property="BorderThickness" Value="0" />
+                            <Setter TargetName="Chrome" Property="Effect" Value="{DynamicResource NavHoverEffect}" />
                             <Setter TargetName="ActiveIndicator" Property="Opacity" Value="1" />
                             <Setter Property="FontWeight" Value="SemiBold" />
                         </Trigger>
@@ -625,6 +626,8 @@
                 <ControlTemplate TargetType="RadioButton">
                     <Border x:Name="Chrome"
                             Background="Transparent"
+                            BorderBrush="Transparent"
+                            BorderThickness="1"
                             CornerRadius="7">
                         <ContentPresenter HorizontalAlignment="Center"
                                           VerticalAlignment="Center"
@@ -632,10 +635,13 @@
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource HoverBrush}" />
+                            <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource NavHoverBrush}" />
+                            <Setter TargetName="Chrome" Property="BorderBrush" Value="{DynamicResource NavHoverBorderBrush}" />
+                            <Setter TargetName="Chrome" Property="Effect" Value="{DynamicResource NavHoverEffect}" />
                         </Trigger>
                         <Trigger Property="IsChecked" Value="True">
                             <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource AccentBlueStrongBrush}" />
+                            <Setter TargetName="Chrome" Property="BorderBrush" Value="{DynamicResource AccentBlueStrongBrush}" />
                             <Setter Property="Foreground" Value="{DynamicResource AccentForegroundBrush}" />
                         </Trigger>
                     </ControlTemplate.Triggers>
