@@ -36,7 +36,7 @@
                     CornerRadius="12,0,0,12">
                 <Grid Margin="14,0,14,16">
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="112" />
+                        <RowDefinition Height="118" />
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="*" />
                         <RowDefinition Height="Auto" />
@@ -45,10 +45,10 @@
 
                     <Grid Margin="10,22,8,18">
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="50" />
+                            <ColumnDefinition Width="60" />
                             <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
-                        <Image Width="50" Height="50"
+                        <Image Width="56" Height="56"
                                Source="/STOW;component/Assets/STOW.png"
                                Stretch="Uniform"
                                IsHitTestVisible="False"
@@ -58,7 +58,7 @@
                                     Margin="5,0,0,0">
                             <TextBlock Text="STOW"
                                        FontFamily="{DynamicResource StowDisplayFont}"
-                                       FontSize="{DynamicResource FontSize24}"
+                                       FontSize="{DynamicResource FontSize26}"
                                        FontWeight="Bold" />
                         </StackPanel>
                     </Grid>

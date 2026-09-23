@@ -44,8 +44,21 @@
                                 <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
                             <StackPanel Orientation="Horizontal">
+                                <Border Width="28"
+                                        Height="28"
+                                        Margin="0,0,9,0"
+                                        CornerRadius="7"
+                                        Background="{DynamicResource AccentBlueSoftBrush}">
+                                    <Path Width="16"
+                                          Height="16"
+                                          Stretch="Uniform"
+                                          Stroke="{DynamicResource AccentBlueStrongBrush}"
+                                          StrokeThickness="1.7"
+                                          Data="M3,6 L10,2 L17,6 L10,10 Z M3,10 L10,14 L17,10 M3,14 L10,18 L17,14" />
+                                </Border>
                                 <TextBlock Text="Managed apps"
-                                           Style="{StaticResource SectionTitle}" />
+                                           Style="{StaticResource SectionTitle}"
+                                           VerticalAlignment="Center" />
                                 <Border Style="{StaticResource StatusChip}"
                                         Margin="10,0,0,0"
                                         VerticalAlignment="Center">
@@ -154,8 +167,24 @@
                                                             VerticalAlignment="Center">
                                                     <Ellipse Width="7"
                                                              Height="7"
-                                                             Fill="{DynamicResource AccentTealBrush}"
-                                                             Margin="0,0,7,0" />
+                                                             Margin="0,0,7,0">
+                                                        <Ellipse.Style>
+                                                            <Style TargetType="Ellipse">
+                                                                <Setter Property="Fill" Value="{DynamicResource MutedBrush}" />
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding StatusText}" Value="On">
+                                                                        <Setter Property="Fill" Value="{DynamicResource AccentTealBrush}" />
+                                                                    </DataTrigger>
+                                                                    <DataTrigger Binding="{Binding StatusText}" Value="Stowed">
+                                                                        <Setter Property="Fill" Value="{DynamicResource AccentBlueStrongBrush}" />
+                                                                    </DataTrigger>
+                                                                    <DataTrigger Binding="{Binding StatusText}" Value="Managed by Trayify">
+                                                                        <Setter Property="Fill" Value="{DynamicResource AccentAmberBrush}" />
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </Ellipse.Style>
+                                                    </Ellipse>
                                                     <TextBlock Text="{Binding StatusText}"
                                                                VerticalAlignment="Center"
                                                                FontSize="{DynamicResource FontSize11}" />
@@ -220,8 +249,21 @@
 
                         <Grid Margin="18,16,18,6">
                             <StackPanel Orientation="Horizontal">
+                                <Border Width="28"
+                                        Height="28"
+                                        Margin="0,0,9,0"
+                                        CornerRadius="7"
+                                        Background="{DynamicResource AccentTealSoftBrush}">
+                                    <Path Width="16"
+                                          Height="16"
+                                          Stretch="Uniform"
+                                          Stroke="{DynamicResource AccentTealBrush}"
+                                          StrokeThickness="1.7"
+                                          Data="M3,4 H15 V14 H3 Z M6,1 H18 V11" />
+                                </Border>
                                 <TextBlock Text="Available apps"
-                                           Style="{StaticResource SectionTitle}" />
+                                           Style="{StaticResource SectionTitle}"
+                                           VerticalAlignment="Center" />
                                 <Border Style="{StaticResource StatusChip}"
                                         Margin="10,0,0,0"
                                         VerticalAlignment="Center">
@@ -328,7 +370,9 @@
             </Grid>
 
             <Border Style="{StaticResource CardBorder}"
-                    Background="{DynamicResource SurfaceElevatedBrush}"
+                    Background="{DynamicResource CardSurfaceBrush}"
+                    BorderBrush="{DynamicResource AccentBlueSoftBrush}"
+                    BorderThickness="1.5"
                     Margin="0,14,0,0"
                     Padding="16,12">
                 <Grid>
@@ -360,12 +404,23 @@
                                    Foreground="{DynamicResource TextSecondaryBrush}" />
                     </StackPanel>
                     <Button Grid.Column="2"
-                            Style="{StaticResource SecondaryButton}"
+                            Style="{StaticResource PrimaryButton}"
                             AutomationProperties.Name="Open Focus mode"
-                            Content="Start focus mode"
                             MinWidth="156"
                             VerticalAlignment="Center"
-                            Click="StartFocus_Click" />
+                            Click="StartFocus_Click">
+                        <StackPanel Orientation="Horizontal"
+                                    HorizontalAlignment="Center">
+                            <Path Width="14"
+                                  Height="15"
+                                  Margin="0,0,8,0"
+                                  Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                                  Stretch="Uniform"
+                                  Data="M2,1 L13,7.5 L2,14 Z" />
+                            <TextBlock Text="Start focus mode"
+                                       FontWeight="SemiBold" />
+                        </StackPanel>
+                    </Button>
                 </Grid>
             </Border>
         </StackPanel>
