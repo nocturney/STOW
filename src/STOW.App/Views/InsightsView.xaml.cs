@@ -1,6 +1,7 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Threading;
+using STOW.App.Themes;
 using STOW.Engine.Contracts;
 
 namespace STOW.App.Views;
@@ -25,6 +26,7 @@ public partial class InsightsView : UserControl
     {
         this.activityStore = activityStore;
         InitializeComponent();
+        ApplyAccessibleLayout();
 
         refreshTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(2) };
         refreshTimer.Tick += (_, _) => RefreshData();
@@ -32,6 +34,23 @@ public partial class InsightsView : UserControl
         Unloaded += (_, _) => refreshTimer.Stop();
 
         RefreshData();
+    }
+
+    private void ApplyAccessibleLayout()
+    {
+        bool stackHistory = AccessibilityManager.CurrentTextScalePercent >= 150;
+
+        Grid.SetRow(ActivityHistoryColumn, 0);
+        Grid.SetColumn(ActivityHistoryColumn, 0);
+        Grid.SetColumnSpan(ActivityHistoryColumn, stackHistory ? 3 : 1);
+        ActivityHistoryColumn.Margin = new Thickness(0);
+
+        Grid.SetRow(RecentActivityCard, stackHistory ? 1 : 0);
+        Grid.SetColumn(RecentActivityCard, stackHistory ? 0 : 2);
+        Grid.SetColumnSpan(RecentActivityCard, stackHistory ? 3 : 1);
+        RecentActivityCard.Margin = stackHistory
+            ? new Thickness(0, 14, 0, 0)
+            : new Thickness(0);
     }
 
     private void RefreshData()
