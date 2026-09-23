@@ -60,21 +60,22 @@
                               Margin="0,12,0,14">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="166" />
+                                <ColumnDefinition Width="152" />
                             </Grid.ColumnDefinitions>
                             <StackPanel VerticalAlignment="Center">
                                 <TextBlock Text="Find your focus"
                                            FontFamily="{DynamicResource StowDisplayFont}"
-                                           FontSize="{DynamicResource FontSize30}"
-                                           FontWeight="SemiBold" />
+                                           FontSize="{DynamicResource FontSize26}"
+                                           FontWeight="SemiBold"
+                                           TextWrapping="Wrap" />
                                 <TextBlock Text="Stow distractions for this session while keeping the apps that matter visible."
                                            Margin="0,8,0,0"
                                            TextWrapping="Wrap"
                                            Foreground="{DynamicResource TextSecondaryBrush}" />
                             </StackPanel>
                             <Image Grid.Column="1"
-                                   Width="166"
-                                   Height="142"
+                                   Width="152"
+                                   Height="132"
                                    HorizontalAlignment="Right"
                                    VerticalAlignment="Center"
                                    Source="/STOW;component/Assets/STOWHero.png"
