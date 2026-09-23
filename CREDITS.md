@@ -22,7 +22,7 @@ These packages are not runtime dependencies of the shipping STOW application and
 
 STOW does not bundle external font files. The UI requests Inter when it is already available on the user's system and otherwise falls back to Windows-provided Segoe UI fonts.
 
-The STOW application icon and related brand artwork in `assets/STOW.png`, `assets/STOW.ico` and `assets/STOWHero.png` are original project artwork created specifically for STOW from the approved STOW visual concept. They do not incorporate third-party logos, photos, illustrations or icon packs. The raster/master assets can be reproduced with `scripts/generate-stow-icon.py` and `scripts/generate-stow-hero.py`; Pillow is used only as development tooling and is not bundled with STOW.
+The STOW application icon and related brand artwork in `assets/source/STOW-icon-master.png`, `assets/STOW.png`, `assets/STOW.ico` and `assets/STOWHero.png` are original project artwork created specifically for STOW from the approved STOW visual concept. They do not incorporate third-party logos, photos, illustrations or icon packs. The shipped icon and transparent hero treatment can be reproduced from the approved master with `scripts/generate-stow-icon.py` and `scripts/generate-stow-hero.py`; Pillow is used only as development tooling and is not bundled with STOW.
 
 Historical Trayify artwork remains in the repository solely for the preserved Trayify compatibility baseline and is not used as the STOW application identity.
 
