@@ -330,8 +330,8 @@
     </ControlTemplate>
 
     <Style x:Key="NavIconPath" TargetType="Path">
-        <Setter Property="Width" Value="22" />
-        <Setter Property="Height" Value="22" />
+        <Setter Property="Width" Value="24" />
+        <Setter Property="Height" Value="24" />
         <Setter Property="Margin" Value="0,0,12,0" />
         <Setter Property="Stretch" Value="Uniform" />
         <Setter Property="StrokeThickness" Value="1.9" />
@@ -407,7 +407,7 @@
 
     <Style x:Key="NavButton" TargetType="Button">
         <Setter Property="FocusVisualStyle" Value="{StaticResource StowFocusVisual}" />
-        <Setter Property="MinHeight" Value="48" />
+        <Setter Property="MinHeight" Value="50" />
         <Setter Property="Margin" Value="8,3" />
         <Setter Property="Padding" Value="14,0" />
         <Setter Property="HorizontalContentAlignment" Value="Left" />
@@ -415,8 +415,8 @@
         <Setter Property="Foreground" Value="{DynamicResource NavForegroundBrush}" />
         <Setter Property="BorderBrush" Value="{DynamicResource NavIconBrush}" />
         <Setter Property="BorderThickness" Value="0" />
-        <Setter Property="FontSize" Value="{DynamicResource FontSize15}" />
-        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="FontSize" Value="{DynamicResource FontSize16}" />
+        <Setter Property="FontWeight" Value="Medium" />
         <Setter Property="Cursor" Value="Hand" />
         <Setter Property="Template">
             <Setter.Value>
@@ -453,6 +453,7 @@
                             <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource NavSelectionBrush}" />
                             <Setter TargetName="Chrome" Property="BorderThickness" Value="0" />
                             <Setter TargetName="ActiveIndicator" Property="Opacity" Value="1" />
+                            <Setter Property="FontWeight" Value="SemiBold" />
                         </Trigger>
                         <MultiTrigger>
                             <MultiTrigger.Conditions>
@@ -477,14 +478,7 @@
         <Setter Property="BorderThickness" Value="1" />
         <Setter Property="CornerRadius" Value="12" />
         <Setter Property="Padding" Value="18" />
-        <Setter Property="Effect">
-            <Setter.Value>
-                <DropShadowEffect BlurRadius="18"
-                                  ShadowDepth="2"
-                                  Opacity="0.11"
-                                  Color="#163A61" />
-            </Setter.Value>
-        </Setter>
+        <Setter Property="Effect" Value="{DynamicResource CardShadowEffect}" />
     </Style>
 
     <Style x:Key="PrimaryButton" TargetType="Button">
@@ -570,7 +564,7 @@
     <Style x:Key="SectionTitle" TargetType="TextBlock">
         <Setter Property="FontFamily" Value="{DynamicResource StowDisplayFont}" />
         <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
-        <Setter Property="FontSize" Value="{DynamicResource FontSize16}" />
+        <Setter Property="FontSize" Value="{DynamicResource FontSize17}" />
         <Setter Property="FontWeight" Value="SemiBold" />
     </Style>
 
@@ -654,6 +648,7 @@
         <Setter Property="FocusVisualStyle" Value="{StaticResource StowFocusVisual}" />
         <Setter Property="MinHeight" Value="44" />
         <Setter Property="Padding" Value="14,8" />
+        <Setter Property="FontSize" Value="{DynamicResource FontSize13}" />
         <Setter Property="Background" Value="{DynamicResource SurfaceBrush}" />
         <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
         <Setter Property="BorderBrush" Value="{DynamicResource ControlBorderBrush}" />
@@ -672,7 +667,8 @@
                                 <ColumnDefinition Width="40" />
                                 <ColumnDefinition Width="*" />
                             </Grid.ColumnDefinitions>
-                            <Path Grid.Column="0"
+                            <Path x:Name="SearchIcon"
+                                  Grid.Column="0"
                                   Width="16" Height="16"
                                   HorizontalAlignment="Center"
                                   VerticalAlignment="Center"
@@ -698,6 +694,11 @@
                     <ControlTemplate.Triggers>
                         <Trigger Property="Text" Value="">
                             <Setter TargetName="Placeholder" Property="Visibility" Value="Visible" />
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Chrome" Property="BorderBrush" Value="{DynamicResource AccentBlueBrush}" />
+                            <Setter TargetName="Chrome" Property="Effect" Value="{DynamicResource NavHoverEffect}" />
+                            <Setter TargetName="SearchIcon" Property="Stroke" Value="{DynamicResource AccentBlueStrongBrush}" />
                         </Trigger>
                         <Trigger Property="IsKeyboardFocused" Value="True">
                             <Setter TargetName="Chrome" Property="BorderBrush" Value="{DynamicResource AccentBlueBrush}" />
@@ -769,7 +770,9 @@
         <Setter Property="Padding" Value="8,9" />
         <Style.Triggers>
             <Trigger Property="IsMouseOver" Value="True">
-                <Setter Property="Background" Value="{DynamicResource HoverBrush}" />
+                <Setter Property="Background" Value="{DynamicResource NavHoverBrush}" />
+                <Setter Property="BorderBrush" Value="{DynamicResource NavHoverBorderBrush}" />
+                <Setter Property="Effect" Value="{DynamicResource NavHoverEffect}" />
             </Trigger>
         </Style.Triggers>
     </Style>

@@ -188,7 +188,7 @@ public partial class MainWindow : Window
 
         ShellSearchBox.Tag = destination switch
         {
-            "Apps" => "Search apps...",
+            "Apps" => "Search apps, e.g. Spotify, Discord, Notion...",
             "Rules" => "Search rules...",
             "Settings" => "Search settings...",
             _ => "Search apps, rules, or settings..."

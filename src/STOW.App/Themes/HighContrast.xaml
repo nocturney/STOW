@@ -73,4 +73,9 @@
                       ShadowDepth="0"
                       Opacity="0"
                       Color="Transparent" />
+    <DropShadowEffect x:Key="CardShadowEffect"
+                      BlurRadius="0"
+                      ShadowDepth="0"
+                      Opacity="0"
+                      Color="Transparent" />
 </ResourceDictionary>

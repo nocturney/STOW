@@ -63,20 +63,20 @@
 
                     <Grid Margin="10,22,8,18">
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="60" />
+                            <ColumnDefinition Width="56" />
                             <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
-                        <Image Width="56" Height="56"
+                        <Image Width="52" Height="52"
                                Source="/STOW;component/Assets/STOW.png"
                                Stretch="Uniform"
                                IsHitTestVisible="False"
                                Focusable="False" />
                         <StackPanel Grid.Column="1"
                                     VerticalAlignment="Center"
-                                    Margin="5,0,0,0">
+                                    Margin="7,0,0,0">
                             <TextBlock Text="STOW"
                                        FontFamily="{DynamicResource StowDisplayFont}"
-                                       FontSize="{DynamicResource FontSize26}"
+                                       FontSize="{DynamicResource FontSize30}"
                                        FontWeight="Bold" />
                         </StackPanel>
                     </Grid>
@@ -141,13 +141,19 @@
 
                     <StackPanel Grid.Row="3"
                                 Margin="14,0,10,14">
-                        <TextBlock Text="☾"
-                                   FontSize="{DynamicResource FontSize22}"
-                                   Foreground="{DynamicResource TextSecondaryBrush}" />
-                        <TextBlock Text="Stay focused."
+                        <Path Width="24"
+                              Height="24"
+                              Stretch="Uniform"
+                              Stroke="{DynamicResource NavIconBrush}"
+                              StrokeThickness="1.8"
+                              StrokeStartLineCap="Round"
+                              StrokeEndLineCap="Round"
+                              StrokeLineJoin="Round"
+                              Data="M15,2 C9,3 5,8 6,13 C7,18 12,21 17,19 C12,18 9,14 9,10 C9,6 11,3 15,2 Z" />
+                        <TextBlock Text="A calmer desktop"
                                    Margin="0,5,0,0"
                                    Foreground="{DynamicResource TextSecondaryBrush}" />
-                        <TextBlock Text="You've got this."
+                        <TextBlock Text="starts here."
                                    Foreground="{DynamicResource TextSecondaryBrush}" />
                     </StackPanel>
 
@@ -221,8 +227,8 @@
                              Style="{StaticResource SearchBox}"
                              Tag="Search apps, rules, or settings..."
                              AutomationProperties.Name="Search STOW"
-                             Width="480"
-                             MaxWidth="520"
+                             Width="560"
+                             MaxWidth="600"
                              HorizontalAlignment="Left"
                              TextChanged="ShellSearchBox_TextChanged"
                              KeyDown="ShellSearchBox_KeyDown" />
@@ -234,8 +240,11 @@
                                 CommandParameter="Focus"
                                 Click="Navigate_Click"
                                 AutomationProperties.Name="Open Focus mode"
+                                Background="{DynamicResource SurfaceElevatedBrush}"
+                                BorderBrush="{DynamicResource BorderBrush}"
                                 MinWidth="144"
                                 MinHeight="40"
+                                FontSize="{DynamicResource FontSize13}"
                                 Margin="16,0,0,0">
                             <StackPanel Orientation="Horizontal">
                                 <Path Width="16" Height="16"
@@ -246,6 +255,15 @@
                                       Data="M2,9 C4,3 10,1 14,2 C14,8 11,13 5,14 M3,13 C6,10 9,8 13,6" />
                                 <TextBlock Text="Focus mode"
                                            FontWeight="SemiBold" />
+                                <Path Width="10"
+                                      Height="6"
+                                      Margin="10,1,0,0"
+                                      VerticalAlignment="Center"
+                                      Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                                      StrokeThickness="1.5"
+                                      StrokeStartLineCap="Round"
+                                      StrokeEndLineCap="Round"
+                                      Data="M1,1 L5,5 L9,1" />
                             </StackPanel>
                         </Button>
                     </StackPanel>

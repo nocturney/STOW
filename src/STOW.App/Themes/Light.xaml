@@ -101,4 +101,9 @@
                       ShadowDepth="0"
                       Opacity="0.14"
                       Color="#2387F4" />
+    <DropShadowEffect x:Key="CardShadowEffect"
+                      BlurRadius="22"
+                      ShadowDepth="2"
+                      Opacity="0.13"
+                      Color="#4A78A8" />
 </ResourceDictionary>
