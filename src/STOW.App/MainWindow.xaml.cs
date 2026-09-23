@@ -170,6 +170,9 @@ public partial class MainWindow : Window
         }
 
         currentDestination = destination;
+        PageIconBadge.Visibility = string.Equals(destination, "Focus", StringComparison.Ordinal)
+            ? Visibility.Visible
+            : Visibility.Collapsed;
 
         (PageTitleText.Text, PageSubtitleText.Text) = destination switch
         {

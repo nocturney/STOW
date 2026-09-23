@@ -16,9 +16,15 @@
                 <Border Grid.Column="0"
                         Style="{StaticResource CardBorder}"
                         BorderBrush="{DynamicResource AccentBlueBrush}"
-                        BorderThickness="1"
+                        BorderThickness="1.5"
                         Padding="18"
-                        MinHeight="278">
+                        MinHeight="292">
+                    <Border.Effect>
+                        <DropShadowEffect BlurRadius="24"
+                                          ShadowDepth="0"
+                                          Opacity="0.22"
+                                          Color="#1683FF" />
+                    </Border.Effect>
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto" />
@@ -35,7 +41,10 @@
                                        FontSize="{DynamicResource FontSize16}" />
                             <Border x:Name="SessionStatusChip"
                                     Grid.Column="1"
-                                    Style="{StaticResource StatusChip}">
+                                    Style="{StaticResource StatusChip}"
+                                    Background="{DynamicResource AccentTealSoftBrush}"
+                                    BorderBrush="{DynamicResource AccentTealBrush}"
+                                    BorderThickness="1">
                                 <StackPanel Orientation="Horizontal">
                                     <Ellipse Width="7" Height="7"
                                              Fill="{DynamicResource AccentTealBrush}"
@@ -51,11 +60,12 @@
                               Margin="0,12,0,14">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="150" />
+                                <ColumnDefinition Width="166" />
                             </Grid.ColumnDefinitions>
                             <StackPanel VerticalAlignment="Center">
                                 <TextBlock Text="Find your focus"
-                                           FontSize="{DynamicResource FontSize26}"
+                                           FontFamily="{DynamicResource StowDisplayFont}"
+                                           FontSize="{DynamicResource FontSize30}"
                                            FontWeight="SemiBold" />
                                 <TextBlock Text="Stow distractions for this session while keeping the apps that matter visible."
                                            Margin="0,8,0,0"
@@ -63,8 +73,8 @@
                                            Foreground="{DynamicResource TextSecondaryBrush}" />
                             </StackPanel>
                             <Image Grid.Column="1"
-                                   Width="154"
-                                   Height="122"
+                                   Width="166"
+                                   Height="142"
                                    HorizontalAlignment="Right"
                                    VerticalAlignment="Center"
                                    Source="/STOW;component/Assets/STOWHero.png"
@@ -76,16 +86,27 @@
                         <Button x:Name="FocusActionButton"
                                 Grid.Row="2"
                                 Style="{StaticResource PrimaryButton}"
-                                Content="Start focus mode"
                                 HorizontalAlignment="Stretch"
-                                Click="FocusAction_Click" />
+                                Click="FocusAction_Click">
+                            <StackPanel Orientation="Horizontal"
+                                        HorizontalAlignment="Center">
+                                <Path Width="15"
+                                      Height="16"
+                                      Margin="0,0,9,0"
+                                      Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                                      Stretch="Uniform"
+                                      Data="M2,1 L14,8 L2,15 Z" />
+                                <TextBlock Text="Start focus mode"
+                                           FontWeight="SemiBold" />
+                            </StackPanel>
+                        </Button>
                     </Grid>
                 </Border>
 
                 <Border Grid.Column="2"
                         Style="{StaticResource CardBorder}"
                         Padding="16"
-                        MinHeight="278">
+                        MinHeight="292">
                     <StackPanel>
                         <Grid Margin="0,0,0,12">
                             <TextBlock Text="Quick presets"
@@ -98,6 +119,8 @@
                         </Grid>
 
                         <Border Background="{DynamicResource SurfaceElevatedBrush}"
+                                BorderBrush="{DynamicResource BorderBrush}"
+                                BorderThickness="1"
                                 CornerRadius="9"
                                 Padding="12"
                                 Margin="0,0,0,8">
@@ -136,6 +159,8 @@
                         </Border>
 
                         <Border Background="{DynamicResource SurfaceElevatedBrush}"
+                                BorderBrush="{DynamicResource BorderBrush}"
+                                BorderThickness="1"
                                 CornerRadius="9"
                                 Padding="12"
                                 Margin="0,0,0,8">
@@ -174,6 +199,8 @@
                         </Border>
 
                         <Border Background="{DynamicResource SurfaceElevatedBrush}"
+                                BorderBrush="{DynamicResource BorderBrush}"
+                                BorderThickness="1"
                                 CornerRadius="9"
                                 Padding="12">
                             <Grid>
@@ -215,7 +242,7 @@
                 <Border Grid.Column="4"
                         Style="{StaticResource CardBorder}"
                         Padding="16"
-                        MinHeight="278">
+                        MinHeight="292">
                     <StackPanel>
                         <Grid Margin="0,0,0,10">
                             <TextBlock Text="Focus schedule"

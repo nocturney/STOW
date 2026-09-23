@@ -241,15 +241,41 @@
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
-                    <StackPanel>
-                        <TextBlock x:Name="PageTitleText"
-                                   Text="Apps"
-                                   Style="{StaticResource PageTitle}"
-                                   AutomationProperties.LiveSetting="Polite" />
-                        <TextBlock x:Name="PageSubtitleText"
-                                   Text="Keep what matters in view. Stow the rest."
-                                   Style="{StaticResource PageSubtitle}" />
-                    </StackPanel>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Border x:Name="PageIconBadge"
+                                Width="46"
+                                Height="46"
+                                Margin="0,0,12,0"
+                                VerticalAlignment="Center"
+                                Background="{DynamicResource AccentBlueSoftBrush}"
+                                BorderBrush="{DynamicResource AccentBlueBrush}"
+                                BorderThickness="1"
+                                CornerRadius="12"
+                                Visibility="Collapsed">
+                            <Path x:Name="PageIconPath"
+                                  Width="27"
+                                  Height="27"
+                                  Stretch="Uniform"
+                                  Stroke="{DynamicResource AccentBlueStrongBrush}"
+                                  StrokeThickness="1.9"
+                                  StrokeStartLineCap="Round"
+                                  StrokeEndLineCap="Round"
+                                  Data="M10,2 A8,8 0 1 1 9.99,2 M10,6 A4,4 0 1 1 9.99,6 M10,9 A1,1 0 1 1 9.99,9" />
+                        </Border>
+                        <StackPanel Grid.Column="1">
+                            <TextBlock x:Name="PageTitleText"
+                                       Text="Apps"
+                                       Style="{StaticResource PageTitle}"
+                                       AutomationProperties.LiveSetting="Polite" />
+                            <TextBlock x:Name="PageSubtitleText"
+                                       Text="Keep what matters in view. Stow the rest."
+                                       Style="{StaticResource PageSubtitle}" />
+                        </StackPanel>
+                    </Grid>
                     <StackPanel Grid.Column="1"
                                 Orientation="Horizontal"
                                 VerticalAlignment="Bottom"
