@@ -13,7 +13,8 @@ public partial class InsightsView : UserControl
     private sealed record ActivityRow(
         string TimeText,
         string Title,
-        string Detail);
+        string Detail,
+        string Tone);
 
     private sealed record DayBucket(
         string Label,
@@ -148,10 +149,19 @@ public partial class InsightsView : UserControl
             _ => ("STOW activity", activity.Source ?? string.Empty)
         };
 
+        string tone = activity.Type switch
+        {
+            ActivityEventType.AppStowed => "Stow",
+            ActivityEventType.AppRestored => "Restore",
+            ActivityEventType.FocusStarted or ActivityEventType.FocusEnded => "Focus",
+            _ => "Neutral"
+        };
+
         return new ActivityRow(
             activity.TimestampUtc.ToLocalTime().ToString("g"),
             title,
-            detail);
+            detail,
+            tone);
     }
 
     private static string SourceDetail(string? source, string fallback) =>

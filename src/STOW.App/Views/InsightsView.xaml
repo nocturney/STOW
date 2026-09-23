@@ -5,7 +5,9 @@
                   HorizontalScrollBarVisibility="Disabled">
         <StackPanel>
             <Border Style="{StaticResource CardBorder}"
-                    Background="{DynamicResource SurfaceElevatedBrush}"
+                    Background="{DynamicResource CardSurfaceBrush}"
+                    BorderBrush="{DynamicResource AccentTealSoftBrush}"
+                    BorderThickness="1.5"
                     Margin="0,0,0,14"
                     Padding="14,11">
                 <Grid>
@@ -226,12 +228,19 @@
                                                     <RowDefinition Height="Auto" />
                                                     <RowDefinition Height="Auto" />
                                                 </Grid.RowDefinitions>
-                                                <Border Width="22"
+                                                <Border Width="24"
                                                         Height="{Binding Height}"
                                                         VerticalAlignment="Bottom"
                                                         HorizontalAlignment="Center"
-                                                        Background="{DynamicResource AccentBlueStrongBrush}"
-                                                        CornerRadius="6,6,2,2" />
+                                                        CornerRadius="7,7,2,2">
+                                                    <Border.Background>
+                                                        <LinearGradientBrush StartPoint="0,1" EndPoint="0,0">
+                                                            <GradientStop Color="#1683FF" Offset="0" />
+                                                            <GradientStop Color="#3B82F6" Offset="0.58" />
+                                                            <GradientStop Color="#14B8A6" Offset="1" />
+                                                        </LinearGradientBrush>
+                                                    </Border.Background>
+                                                </Border>
                                                 <TextBlock Grid.Row="1"
                                                            Text="{Binding Count}"
                                                            HorizontalAlignment="Center"
@@ -303,13 +312,37 @@
                                             Padding="0,9">
                                         <Grid>
                                             <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="18" />
                                                 <ColumnDefinition Width="82" />
                                                 <ColumnDefinition Width="*" />
                                             </Grid.ColumnDefinitions>
-                                            <TextBlock Text="{Binding TimeText}"
+                                            <Ellipse Width="8"
+                                                     Height="8"
+                                                     HorizontalAlignment="Left"
+                                                     VerticalAlignment="Top"
+                                                     Margin="1,5,0,0">
+                                                <Ellipse.Style>
+                                                    <Style TargetType="Ellipse">
+                                                        <Setter Property="Fill" Value="{DynamicResource MutedBrush}" />
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding Tone}" Value="Stow">
+                                                                <Setter Property="Fill" Value="{DynamicResource AccentBlueStrongBrush}" />
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding Tone}" Value="Restore">
+                                                                <Setter Property="Fill" Value="{DynamicResource AccentTealBrush}" />
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding Tone}" Value="Focus">
+                                                                <Setter Property="Fill" Value="{DynamicResource AccentAmberBrush}" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Ellipse.Style>
+                                            </Ellipse>
+                                            <TextBlock Grid.Column="1"
+                                                       Text="{Binding TimeText}"
                                                        FontSize="{DynamicResource FontSize11}"
                                                        Foreground="{DynamicResource MutedBrush}" />
-                                            <StackPanel Grid.Column="1">
+                                            <StackPanel Grid.Column="2">
                                                 <TextBlock Text="{Binding Title}"
                                                            FontWeight="SemiBold" />
                                                 <TextBlock Text="{Binding Detail}"
