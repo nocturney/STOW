@@ -171,7 +171,11 @@ public partial class MainWindow : Window
         }
 
         currentDestination = destination;
-        PageIconBadge.Visibility = string.Equals(destination, "Focus", StringComparison.Ordinal)
+        bool isFocusDestination = string.Equals(destination, "Focus", StringComparison.Ordinal);
+        PageIconBadge.Visibility = isFocusDestination
+            ? Visibility.Visible
+            : Visibility.Collapsed;
+        ShellMantraPanel.Visibility = isFocusDestination
             ? Visibility.Visible
             : Visibility.Collapsed;
 

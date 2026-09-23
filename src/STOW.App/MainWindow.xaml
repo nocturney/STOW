@@ -310,10 +310,12 @@
                                        Style="{StaticResource PageSubtitle}" />
                         </StackPanel>
                     </Grid>
-                    <StackPanel Grid.Column="1"
+                    <StackPanel x:Name="ShellMantraPanel"
+                                Grid.Column="1"
                                 Orientation="Horizontal"
                                 VerticalAlignment="Bottom"
-                                Margin="20,0,0,2">
+                                Margin="20,0,0,2"
+                                Visibility="Collapsed">
                         <Rectangle Width="52"
                                    Height="1"
                                    Fill="{DynamicResource ControlBorderBrush}"
