@@ -1,5 +1,6 @@
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 using STOW.Engine.Contracts;
 
 namespace STOW.App.Views;
@@ -39,6 +40,7 @@ public partial class RulesView : UserControl
 
         InitializeComponent();
         LoadManagedApps();
+        UpdateFilterButtonStates();
         RefreshRules();
         ApplyEditAvailability();
     }
@@ -194,7 +196,37 @@ public partial class RulesView : UserControl
         RulesList.SelectedItem = null;
         EditorPanel.Visibility = Visibility.Collapsed;
         EditorPlaceholder.Visibility = Visibility.Visible;
+        UpdateFilterButtonStates();
         RefreshRules();
+    }
+
+    private void UpdateFilterButtonStates()
+    {
+        Button[] buttons =
+        [
+            AllRulesFilterButton,
+            AppRulesFilterButton,
+            FocusRulesFilterButton,
+            StartupRulesFilterButton
+        ];
+
+        foreach (Button button in buttons)
+        {
+            button.Background = (Brush)FindResource("SurfaceElevatedBrush");
+            button.Foreground = (Brush)FindResource("TextSecondaryBrush");
+            button.BorderBrush = (Brush)FindResource("BorderBrush");
+        }
+
+        Button active = triggerFilter switch
+        {
+            RuleTrigger.Minimize => AppRulesFilterButton,
+            RuleTrigger.Focus => FocusRulesFilterButton,
+            RuleTrigger.Startup => StartupRulesFilterButton,
+            _ => AllRulesFilterButton
+        };
+        active.Background = (Brush)FindResource("AccentBlueStrongBrush");
+        active.Foreground = (Brush)FindResource("AccentForegroundBrush");
+        active.BorderBrush = (Brush)FindResource("AccentBlueStrongBrush");
     }
 
     private void RulesList_SelectionChanged(object sender, SelectionChangedEventArgs e)

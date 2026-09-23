@@ -115,13 +115,13 @@ public partial class FocusView : UserControl
                 ? Visibility.Visible
                 : Visibility.Collapsed;
 
-            SessionStatusText.Text = focus.Active ? "Active" : "Inactive";
+            SessionStatusText.Text = focus.Active ? "Active" : "Ready to start";
             StowedCountText.Text = focus.StowedByFocusAppKeys.Count.ToString();
             VisibleCountText.Text = (focus.Active
                 ? focus.KeepVisibleAppKeys.Count
                 : selectedKeepVisible.Count).ToString();
 
-            FocusActionButton.Content = focus.Active ? "End Focus" : "Start Focus";
+            FocusActionButton.Content = focus.Active ? "End focus mode" : "Start focus mode";
             FocusActionButton.IsEnabled = focus.Active || enabled.Length > 0;
             DeepWorkButton.IsEnabled = !focus.Active && enabled.Length > 0;
             KeepAllButton.IsEnabled = !focus.Active && enabled.Length > 0;

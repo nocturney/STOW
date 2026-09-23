@@ -48,7 +48,7 @@
                             <ColumnDefinition Width="50" />
                             <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
-                        <Image Width="42" Height="42"
+                        <Image Width="50" Height="50"
                                Source="/STOW;component/Assets/STOW.png"
                                Stretch="Uniform"
                                IsHitTestVisible="False"
@@ -157,7 +157,7 @@
             <Grid Grid.Column="2">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="38" />
-                    <RowDefinition Height="66" />
+                    <RowDefinition Height="58" />
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="14" />
                     <RowDefinition Height="*" />
@@ -205,8 +205,8 @@
                              Style="{StaticResource SearchBox}"
                              Tag="Search apps, rules, or settings..."
                              AutomationProperties.Name="Search STOW"
-                             Width="520"
-                             MaxWidth="560"
+                             Width="480"
+                             MaxWidth="520"
                              HorizontalAlignment="Left"
                              TextChanged="ShellSearchBox_TextChanged"
                              KeyDown="ShellSearchBox_KeyDown" />

@@ -156,6 +156,8 @@ public partial class MainWindow : Window
         {
             activeButton.Background = Brushes.Transparent;
             activeButton.Foreground = (Brush)FindResource("TextSecondaryBrush");
+            activeButton.BorderBrush = Brushes.Transparent;
+            activeButton.BorderThickness = new Thickness(0);
         }
 
         activeButton = nextButton;
@@ -163,6 +165,8 @@ public partial class MainWindow : Window
         {
             activeButton.Background = (Brush)FindResource("SelectionBrush");
             activeButton.Foreground = (Brush)FindResource("SelectionForegroundBrush");
+            activeButton.BorderBrush = (Brush)FindResource("AccentBlueStrongBrush");
+            activeButton.BorderThickness = new Thickness(3, 0, 0, 0);
         }
 
         currentDestination = destination;
@@ -199,7 +203,7 @@ public partial class MainWindow : Window
                 focusScheduleCoordinator,
                 engineUnavailableReason),
             "Insights" => new InsightsView(activityStore),
-            "Settings" => new SettingsView(settingsStore, trayEngine),
+            "Settings" => CreateSettingsView(),
             "About" => new AboutView(),
             _ => CreateAppsView()
         };
@@ -268,6 +272,13 @@ public partial class MainWindow : Window
             appDiscovery,
             engineUnavailableReason);
         view.FocusRequested += (_, _) => NavigateTo("Focus");
+        return view;
+    }
+
+    private SettingsView CreateSettingsView()
+    {
+        var view = new SettingsView(settingsStore, trayEngine);
+        view.AboutRequested += (_, _) => NavigateTo("About");
         return view;
     }
 

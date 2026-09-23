@@ -12,6 +12,7 @@
     <EmbeddedResource Include="..\..\THIRD_PARTY_NOTICES.md" LogicalName="STOW.Legal.THIRD_PARTY_NOTICES.md" />
     <EmbeddedResource Include="..\..\CREDITS.md" LogicalName="STOW.Legal.CREDITS.md" />
     <Resource Include="..\..\assets\STOW.png" Link="Assets\STOW.png" />
+    <Resource Include="..\..\assets\STOWHero.png" Link="Assets\STOWHero.png" />
     <EmbeddedResource Include="GeneratedLegal\*.*">
       <LogicalName>STOW.Legal.%(Filename)%(Extension)</LogicalName>
     </EmbeddedResource>

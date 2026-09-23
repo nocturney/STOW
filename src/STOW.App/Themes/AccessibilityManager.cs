@@ -14,6 +14,7 @@ public static class AccessibilityManager
             ["FontSize12"] = 12,
             ["FontSize13"] = 13,
             ["FontSize14"] = 14,
+            ["FontSize15"] = 15,
             ["FontSize16"] = 16,
             ["FontSize17"] = 17,
             ["FontSize18"] = 18,
@@ -22,7 +23,8 @@ public static class AccessibilityManager
             ["FontSize22"] = 22,
             ["FontSize24"] = 24,
             ["FontSize26"] = 26,
-            ["FontSize30"] = 30
+            ["FontSize30"] = 30,
+            ["FontSize32"] = 32
         };
 
     public static int CurrentTextScalePercent { get; private set; } = 100;

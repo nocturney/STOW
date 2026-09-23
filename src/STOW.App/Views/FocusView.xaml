@@ -41,7 +41,7 @@
                                              Fill="{DynamicResource AccentTealBrush}"
                                              Margin="0,0,6,0" />
                                     <TextBlock x:Name="SessionStatusText"
-                                               Text="Inactive"
+                                               Text="Ready to start"
                                                AutomationProperties.LiveSetting="Polite" />
                                 </StackPanel>
                             </Border>
@@ -62,14 +62,15 @@
                                            TextWrapping="Wrap"
                                            Foreground="{DynamicResource TextSecondaryBrush}" />
                             </StackPanel>
-                            <Control Grid.Column="1"
-                                     Width="142"
-                                     Height="112"
-                                     HorizontalAlignment="Right"
-                                     VerticalAlignment="Center"
-                                     Template="{StaticResource StowHeroTemplate}"
-                                     IsHitTestVisible="False"
-                                     Focusable="False" />
+                            <Image Grid.Column="1"
+                                   Width="154"
+                                   Height="122"
+                                   HorizontalAlignment="Right"
+                                   VerticalAlignment="Center"
+                                   Source="/STOW;component/Assets/STOWHero.png"
+                                   Stretch="Uniform"
+                                   IsHitTestVisible="False"
+                                   Focusable="False" />
                         </Grid>
 
                         <Button x:Name="FocusActionButton"
@@ -108,7 +109,7 @@
                                 </Grid.ColumnDefinitions>
                                 <Border Width="30" Height="30"
                                         CornerRadius="7"
-                                        Background="{DynamicResource SelectionBrush}">
+                                        Background="{DynamicResource AccentBlueSoftBrush}">
                                     <Path Width="17" Height="17"
                                           Stretch="Uniform"
                                           Stroke="{DynamicResource AccentBlueStrongBrush}"
@@ -146,7 +147,7 @@
                                 </Grid.ColumnDefinitions>
                                 <Border Width="30" Height="30"
                                         CornerRadius="7"
-                                        Background="{DynamicResource SelectionBrush}">
+                                        Background="{DynamicResource AccentTealSoftBrush}">
                                     <Path Width="17" Height="17"
                                           Stretch="Uniform"
                                           Stroke="{DynamicResource AccentTealBrush}"
@@ -183,10 +184,10 @@
                                 </Grid.ColumnDefinitions>
                                 <Border Width="30" Height="30"
                                         CornerRadius="7"
-                                        Background="{DynamicResource SelectionBrush}">
+                                        Background="{DynamicResource AccentAmberSoftBrush}">
                                     <Path Width="17" Height="17"
                                           Stretch="Uniform"
-                                          Stroke="{DynamicResource AccentBlueStrongBrush}"
+                                          Stroke="{DynamicResource AccentAmberBrush}"
                                           StrokeThickness="1.7"
                                           Data="M3,3 H15 V15 H3 Z M6,3 V8 H12 V3 M6,12 H12" />
                                 </Border>
@@ -358,8 +359,7 @@
                                       AutomationProperties.Name="Apps during Focus">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
-                                    <Border BorderBrush="{DynamicResource BorderBrush}"
-                                            BorderThickness="0,1,0,0"
+                                    <Border Style="{StaticResource TableRowBorder}"
                                             Padding="0,10">
                                         <Grid>
                                             <Grid.ColumnDefinitions>
@@ -411,8 +411,7 @@
                                           AutomationProperties.Name="Saved Focus presets">
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
-                                        <Border BorderBrush="{DynamicResource BorderBrush}"
-                                                BorderThickness="0,1,0,0"
+                                        <Border Style="{StaticResource TableRowBorder}"
                                                 Padding="0,8">
                                             <Grid>
                                                 <Grid.ColumnDefinitions>

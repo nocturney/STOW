@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 using STOW.App.Themes;
@@ -7,6 +8,8 @@ namespace STOW.App.Views;
 
 public partial class SettingsView : UserControl
 {
+    public event EventHandler? AboutRequested;
+
     private readonly IAppSettingsStore settingsStore;
     private readonly ITrayEngine? engine;
     private bool loading;
@@ -16,6 +19,7 @@ public partial class SettingsView : UserControl
         this.settingsStore = settingsStore;
         this.engine = engine;
         InitializeComponent();
+        CurrentVersionText.Text = ReadCurrentVersion();
         LoadSettings();
     }
 
@@ -33,6 +37,10 @@ public partial class SettingsView : UserControl
         NotificationsCard.Visibility = Matches(query, "notification", "focus", "schedule")
             ? Visibility.Visible : Visibility.Collapsed;
         FocusBehaviorCard.Visibility = Matches(query, "focus", "restore", "stowed", "session")
+            ? Visibility.Visible : Visibility.Collapsed;
+        PrivacyCard.Visibility = Matches(query, "privacy", "local", "telemetry", "data")
+            ? Visibility.Visible : Visibility.Collapsed;
+        UpdatesCard.Visibility = Matches(query, "update", "version", "release", "about")
             ? Visibility.Visible : Visibility.Collapsed;
     }
 
@@ -240,6 +248,16 @@ public partial class SettingsView : UserControl
             return false;
         }
     }
+
+    private static string ReadCurrentVersion()
+    {
+        string product = FileVersionInfo.GetVersionInfo(Environment.ProcessPath!).ProductVersion ?? "0.0.0";
+        int metadata = product.IndexOf('+');
+        return metadata >= 0 ? product[..metadata] : product;
+    }
+
+    private void OpenAbout_Click(object sender, RoutedEventArgs e) =>
+        AboutRequested?.Invoke(this, EventArgs.Empty);
 
     private void ShowWarning(string message)
     {

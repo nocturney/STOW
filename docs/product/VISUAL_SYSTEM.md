@@ -17,9 +17,10 @@ STOW should feel like a calm, polished Windows 11 utility rather than a generic 
 
 - `assets/STOW.png` is the approved raster master.
 - `assets/STOW.ico` is the Windows multi-resolution icon.
-- The mark is layered blue/teal window cards entering a tray/container.
+- `assets/STOWHero.png` is the transparent hero treatment used in Focus and About.
+- The mark is layered blue/teal window cards entering a tray/container, with blue behind and the smaller teal card in front.
 - The same identity is used by the app shell, executable, taskbar, main tray icon, installer and About.
-- Asset provenance is documented in `assets/README.md` and `CREDITS.md`.
+- Asset provenance is documented in `assets/README.md` and `CREDITS.md`; generators live in `scripts/generate-stow-icon.py` and `scripts/generate-stow-hero.py`.
 
 ## Shell
 

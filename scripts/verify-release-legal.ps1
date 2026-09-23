@@ -27,7 +27,9 @@ $rootRequired = @(
     'assets\README.md',
     'assets\STOW.png',
     'assets\STOW.ico',
+    'assets\STOWHero.png',
     'scripts\generate-stow-icon.py',
+    'scripts\generate-stow-hero.py',
     'licenses\README.md',
     'licenses\MICROSOFT_DOTNET_LIBRARY_LICENSE.html',
     'licenses\MICROSOFT_WINDOWS_SDK_LICENSE.html'
@@ -61,6 +63,9 @@ if ($appProjectText -notmatch '<ApplicationIcon>\.\.\\\.\.\\assets\\STOW\.ico</A
 }
 if ($appProjectText -notmatch '<Resource Include="\.\.\\\.\.\\assets\\STOW\.png" Link="Assets\\STOW\.png"\s*/>') {
     throw 'STOW.App must embed the reviewed assets/STOW.png brand artwork.'
+}
+if ($appProjectText -notmatch '<Resource Include="\.\.\\\.\.\\assets\\STOWHero\.png" Link="Assets\\STOWHero\.png"\s*/>') {
+    throw 'STOW.App must embed the reviewed assets/STOWHero.png hero artwork.'
 }
 
 $releaseBuildText = Get-Content (Join-Path $root 'scripts\build-stow.ps1') -Raw

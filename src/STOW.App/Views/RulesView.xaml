@@ -28,7 +28,7 @@
 
                 <Border Style="{StaticResource CardBorder}"
                         Padding="0"
-                        MinHeight="520">
+                        MinHeight="470">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto" />
@@ -167,12 +167,17 @@
                                         <Setter Property="Background" Value="Transparent" />
                                         <Setter Property="BorderThickness" Value="0" />
                                         <Setter Property="FocusVisualStyle" Value="{StaticResource StowFocusVisual}" />
+                                        <Style.Triggers>
+                                            <Trigger Property="IsSelected" Value="True">
+                                                <Setter Property="Background" Value="{DynamicResource SelectionBrush}" />
+                                                <Setter Property="Foreground" Value="{DynamicResource SelectionForegroundBrush}" />
+                                            </Trigger>
+                                        </Style.Triggers>
                                     </Style>
                                 </ListBox.ItemContainerStyle>
                                 <ListBox.ItemTemplate>
                                     <DataTemplate>
-                                        <Border BorderBrush="{DynamicResource BorderBrush}"
-                                                BorderThickness="0,1,0,0"
+                                        <Border Style="{StaticResource TableRowBorder}"
                                                 Padding="8,10">
                                             <Grid>
                                                 <Grid.ColumnDefinitions>
@@ -223,7 +228,7 @@
             <Border Grid.Column="2"
                     Style="{StaticResource CardBorder}"
                     Padding="0"
-                    MinHeight="520">
+                    MinHeight="470">
                 <Grid>
                     <StackPanel x:Name="EditorPlaceholder"
                                 VerticalAlignment="Center"

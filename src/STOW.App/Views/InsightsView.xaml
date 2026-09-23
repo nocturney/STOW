@@ -299,8 +299,7 @@
                                       AutomationProperties.Name="Recent activity">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
-                                    <Border BorderBrush="{DynamicResource BorderBrush}"
-                                            BorderThickness="0,1,0,0"
+                                    <Border Style="{StaticResource TableRowBorder}"
                                             Padding="0,9">
                                         <Grid>
                                             <Grid.ColumnDefinitions>
