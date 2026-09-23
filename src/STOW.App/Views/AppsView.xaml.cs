@@ -1,5 +1,10 @@
+using System.Drawing;
+using System.IO;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Interop;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 using STOW.Engine.Contracts;
 
@@ -11,6 +16,8 @@ public partial class AppsView : UserControl
     private readonly IManagedAppStore fallbackStore;
     private readonly IAppDiscovery appDiscovery;
     private readonly DispatcherTimer refreshTimer;
+    private readonly Dictionary<string, ImageSource?> iconCache =
+        new(StringComparer.OrdinalIgnoreCase);
     private IReadOnlyList<DiscoveredAppSnapshot> lastDiscoveredApps = Array.Empty<DiscoveredAppSnapshot>();
     private string? runtimeUnavailableReason;
     private bool runtimeHealthy;
@@ -19,6 +26,7 @@ public partial class AppsView : UserControl
         string Key,
         string Name,
         string ProcessName,
+        ImageSource? Icon,
         bool Enabled,
         string StatusText,
         bool CanManage,
@@ -29,6 +37,7 @@ public partial class AppsView : UserControl
         string DisplayName,
         string WindowTitle,
         string ProcessName,
+        ImageSource? Icon,
         bool CanAdd);
 
     public AppsView(
@@ -101,6 +110,7 @@ public partial class AppsView : UserControl
                 app.DisplayName,
                 app.WindowTitle,
                 app.ProcessName,
+                LoadAppIcon(app.ExecutablePath),
                 canManage))
             .OrderBy(app => app.DisplayName, StringComparer.CurrentCultureIgnoreCase)
             .ToArray();
@@ -202,6 +212,7 @@ public partial class AppsView : UserControl
                 app.Key,
                 app.Name,
                 app.ProcessName,
+                LoadAppIcon(app.ExecutablePath),
                 app.Enabled,
                 app.Enabled ? enabledStatus : "Off",
                 CanManage: false,
@@ -215,6 +226,7 @@ public partial class AppsView : UserControl
         app.Key,
         app.DisplayName,
         app.ProcessName,
+        LoadAppIcon(app.ExecutablePath),
         app.Enabled,
         app.State switch
         {
@@ -226,6 +238,40 @@ public partial class AppsView : UserControl
         },
         CanManage: runtimeHealthy,
         CanRestore: runtimeHealthy && app.State == ManagedAppRuntimeState.Stowed);
+
+    private ImageSource? LoadAppIcon(string executablePath)
+    {
+        if (string.IsNullOrWhiteSpace(executablePath))
+            return null;
+
+        if (iconCache.TryGetValue(executablePath, out ImageSource? cached))
+            return cached;
+
+        ImageSource? source = null;
+        try
+        {
+            if (File.Exists(executablePath))
+            {
+                using Icon? icon = Icon.ExtractAssociatedIcon(executablePath);
+                if (icon is not null)
+                {
+                    BitmapSource bitmap = Imaging.CreateBitmapSourceFromHIcon(
+                        icon.Handle,
+                        Int32Rect.Empty,
+                        BitmapSizeOptions.FromWidthAndHeight(32, 32));
+                    bitmap.Freeze();
+                    source = bitmap;
+                }
+            }
+        }
+        catch
+        {
+            source = null;
+        }
+
+        iconCache[executablePath] = source;
+        return source;
+    }
 
     private static bool TryGetKey(object sender, out string key)
     {

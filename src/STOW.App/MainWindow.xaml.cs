@@ -1,8 +1,11 @@
 using System.ComponentModel;
+using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Threading;
+using STOW.App.Themes;
 using STOW.App.Views;
 using STOW.Engine;
 using STOW.Engine.Contracts;
@@ -50,6 +53,9 @@ public partial class MainWindow : Window
         }
 
         InitializeComponent();
+        SourceInitialized += (_, _) => ApplyNativeTitleBarTheme(ThemeManager.Current);
+        ThemeManager.Applied += ThemeManager_Applied;
+        Closed += MainWindow_Closed;
         StartRuntimeSafely();
         StartFocusScheduling();
         activeButton = AppsNavButton;
@@ -136,12 +142,12 @@ public partial class MainWindow : Window
 
         (PageTitleText.Text, PageSubtitleText.Text) = destination switch
         {
-            "Apps" => ("Apps", "Choose what STOW keeps quietly out of your way."),
-            "Rules" => ("Rules", "Automate when and how apps are stowed."),
-            "Focus" => ("Focus", "Create a calmer desktop for the task at hand."),
-            "Insights" => ("Insights", "Understand local desktop patterns without telemetry."),
-            "Settings" => ("Settings", "Adjust STOW behavior and appearance."),
-            "About" => ("About", "Version, updates, privacy, diagnostics and project information."),
+            "Apps" => ("Apps", "Keep what matters in view. Stow the rest."),
+            "Rules" => ("Rules", "Automate your desktop with clear conditions and actions."),
+            "Focus" => ("Focus", "Block distractions. Make space for what matters."),
+            "Insights" => ("Insights", "See local desktop patterns without telemetry."),
+            "Settings" => ("Settings", "Customize STOW to fit your workflow."),
+            "About" => ("About STOW", "Version info, updates, privacy and more."),
             _ => (destination, string.Empty)
         };
 
@@ -168,6 +174,35 @@ public partial class MainWindow : Window
         managedAppStore,
         appDiscovery,
         engineUnavailableReason);
+
+    private void ThemeManager_Applied(STOW.App.Themes.ThemeMode mode) =>
+        Dispatcher.BeginInvoke(() => ApplyNativeTitleBarTheme(mode));
+
+    private void ApplyNativeTitleBarTheme(STOW.App.Themes.ThemeMode mode)
+    {
+        IntPtr handle = new WindowInteropHelper(this).Handle;
+        if (handle == IntPtr.Zero)
+            return;
+
+        int enabled = mode == STOW.App.Themes.ThemeMode.Dark ? 1 : 0;
+        _ = DwmSetWindowAttribute(
+            handle,
+            DwmWindowAttributeUseImmersiveDarkMode,
+            ref enabled,
+            sizeof(int));
+    }
+
+    private void MainWindow_Closed(object? sender, EventArgs e) =>
+        ThemeManager.Applied -= ThemeManager_Applied;
+
+    private const int DwmWindowAttributeUseImmersiveDarkMode = 20;
+
+    [DllImport("dwmapi.dll")]
+    private static extern int DwmSetWindowAttribute(
+        IntPtr hwnd,
+        int attribute,
+        ref int value,
+        int size);
 
     private void MainWindow_Closing(object? sender, CancelEventArgs e)
     {

@@ -10,7 +10,8 @@
                            Foreground="{DynamicResource TextSecondaryBrush}" />
             </Border>
 
-            <Border Style="{StaticResource CardBorder}" Margin="0,0,0,12">
+            <WrapPanel ItemWidth="470">
+            <Border Style="{StaticResource CardBorder}" Margin="0,0,12,12">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
@@ -22,6 +23,7 @@
                                    Margin="0,5,0,0" Foreground="{DynamicResource TextSecondaryBrush}" />
                     </StackPanel>
                     <CheckBox x:Name="KeepRunningCheckBox" Grid.Column="1"
+                              Style="{StaticResource ToggleSwitch}"
                               Content="Keep STOW running in the tray"
                               VerticalAlignment="Center"
                               Click="KeepRunning_Click" />
@@ -33,17 +35,33 @@
                     <TextBlock Text="Appearance" Style="{StaticResource SectionTitle}" />
                     <TextBlock Text="Theme" Margin="0,14,0,8"
                                Foreground="{DynamicResource TextSecondaryBrush}" />
-                    <StackPanel Orientation="Horizontal">
-                        <RadioButton x:Name="LightThemeRadio" GroupName="Theme"
-                                     Content="Light" Tag="Light" Margin="0,0,20,0"
-                                     Click="Theme_Click" />
-                        <RadioButton x:Name="DarkThemeRadio" GroupName="Theme"
-                                     Content="Dark" Tag="Dark" Margin="0,0,20,0"
-                                     Click="Theme_Click" />
-                        <RadioButton x:Name="SystemThemeRadio" GroupName="Theme"
-                                     Content="System" Tag="System"
-                                     Click="Theme_Click" />
-                    </StackPanel>
+                    <Border Background="{DynamicResource SurfaceElevatedBrush}"
+                            BorderBrush="{DynamicResource BorderBrush}"
+                            BorderThickness="1"
+                            CornerRadius="9"
+                            HorizontalAlignment="Left"
+                            Padding="3">
+                        <StackPanel Orientation="Horizontal">
+                            <RadioButton x:Name="LightThemeRadio"
+                                         Style="{StaticResource ThemeSegmentRadio}"
+                                         GroupName="Theme"
+                                         Content="Light"
+                                         Tag="Light"
+                                         Click="Theme_Click" />
+                            <RadioButton x:Name="DarkThemeRadio"
+                                         Style="{StaticResource ThemeSegmentRadio}"
+                                         GroupName="Theme"
+                                         Content="Dark"
+                                         Tag="Dark"
+                                         Click="Theme_Click" />
+                            <RadioButton x:Name="SystemThemeRadio"
+                                         Style="{StaticResource ThemeSegmentRadio}"
+                                         GroupName="Theme"
+                                         Content="System"
+                                         Tag="System"
+                                         Click="Theme_Click" />
+                        </StackPanel>
+                    </Border>
                 </StackPanel>
             </Border>
 
@@ -79,11 +97,13 @@
                     </Grid>
 
                     <CheckBox x:Name="EnhancedContrastCheckBox"
+                              Style="{StaticResource ToggleSwitch}"
                               Content="Increase contrast in STOW"
                               Margin="0,2,0,8"
                               Checked="Accessibility_Changed"
                               Unchecked="Accessibility_Changed" />
                     <CheckBox x:Name="UseSystemFontCheckBox"
+                              Style="{StaticResource ToggleSwitch}"
                               Content="Use the Windows UI font"
                               Margin="0,0,0,4"
                               Checked="Accessibility_Changed"
@@ -110,6 +130,7 @@
                                    Foreground="{DynamicResource TextSecondaryBrush}" />
                     </StackPanel>
                     <CheckBox x:Name="StartWithWindowsCheckBox" Grid.Column="1"
+                              Style="{StaticResource ToggleSwitch}"
                               Content="Start STOW with Windows"
                               VerticalAlignment="Center"
                               Click="StartWithWindows_Click" />
@@ -130,6 +151,7 @@
                     </StackPanel>
                     <CheckBox x:Name="NotificationsCheckBox"
                               Grid.Column="1"
+                              Style="{StaticResource ToggleSwitch}"
                               Content="Scheduled Focus notifications"
                               VerticalAlignment="Center"
                               Checked="Notifications_Changed"
@@ -158,6 +180,7 @@
                     </ComboBox>
                 </Grid>
             </Border>
+            </WrapPanel>
         </StackPanel>
     </ScrollViewer>
 </UserControl>

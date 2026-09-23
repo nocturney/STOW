@@ -3,7 +3,10 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
         <StackPanel>
-            <Border Style="{StaticResource CardBorder}" Margin="0,0,0,14">
+            <Border Style="{StaticResource CardBorder}"
+                    BorderBrush="{DynamicResource AccentBlueBrush}"
+                    BorderThickness="1"
+                    Margin="0,0,0,14">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
@@ -36,9 +39,11 @@
 
             <TextBlock Text="Quick setup" Style="{StaticResource SectionTitle}" Margin="0,2,0,10" />
             <UniformGrid Columns="3" Margin="0,0,0,14">
-                <Border Style="{StaticResource CardBorder}" Margin="0,0,10,0">
+                <Border Style="{StaticResource CardBorder}" Margin="0,0,10,0"
+                        Background="{DynamicResource SurfaceElevatedBrush}">
                     <StackPanel>
-                        <TextBlock Text="Deep work" FontWeight="SemiBold" />
+                        <TextBlock Text="Deep work" FontWeight="SemiBold"
+                                   Foreground="{DynamicResource AccentBlueStrongBrush}" />
                         <TextBlock Text="Stow every enabled managed app for a blank-slate desktop."
                                    Margin="0,5,0,10" TextWrapping="Wrap"
                                    Foreground="{DynamicResource TextSecondaryBrush}" />
@@ -46,9 +51,11 @@
                                 Content="Use preset" HorizontalAlignment="Left" Click="DeepWork_Click" />
                     </StackPanel>
                 </Border>
-                <Border Style="{StaticResource CardBorder}" Margin="0,0,10,0">
+                <Border Style="{StaticResource CardBorder}" Margin="0,0,10,0"
+                        Background="{DynamicResource SurfaceElevatedBrush}">
                     <StackPanel>
-                        <TextBlock Text="Keep all visible" FontWeight="SemiBold" />
+                        <TextBlock Text="Keep all visible" FontWeight="SemiBold"
+                                   Foreground="{DynamicResource AccentTealBrush}" />
                         <TextBlock Text="Select every managed app as visible before starting a session."
                                    Margin="0,5,0,10" TextWrapping="Wrap"
                                    Foreground="{DynamicResource TextSecondaryBrush}" />
@@ -155,10 +162,14 @@
                                             <TextBlock Text="{Binding ProcessName}" FontSize="{DynamicResource FontSize11}" Margin="0,2,0,0"
                                                        Foreground="{DynamicResource TextSecondaryBrush}" />
                                         </StackPanel>
-                                        <CheckBox Grid.Column="1" Content="Keep visible" Tag="{Binding Key}"
+                                        <CheckBox Grid.Column="1"
+                                                  Style="{StaticResource ToggleSwitch}"
+                                                  Content="Keep visible"
+                                                  Tag="{Binding Key}"
                                                   IsChecked="{Binding KeepVisible, Mode=OneWay}"
                                                   IsEnabled="{Binding CanEdit}"
-                                                  Click="KeepVisible_Click" VerticalAlignment="Center" />
+                                                  Click="KeepVisible_Click"
+                                                  VerticalAlignment="Center" />
                                     </Grid>
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>

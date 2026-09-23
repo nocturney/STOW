@@ -1,14 +1,15 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    <Color x:Key="CanvasColor">#0B1220</Color>
-    <Color x:Key="SurfaceColor">#0F1B2B</Color>
-    <Color x:Key="SurfaceElevatedColor">#132238</Color>
-    <Color x:Key="TextPrimaryColor">#E5E7EB</Color>
-    <Color x:Key="TextSecondaryColor">#A7B4C7</Color>
-    <Color x:Key="BorderColor">#334155</Color>
-    <Color x:Key="ControlBorderColor">#64748B</Color>
+    <Color x:Key="CanvasColor">#071523</Color>
+    <Color x:Key="SurfaceColor">#0B1D30</Color>
+    <Color x:Key="SidebarColor">#081829</Color>
+    <Color x:Key="SurfaceElevatedColor">#102942</Color>
+    <Color x:Key="TextPrimaryColor">#F3F7FC</Color>
+    <Color x:Key="TextSecondaryColor">#A9BED5</Color>
+    <Color x:Key="BorderColor">#24415E</Color>
+    <Color x:Key="ControlBorderColor">#50718F</Color>
     <Color x:Key="AccentBlueColor">#3B82F6</Color>
-    <Color x:Key="AccentBlueStrongColor">#2563EB</Color>
+    <Color x:Key="AccentBlueStrongColor">#1683FF</Color>
     <Color x:Key="AccentTealColor">#14B8A6</Color>
     <Color x:Key="AccentForegroundColor">#FFFFFF</Color>
     <Color x:Key="SelectionColor">#153A68</Color>
@@ -19,6 +20,7 @@
 
     <SolidColorBrush x:Key="CanvasBrush" Color="{StaticResource CanvasColor}" />
     <SolidColorBrush x:Key="SurfaceBrush" Color="{StaticResource SurfaceColor}" />
+    <SolidColorBrush x:Key="SidebarBrush" Color="{StaticResource SidebarColor}" />
     <SolidColorBrush x:Key="SurfaceElevatedBrush" Color="{StaticResource SurfaceElevatedColor}" />
     <SolidColorBrush x:Key="TextPrimaryBrush" Color="{StaticResource TextPrimaryColor}" />
     <SolidColorBrush x:Key="TextSecondaryBrush" Color="{StaticResource TextSecondaryColor}" />

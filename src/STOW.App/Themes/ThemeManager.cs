@@ -13,6 +13,8 @@ public enum ThemeMode
 
 public static class ThemeManager
 {
+    public static event Action<ThemeMode>? Applied;
+
     public static ThemeMode Current { get; private set; } = ThemeMode.Light;
     public static ThemePreference Preference { get; private set; } = ThemePreference.System;
     public static bool EnhancedContrast { get; private set; }
@@ -58,6 +60,7 @@ public static class ThemeManager
             Source = new Uri($"Themes/{mode}.xaml", UriKind.Relative)
         };
         Current = mode;
+        Applied?.Invoke(mode);
     }
 
     public static void ApplySystemTheme()

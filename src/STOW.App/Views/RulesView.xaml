@@ -12,7 +12,8 @@
 
         <StackPanel Grid.Column="0">
             <Grid Margin="0,0,0,14">
-                <TextBox x:Name="SearchBox" Style="{StaticResource SearchBox}" Width="340"
+                <TextBox x:Name="SearchBox" Style="{StaticResource SearchBox}" Width="420"
+                         Tag="Search rules..."
                          HorizontalAlignment="Left"
                          AutomationProperties.Name="Search rules"
                          AutomationProperties.HelpText="Filter saved rules."
@@ -117,7 +118,7 @@
                 <StackPanel x:Name="EditorPanel" Visibility="Collapsed">
                     <Grid Margin="0,0,0,16">
                         <TextBlock x:Name="EditorTitleText" Text="Rule" FontSize="{DynamicResource FontSize19}" FontWeight="SemiBold" />
-                        <CheckBox x:Name="EnabledCheckBox" Content="Enabled" HorizontalAlignment="Right"
+                        <CheckBox x:Name="EnabledCheckBox" Style="{StaticResource ToggleSwitch}" Content="Enabled" HorizontalAlignment="Right"
                                   VerticalAlignment="Center" />
                     </Grid>
 
