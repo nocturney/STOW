@@ -4,7 +4,12 @@
     <ScrollViewer VerticalScrollBarVisibility="Auto"
                   HorizontalScrollBarVisibility="Disabled">
         <StackPanel>
-            <Grid>
+            <Grid x:Name="FocusTopGrid">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="1.08*" />
                     <ColumnDefinition Width="14" />
@@ -13,7 +18,9 @@
                     <ColumnDefinition Width="1.05*" />
                 </Grid.ColumnDefinitions>
 
-                <Border Grid.Column="0"
+                <Border x:Name="CurrentSessionCard"
+                        Grid.Row="0"
+                        Grid.Column="0"
                         Style="{StaticResource CardBorder}"
                         BorderBrush="{DynamicResource AccentBlueBrush}"
                         BorderThickness="1.5"
@@ -105,7 +112,9 @@
                     </Grid>
                 </Border>
 
-                <Border Grid.Column="2"
+                <Border x:Name="QuickPresetsCard"
+                        Grid.Row="0"
+                        Grid.Column="2"
                         Style="{StaticResource CardBorder}"
                         Padding="16"
                         MinHeight="292">
@@ -241,7 +250,9 @@
                     </StackPanel>
                 </Border>
 
-                <Border Grid.Column="4"
+                <Border x:Name="FocusScheduleCard"
+                        Grid.Row="0"
+                        Grid.Column="4"
                         Style="{StaticResource CardBorder}"
                         Padding="16"
                         MinHeight="292">
@@ -362,14 +373,21 @@
                            Foreground="{DynamicResource TextSecondaryBrush}" />
             </Border>
 
-            <Grid Margin="0,14,0,0">
+            <Grid x:Name="FocusDetailsGrid"
+                  Margin="0,14,0,0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="1.42*" />
                     <ColumnDefinition Width="14" />
                     <ColumnDefinition Width="0.78*" />
                 </Grid.ColumnDefinitions>
 
-                <Border Grid.Column="0"
+                <Border x:Name="FocusAppsCard"
+                        Grid.Row="0"
+                        Grid.Column="0"
                         Style="{StaticResource CardBorder}"
                         MinHeight="280">
                     <StackPanel>
@@ -430,7 +448,9 @@
                     </StackPanel>
                 </Border>
 
-                <StackPanel Grid.Column="2">
+                <StackPanel x:Name="FocusSideColumn"
+                            Grid.Row="0"
+                            Grid.Column="2">
                     <Border x:Name="SavedPresetsCard"
                             Style="{StaticResource CardBorder}"
                             Margin="0,0,0,14">

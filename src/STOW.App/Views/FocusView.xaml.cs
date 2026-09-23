@@ -2,6 +2,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Globalization;
 using System.Windows.Threading;
+using STOW.App.Themes;
 using STOW.Engine;
 using STOW.Engine.Contracts;
 
@@ -59,6 +60,7 @@ public partial class FocusView : UserControl
         runtimeHealthy = engine is not null;
 
         InitializeComponent();
+        ApplyAccessibleLayout();
 
         refreshTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(1200) };
         refreshTimer.Tick += (_, _) => RefreshData();
@@ -66,6 +68,42 @@ public partial class FocusView : UserControl
         Unloaded += (_, _) => refreshTimer.Stop();
 
         RefreshData();
+    }
+
+    private void ApplyAccessibleLayout()
+    {
+        bool stackCards = AccessibilityManager.CurrentTextScalePercent >= 150;
+
+        Grid.SetRow(CurrentSessionCard, 0);
+        Grid.SetColumn(CurrentSessionCard, 0);
+        Grid.SetColumnSpan(CurrentSessionCard, stackCards ? 5 : 1);
+        CurrentSessionCard.Margin = new Thickness(0);
+
+        Grid.SetRow(QuickPresetsCard, stackCards ? 1 : 0);
+        Grid.SetColumn(QuickPresetsCard, stackCards ? 0 : 2);
+        Grid.SetColumnSpan(QuickPresetsCard, stackCards ? 5 : 1);
+        QuickPresetsCard.Margin = stackCards
+            ? new Thickness(0, 14, 0, 0)
+            : new Thickness(0);
+
+        Grid.SetRow(FocusScheduleCard, stackCards ? 2 : 0);
+        Grid.SetColumn(FocusScheduleCard, stackCards ? 0 : 4);
+        Grid.SetColumnSpan(FocusScheduleCard, stackCards ? 5 : 1);
+        FocusScheduleCard.Margin = stackCards
+            ? new Thickness(0, 14, 0, 0)
+            : new Thickness(0);
+
+        Grid.SetRow(FocusAppsCard, 0);
+        Grid.SetColumn(FocusAppsCard, 0);
+        Grid.SetColumnSpan(FocusAppsCard, stackCards ? 3 : 1);
+        FocusAppsCard.Margin = new Thickness(0);
+
+        Grid.SetRow(FocusSideColumn, stackCards ? 1 : 0);
+        Grid.SetColumn(FocusSideColumn, stackCards ? 0 : 2);
+        Grid.SetColumnSpan(FocusSideColumn, stackCards ? 3 : 1);
+        FocusSideColumn.Margin = stackCards
+            ? new Thickness(0, 14, 0, 0)
+            : new Thickness(0);
     }
 
     private void RefreshData()
