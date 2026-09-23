@@ -4,6 +4,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
+using STOW.App.Themes;
 using STOW.Infrastructure.Updates;
 
 namespace STOW.App.Views;
@@ -21,6 +22,7 @@ public partial class AboutView : UserControl
     public AboutView()
     {
         InitializeComponent();
+        ApplyAccessibleLayout();
         (currentVersion, buildLabel, updateChannel) = ReadBuildIdentity();
         VersionText.Text = currentVersion;
         BuildText.Text = buildLabel;
@@ -28,6 +30,23 @@ public partial class AboutView : UserControl
         DateTimeOffset? lastCheck = updateState.LoadLastCheck();
         if (lastCheck is not null)
             LastCheckText.Text = "Last update check  " + lastCheck.Value.LocalDateTime.ToString("g");
+    }
+
+    private void ApplyAccessibleLayout()
+    {
+        bool stackDetails = AccessibilityManager.CurrentTextScalePercent >= 150;
+
+        Grid.SetRow(WhatsNewCard, 0);
+        Grid.SetColumn(WhatsNewCard, 0);
+        Grid.SetColumnSpan(WhatsNewCard, stackDetails ? 3 : 1);
+        WhatsNewCard.Margin = new Thickness(0);
+
+        Grid.SetRow(InformationCard, stackDetails ? 1 : 0);
+        Grid.SetColumn(InformationCard, stackDetails ? 0 : 2);
+        Grid.SetColumnSpan(InformationCard, stackDetails ? 3 : 1);
+        InformationCard.Margin = stackDetails
+            ? new Thickness(0, 14, 0, 0)
+            : new Thickness(0);
     }
 
     private static (string Version, string Build, UpdateChannel Channel) ReadBuildIdentity()

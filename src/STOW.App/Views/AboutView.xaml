@@ -168,7 +168,11 @@
                 </Border>
             </Grid>
 
-            <Grid>
+            <Grid x:Name="AboutDetailsGrid">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="1.02*" />
                     <ColumnDefinition Width="14" />
@@ -176,6 +180,7 @@
                 </Grid.ColumnDefinitions>
 
                 <Border x:Name="WhatsNewCard"
+                        Grid.Row="0"
                         Grid.Column="0"
                         Style="{StaticResource CardBorder}"
                         Padding="18"
@@ -258,6 +263,7 @@
                 </Border>
 
                 <Border x:Name="InformationCard"
+                        Grid.Row="0"
                         Grid.Column="2"
                         Style="{StaticResource CardBorder}"
                         Padding="14"
@@ -298,6 +304,7 @@
                                         <TextBlock Text="Privacy"
                                                    FontWeight="SemiBold" />
                                         <TextBlock Text="How your local data and updates are handled"
+                                                   TextWrapping="Wrap"
                                                    FontSize="{DynamicResource FontSize11}"
                                                    Foreground="{DynamicResource TextSecondaryBrush}" />
                                     </StackPanel>
@@ -340,6 +347,7 @@
                                         <TextBlock Text="License"
                                                    FontWeight="SemiBold" />
                                         <TextBlock Text="View the MIT license and project terms"
+                                                   TextWrapping="Wrap"
                                                    FontSize="{DynamicResource FontSize11}"
                                                    Foreground="{DynamicResource TextSecondaryBrush}" />
                                     </StackPanel>
@@ -382,6 +390,7 @@
                                         <TextBlock Text="Open-source notices"
                                                    FontWeight="SemiBold" />
                                         <TextBlock Text="Third-party notices, credits and compatibility disclosures"
+                                                   TextWrapping="Wrap"
                                                    FontSize="{DynamicResource FontSize11}"
                                                    Foreground="{DynamicResource TextSecondaryBrush}" />
                                     </StackPanel>
@@ -424,6 +433,7 @@
                                         <TextBlock Text="Diagnostics"
                                                    FontWeight="SemiBold" />
                                         <TextBlock Text="Copy a local build and environment summary"
+                                                   TextWrapping="Wrap"
                                                    FontSize="{DynamicResource FontSize11}"
                                                    Foreground="{DynamicResource TextSecondaryBrush}" />
                                     </StackPanel>
