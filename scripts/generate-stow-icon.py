@@ -77,24 +77,32 @@ card(420,468,316,338,-11,(154,245,239),(31,159,190),218)
 # tray shadow
 shadow=Image.new("RGBA",(W,W),(0,0,0,0))
 sd=ImageDraw.Draw(shadow)
-sd.rounded_rectangle([sc(240),sc(620),sc(784),sc(802)],radius=sc(78),fill=(0,0,0,90))
+sd.rounded_rectangle([sc(238),sc(642),sc(786),sc(814)],radius=sc(70),fill=(0,0,0,78))
 shadow=shadow.filter(ImageFilter.GaussianBlur(sc(18)))
 canvas.alpha_composite(shadow)
 
-# tray outer gradient
-tray=gradient((sc(544),sc(182)),(253,255,255,255),(74,157,245,255),False)
-tm=Image.new("L",tray.size,0)
-td=ImageDraw.Draw(tm)
-td.rounded_rectangle([0,0,tray.width-1,tray.height-1],radius=sc(78),fill=255)
-tray.putalpha(tm)
-canvas.alpha_composite(tray,(sc(240),sc(620)))
-
-# tray interior
+# Recessed cavity behind the open tray.
 inner=Image.new("RGBA",(W,W),(0,0,0,0))
 idraw=ImageDraw.Draw(inner)
-idraw.rounded_rectangle([sc(302),sc(615),sc(722),sc(704)],radius=sc(40),fill=(6,24,46,255))
-idraw.rounded_rectangle([sc(327),sc(632),sc(697),sc(687)],radius=sc(24),fill=(10,51,87,255))
+idraw.rounded_rectangle([sc(306),sc(626),sc(718),sc(708)],radius=sc(38),fill=(6,24,46,255))
+idraw.rounded_rectangle([sc(334),sc(643),sc(690),sc(690)],radius=sc(22),fill=(10,51,87,255))
 canvas.alpha_composite(inner)
+
+# Open tray = front wall + two side rails. This avoids the printer-slot silhouette.
+tray=gradient((sc(548),sc(198)),(253,255,255,255),(74,157,245,255),False)
+tm=Image.new("L",tray.size,0)
+td=ImageDraw.Draw(tm)
+td.rounded_rectangle([0,sc(72),tray.width-1,tray.height-1],radius=sc(64),fill=255)
+td.rounded_rectangle([0,sc(8),sc(104),sc(160)],radius=sc(48),fill=255)
+td.rounded_rectangle([tray.width-sc(104),sc(8),tray.width-1,sc(160)],radius=sc(48),fill=255)
+tray.putalpha(tm)
+canvas.alpha_composite(tray,(sc(238),sc(620)))
+
+# restrained highlight across the front face
+lip=Image.new("RGBA",(W,W),(0,0,0,0))
+ld=ImageDraw.Draw(lip)
+ld.line([sc(304),sc(758),sc(720),sc(758)],fill=(255,255,255,115),width=sc(3))
+canvas.alpha_composite(lip)
 
 # downsample
 canvas=canvas.resize((S,S),Image.Resampling.LANCZOS)

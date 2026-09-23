@@ -54,22 +54,31 @@ card(468,374,322,340,-11,(154,245,239),(31,159,190),218)
 # tray shadow
 shadow=Image.new("RGBA",(W,H),(0,0,0,0))
 sd=ImageDraw.Draw(shadow)
-sd.rounded_rectangle([sc(290),sc(520),sc(910),sc(700)],radius=sc(82),fill=(0,0,0,90))
+sd.rounded_rectangle([sc(286),sc(548),sc(914),sc(714)],radius=sc(76),fill=(0,0,0,82))
 shadow=shadow.filter(ImageFilter.GaussianBlur(sc(20)))
 canvas.alpha_composite(shadow)
 
-tray=gradient((sc(620),sc(180)),(253,255,255,255),(74,157,245,255),False)
-mask=Image.new("L",tray.size,0)
-md=ImageDraw.Draw(mask)
-md.rounded_rectangle([0,0,tray.width-1,tray.height-1],radius=sc(82),fill=255)
-tray.putalpha(mask)
-canvas.alpha_composite(tray,(sc(290),sc(520)))
-
+# recessed cavity behind an open tray
 inner=Image.new("RGBA",(W,H),(0,0,0,0))
 idraw=ImageDraw.Draw(inner)
-idraw.rounded_rectangle([sc(360),sc(515),sc(840),sc(610)],radius=sc(44),fill=(6,24,46,255))
-idraw.rounded_rectangle([sc(389),sc(534),sc(811),sc(590)],radius=sc(25),fill=(10,51,87,255))
+idraw.rounded_rectangle([sc(356),sc(522),sc(844),sc(622)],radius=sc(44),fill=(6,24,46,255))
+idraw.rounded_rectangle([sc(388),sc(542),sc(812),sc(601)],radius=sc(27),fill=(10,51,87,255))
 canvas.alpha_composite(inner)
+
+# front wall + side rails, matching the official app icon silhouette
+tray=gradient((sc(628),sc(194)),(253,255,255,255),(74,157,245,255),False)
+mask=Image.new("L",tray.size,0)
+md=ImageDraw.Draw(mask)
+md.rounded_rectangle([0,sc(78),tray.width-1,tray.height-1],radius=sc(66),fill=255)
+md.rounded_rectangle([0,sc(10),sc(118),sc(164)],radius=sc(50),fill=255)
+md.rounded_rectangle([tray.width-sc(118),sc(10),tray.width-1,sc(164)],radius=sc(50),fill=255)
+tray.putalpha(mask)
+canvas.alpha_composite(tray,(sc(286),sc(520)))
+
+lip=Image.new("RGBA",(W,H),(0,0,0,0))
+ld=ImageDraw.Draw(lip)
+ld.line([sc(360),sc(660),sc(840),sc(660)],fill=(255,255,255,120),width=sc(4))
+canvas.alpha_composite(lip)
 
 canvas=canvas.resize((1200,760),Image.Resampling.LANCZOS)
 canvas.save(OUT,"PNG")

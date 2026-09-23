@@ -248,54 +248,65 @@
                                     <Border BorderBrush="{DynamicResource BorderBrush}"
                                             BorderThickness="1"
                                             CornerRadius="8"
-                                            Padding="10"
+                                            Padding="10,8"
                                             Margin="0,0,0,7">
-                                        <StackPanel>
-                                            <Grid>
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="*" />
-                                                    <ColumnDefinition Width="Auto" />
-                                                </Grid.ColumnDefinitions>
-                                                <TextBlock Text="{Binding Name}"
-                                                           FontWeight="SemiBold"
-                                                           TextWrapping="Wrap" />
-                                                <CheckBox Grid.Column="1"
-                                                          Style="{StaticResource ToggleSwitch}"
-                                                          Tag="{Binding Id}"
-                                                          IsChecked="{Binding Enabled, Mode=OneWay}"
-                                                          IsEnabled="{Binding CanManage}"
-                                                          Click="ScheduleEnabled_Click" />
-                                            </Grid>
-                                            <TextBlock Text="{Binding Details}"
-                                                       Margin="0,3,0,0"
-                                                       TextWrapping="Wrap"
-                                                       FontSize="{DynamicResource FontSize11}"
-                                                       Foreground="{DynamicResource TextSecondaryBrush}" />
-                                            <TextBlock Text="{Binding Status}"
-                                                       Margin="0,2,0,6"
-                                                       TextWrapping="Wrap"
-                                                       FontSize="{DynamicResource FontSize11}"
-                                                       Foreground="{DynamicResource AccentTealBrush}" />
-                                            <StackPanel Orientation="Horizontal">
-                                                <Button Style="{StaticResource SecondaryButton}"
-                                                        Content="Edit"
-                                                        AutomationProperties.Name="Edit Focus schedule"
-                                                        Tag="{Binding Id}"
-                                                        IsEnabled="{Binding CanManage}"
-                                                        MinHeight="32"
-                                                        Padding="9,2"
-                                                        Margin="0,0,6,0"
-                                                        Click="EditSchedule_Click" />
-                                                <Button Style="{StaticResource SecondaryButton}"
-                                                        Content="Delete"
-                                                        AutomationProperties.Name="Delete Focus schedule"
-                                                        Tag="{Binding Id}"
-                                                        IsEnabled="{Binding CanManage}"
-                                                        MinHeight="32"
-                                                        Padding="9,2"
-                                                        Click="DeleteSchedule_Click" />
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel VerticalAlignment="Center">
+                                                <StackPanel Orientation="Horizontal">
+                                                    <TextBlock Text="{Binding Name}"
+                                                               FontWeight="SemiBold"
+                                                               TextWrapping="Wrap" />
+                                                    <TextBlock Text="{Binding Status}"
+                                                               Margin="8,0,0,0"
+                                                               VerticalAlignment="Center"
+                                                               FontSize="{DynamicResource FontSize11}"
+                                                               Foreground="{DynamicResource AccentTealBrush}" />
+                                                </StackPanel>
+                                                <TextBlock Text="{Binding Details}"
+                                                           Margin="0,3,0,0"
+                                                           TextWrapping="Wrap"
+                                                           FontSize="{DynamicResource FontSize11}"
+                                                           Foreground="{DynamicResource TextSecondaryBrush}" />
                                             </StackPanel>
-                                        </StackPanel>
+                                            <CheckBox Grid.Column="1"
+                                                      Style="{StaticResource ToggleSwitch}"
+                                                      AutomationProperties.Name="Enable Focus schedule"
+                                                      Tag="{Binding Id}"
+                                                      IsChecked="{Binding Enabled, Mode=OneWay}"
+                                                      IsEnabled="{Binding CanManage}"
+                                                      Click="ScheduleEnabled_Click"
+                                                      VerticalAlignment="Center"
+                                                      Margin="8,0,8,0" />
+                                            <Button Grid.Column="2"
+                                                    Style="{StaticResource SecondaryButton}"
+                                                    Content="Edit"
+                                                    AutomationProperties.Name="Edit Focus schedule"
+                                                    Tag="{Binding Id}"
+                                                    IsEnabled="{Binding CanManage}"
+                                                    MinHeight="32"
+                                                    Padding="9,2"
+                                                    Margin="0,0,6,0"
+                                                    VerticalAlignment="Center"
+                                                    Click="EditSchedule_Click" />
+                                            <Button Grid.Column="3"
+                                                    Style="{StaticResource SecondaryButton}"
+                                                    Content="×"
+                                                    AutomationProperties.Name="Delete Focus schedule"
+                                                    ToolTip="Delete schedule"
+                                                    Width="34"
+                                                    MinHeight="32"
+                                                    Padding="0"
+                                                    Tag="{Binding Id}"
+                                                    IsEnabled="{Binding CanManage}"
+                                                    VerticalAlignment="Center"
+                                                    Click="DeleteSchedule_Click" />
+                                        </Grid>
                                     </Border>
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
