@@ -440,17 +440,17 @@
     </Style>
 
     <Style x:Key="CardBorder" TargetType="Border">
-        <Setter Property="Background" Value="{DynamicResource SurfaceBrush}" />
+        <Setter Property="Background" Value="{DynamicResource CardSurfaceBrush}" />
         <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}" />
         <Setter Property="BorderThickness" Value="1" />
         <Setter Property="CornerRadius" Value="12" />
         <Setter Property="Padding" Value="18" />
         <Setter Property="Effect">
             <Setter.Value>
-                <DropShadowEffect BlurRadius="14"
+                <DropShadowEffect BlurRadius="18"
                                   ShadowDepth="2"
-                                  Opacity="0.08"
-                                  Color="#25466A" />
+                                  Opacity="0.11"
+                                  Color="#163A61" />
             </Setter.Value>
         </Setter>
     </Style>
