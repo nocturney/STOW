@@ -16,12 +16,12 @@
                         MinHeight="250">
                     <Grid>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="110" />
+                            <ColumnDefinition Width="118" />
                             <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
 
-                        <Image Width="88"
-                               Height="88"
+                        <Image Width="94"
+                               Height="94"
                                HorizontalAlignment="Left"
                                VerticalAlignment="Top"
                                Source="/STOW;component/Assets/STOW.png"
@@ -67,9 +67,15 @@
                                 </Grid.ColumnDefinitions>
                                 <TextBlock Text="Channel"
                                            Foreground="{DynamicResource TextSecondaryBrush}" />
-                                <TextBlock x:Name="ChannelText"
-                                           Grid.Column="1"
-                                           Text="—" />
+                                <Border Grid.Column="1"
+                                        Style="{StaticResource StatusChip}"
+                                        HorizontalAlignment="Left"
+                                        Background="{DynamicResource AccentBlueSoftBrush}">
+                                    <TextBlock x:Name="ChannelText"
+                                               Text="—"
+                                               FontSize="{DynamicResource FontSize11}"
+                                               FontWeight="SemiBold" />
+                                </Border>
                             </Grid>
 
                             <TextBlock x:Name="LastCheckText"
@@ -96,9 +102,16 @@
 
                 <Border Grid.Column="2"
                         Style="{StaticResource CardBorder}"
-                        Background="#0B1D30"
-                        BorderBrush="#24415E"
+                        BorderBrush="#2C5D8B"
+                        BorderThickness="1.5"
                         MinHeight="250">
+                    <Border.Background>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                            <GradientStop Color="#0B1D30" Offset="0" />
+                            <GradientStop Color="#0D2946" Offset="0.68" />
+                            <GradientStop Color="#081827" Offset="1" />
+                        </LinearGradientBrush>
+                    </Border.Background>
                     <Grid>
                         <Viewbox Stretch="Fill"
                                  IsHitTestVisible="False">
@@ -129,11 +142,24 @@
                                        Foreground="#F3F7FC" />
                         </StackPanel>
 
-                        <Image Width="310"
-                               Height="194"
+                        <Ellipse Width="292"
+                                 Height="164"
+                                 HorizontalAlignment="Right"
+                                 VerticalAlignment="Bottom"
+                                 Margin="0,0,8,8"
+                                 Fill="#268BFF"
+                                 Opacity="0.13"
+                                 IsHitTestVisible="False">
+                            <Ellipse.Effect>
+                                <BlurEffect Radius="34" />
+                            </Ellipse.Effect>
+                        </Ellipse>
+
+                        <Image Width="332"
+                               Height="214"
                                HorizontalAlignment="Right"
                                VerticalAlignment="Bottom"
-                               Margin="0,30,-10,-5"
+                               Margin="0,22,-8,-2"
                                Source="/STOW;component/Assets/STOWHero.png"
                                Stretch="Uniform"
                                IsHitTestVisible="False"
