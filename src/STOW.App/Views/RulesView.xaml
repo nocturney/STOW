@@ -239,96 +239,164 @@
             <Border Grid.Column="2"
                     Style="{StaticResource CardBorder}"
                     Padding="0"
-                    MinHeight="470">
+                    MinHeight="470"
+                    VerticalAlignment="Top">
                 <Grid>
                     <StackPanel x:Name="EditorPlaceholder"
-                                VerticalAlignment="Center"
-                                Margin="28">
-                        <Border Width="52" Height="52"
-                                CornerRadius="12"
-                                Background="{DynamicResource SelectionBrush}"
-                                HorizontalAlignment="Center"
+                                VerticalAlignment="Top"
+                                Margin="18,18,18,20">
+                        <Grid Margin="0,0,0,14">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="52" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Border Width="42" Height="42"
+                                    CornerRadius="10"
+                                    Background="{DynamicResource SelectionBrush}"
+                                    HorizontalAlignment="Left">
+                                <Path Width="22" Height="22"
+                                      Stretch="Uniform"
+                                      Stroke="{DynamicResource AccentBlueStrongBrush}"
+                                      StrokeThickness="1.7"
+                                      Data="M10,2 A8,8 0 1 1 9.99,2 M10,6 A4,4 0 1 1 9.99,6 M10,9 A1,1 0 1 1 9.99,9" />
+                            </Border>
+                            <StackPanel Grid.Column="1"
+                                        VerticalAlignment="Center">
+                                <TextBlock Text="Rule details"
+                                           FontSize="{DynamicResource FontSize18}"
+                                           FontWeight="SemiBold" />
+                                <TextBlock Text="Select a saved rule to edit it."
+                                           Margin="0,2,0,0"
+                                           TextWrapping="Wrap"
+                                           Foreground="{DynamicResource TextSecondaryBrush}" />
+                            </StackPanel>
+                        </Grid>
+
+                        <Border Height="1"
+                                Background="{DynamicResource BorderBrush}"
+                                Margin="0,0,0,14" />
+
+                        <Border Background="{DynamicResource SurfaceElevatedBrush}"
+                                BorderBrush="{DynamicResource BorderBrush}"
+                                BorderThickness="1"
+                                CornerRadius="10"
+                                Padding="14"
                                 Margin="0,0,0,14">
-                            <Path Width="27" Height="27"
-                                  Stretch="Uniform"
-                                  Stroke="{DynamicResource AccentBlueStrongBrush}"
-                                  StrokeThickness="1.7"
-                                  Data="M10,2 A8,8 0 1 1 9.99,2 M10,6 A4,4 0 1 1 9.99,6 M10,9 A1,1 0 1 1 9.99,9" />
+                            <StackPanel>
+                                <TextBlock Text="Create a rule"
+                                           Style="{StaticResource SectionTitle}" />
+                                <TextBlock Text="Every rule connects an app, a condition and an action."
+                                           Margin="0,4,0,14"
+                                           TextWrapping="Wrap"
+                                           Foreground="{DynamicResource TextSecondaryBrush}" />
+
+                                <Grid Margin="0,0,0,10">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="32" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <Border Width="24" Height="24"
+                                            CornerRadius="12"
+                                            Background="{DynamicResource AccentBlueSoftBrush}">
+                                        <TextBlock Text="1"
+                                                   HorizontalAlignment="Center"
+                                                   VerticalAlignment="Center"
+                                                   FontWeight="SemiBold"
+                                                   Foreground="{DynamicResource AccentBlueStrongBrush}" />
+                                    </Border>
+                                    <StackPanel Grid.Column="1">
+                                        <TextBlock Text="Choose a managed app"
+                                                   FontWeight="SemiBold" />
+                                        <TextBlock Text="Pick the app this automation belongs to."
+                                                   TextWrapping="Wrap"
+                                                   FontSize="{DynamicResource FontSize11}"
+                                                   Foreground="{DynamicResource TextSecondaryBrush}" />
+                                    </StackPanel>
+                                </Grid>
+
+                                <Grid Margin="0,0,0,10">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="32" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <Border Width="24" Height="24"
+                                            CornerRadius="12"
+                                            Background="{DynamicResource AccentTealSoftBrush}">
+                                        <TextBlock Text="2"
+                                                   HorizontalAlignment="Center"
+                                                   VerticalAlignment="Center"
+                                                   FontWeight="SemiBold"
+                                                   Foreground="{DynamicResource AccentTealBrush}" />
+                                    </Border>
+                                    <StackPanel Grid.Column="1">
+                                        <TextBlock Text="Choose when it runs"
+                                                   FontWeight="SemiBold" />
+                                        <TextBlock Text="Minimize, Focus start or app startup."
+                                                   TextWrapping="Wrap"
+                                                   FontSize="{DynamicResource FontSize11}"
+                                                   Foreground="{DynamicResource TextSecondaryBrush}" />
+                                    </StackPanel>
+                                </Grid>
+
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="32" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <Border Width="24" Height="24"
+                                            CornerRadius="12"
+                                            Background="{DynamicResource AccentAmberSoftBrush}">
+                                        <TextBlock Text="3"
+                                                   HorizontalAlignment="Center"
+                                                   VerticalAlignment="Center"
+                                                   FontWeight="SemiBold"
+                                                   Foreground="{DynamicResource AccentAmberBrush}" />
+                                    </Border>
+                                    <StackPanel Grid.Column="1">
+                                        <TextBlock Text="Choose what STOW does"
+                                                   FontWeight="SemiBold" />
+                                        <TextBlock Text="Stow the app or keep it visible."
+                                                   TextWrapping="Wrap"
+                                                   FontSize="{DynamicResource FontSize11}"
+                                                   Foreground="{DynamicResource TextSecondaryBrush}" />
+                                    </StackPanel>
+                                </Grid>
+                            </StackPanel>
                         </Border>
-                        <TextBlock Text="Select a rule"
-                                   FontSize="{DynamicResource FontSize18}"
-                                   FontWeight="SemiBold"
-                                   HorizontalAlignment="Center" />
-                        <TextBlock Text="Choose an existing rule or create a new one."
-                                   Margin="0,6,0,18"
-                                   TextAlignment="Center"
-                                   TextWrapping="Wrap"
-                                   Foreground="{DynamicResource TextSecondaryBrush}" />
-                        <WrapPanel HorizontalAlignment="Center">
+
+                        <WrapPanel Margin="-4,0,-4,14">
                             <Border Margin="4"
                                     Padding="10,7"
-                                    MinWidth="92"
                                     Background="{DynamicResource AccentBlueSoftBrush}"
-                                    BorderBrush="{DynamicResource BorderBrush}"
-                                    BorderThickness="1"
                                     CornerRadius="8">
-                                <StackPanel Orientation="Horizontal">
-                                    <Path Width="14"
-                                          Height="14"
-                                          Margin="0,0,7,0"
-                                          Stretch="Uniform"
-                                          Stroke="{DynamicResource AccentBlueStrongBrush}"
-                                          StrokeThickness="1.6"
-                                          Data="M3,5 H17 V18 H3 Z M3,9 H17" />
-                                    <TextBlock Text="Minimize"
-                                               VerticalAlignment="Center"
-                                               FontSize="{DynamicResource FontSize11}"
-                                               FontWeight="SemiBold" />
-                                </StackPanel>
+                                <TextBlock Text="Minimize"
+                                           FontSize="{DynamicResource FontSize11}"
+                                           FontWeight="SemiBold" />
                             </Border>
                             <Border Margin="4"
                                     Padding="10,7"
-                                    MinWidth="92"
                                     Background="{DynamicResource AccentTealSoftBrush}"
-                                    BorderBrush="{DynamicResource BorderBrush}"
-                                    BorderThickness="1"
                                     CornerRadius="8">
-                                <StackPanel Orientation="Horizontal">
-                                    <Path Width="14"
-                                          Height="14"
-                                          Margin="0,0,7,0"
-                                          Stretch="Uniform"
-                                          Stroke="{DynamicResource AccentTealBrush}"
-                                          StrokeThickness="1.6"
-                                          Data="M10,2 A8,8 0 1 1 9.99,2 M10,6 A4,4 0 1 1 9.99,6" />
-                                    <TextBlock Text="Focus"
-                                               VerticalAlignment="Center"
-                                               FontSize="{DynamicResource FontSize11}"
-                                               FontWeight="SemiBold" />
-                                </StackPanel>
+                                <TextBlock Text="Focus"
+                                           FontSize="{DynamicResource FontSize11}"
+                                           FontWeight="SemiBold" />
                             </Border>
                             <Border Margin="4"
                                     Padding="10,7"
-                                    MinWidth="92"
                                     Background="{DynamicResource SurfaceElevatedBrush}"
                                     BorderBrush="{DynamicResource BorderBrush}"
                                     BorderThickness="1"
                                     CornerRadius="8">
-                                <StackPanel Orientation="Horizontal">
-                                    <Path Width="14"
-                                          Height="14"
-                                          Margin="0,0,7,0"
-                                          Stretch="Uniform"
-                                          Stroke="{DynamicResource AccentBlueStrongBrush}"
-                                          StrokeThickness="1.6"
-                                          Data="M3,16 V4 H14 M10,1 L14,4 L10,7" />
-                                    <TextBlock Text="Startup"
-                                               VerticalAlignment="Center"
-                                               FontSize="{DynamicResource FontSize11}"
-                                               FontWeight="SemiBold" />
-                                </StackPanel>
+                                <TextBlock Text="Startup"
+                                           FontSize="{DynamicResource FontSize11}"
+                                           FontWeight="SemiBold" />
                             </Border>
                         </WrapPanel>
+
+                        <Button Style="{StaticResource PrimaryButton}"
+                                Content="+  Create rule"
+                                HorizontalAlignment="Stretch"
+                                Click="NewRule_Click" />
                     </StackPanel>
 
                     <StackPanel x:Name="EditorPanel"
