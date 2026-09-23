@@ -278,12 +278,8 @@ public partial class MainWindow : Window
         return view;
     }
 
-    private SettingsView CreateSettingsView()
-    {
-        var view = new SettingsView(settingsStore, trayEngine);
-        view.AboutRequested += (_, _) => NavigateTo("About");
-        return view;
-    }
+    private SettingsView CreateSettingsView() =>
+        new(settingsStore, trayEngine);
 
     private void ThemeManager_Applied(STOW.App.Themes.ThemeMode mode) =>
         Dispatcher.BeginInvoke(() => ApplyNativeWindowAttributes(mode));
