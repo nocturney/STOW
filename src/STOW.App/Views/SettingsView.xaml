@@ -141,10 +141,22 @@
                             <Border Grid.Row="0"
                                     Grid.Column="0"
                                     Background="#F3F8FE"
-                                    BorderBrush="#D5E3F2"
-                                    BorderThickness="1"
                                     CornerRadius="10"
                                     Height="96">
+                                <Border.Style>
+                                    <Style TargetType="Border">
+                                        <Setter Property="BorderBrush" Value="#D5E3F2" />
+                                        <Setter Property="BorderThickness" Value="1" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsChecked, ElementName=LightThemeRadio}"
+                                                         Value="True">
+                                                <Setter Property="BorderBrush"
+                                                        Value="{DynamicResource AccentBlueStrongBrush}" />
+                                                <Setter Property="BorderThickness" Value="2" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
                                 <Grid Margin="10">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="28" />
@@ -183,10 +195,22 @@
                             <Border Grid.Row="0"
                                     Grid.Column="2"
                                     Background="#071523"
-                                    BorderBrush="#24415E"
-                                    BorderThickness="1"
                                     CornerRadius="10"
                                     Height="96">
+                                <Border.Style>
+                                    <Style TargetType="Border">
+                                        <Setter Property="BorderBrush" Value="#24415E" />
+                                        <Setter Property="BorderThickness" Value="1" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsChecked, ElementName=DarkThemeRadio}"
+                                                         Value="True">
+                                                <Setter Property="BorderBrush"
+                                                        Value="{DynamicResource AccentBlueStrongBrush}" />
+                                                <Setter Property="BorderThickness" Value="2" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
                                 <Grid Margin="10">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="28" />
