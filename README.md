@@ -7,16 +7,13 @@ It is the successor to Trayify and is currently in a controlled migration from t
 
 ## Current state
 
-- Product name and visual direction: **STOW**.
-- Approved navigation: Apps, Rules, Focus, Insights, Settings; About is separate at the bottom.
-- UI/runtime: **WPF on modern .NET**; Electron is not used for UI.
-- Apps, Rules, Focus, Insights, Settings and About now have operational runtime-backed slices, including saved Focus presets, recurring local-time Focus schedules, Minimize/Focus/Startup rules, opt-in scheduled-Focus tray notifications, and persistent accessibility preferences.
-- Existing minimize-to-tray engine: Trayify v0.3.3 behavior remains the protected compatibility baseline.
-- Per-user installer migration, unsigned Preview releases and the GitHub self-updater are validated end to end.
-- Stable Authenticode signing and final package-manager publication remain gated.
+**STOW is in preview.** The latest published GitHub release is [v0.4.0-preview.7](https://github.com/nocturney/STOW/releases/tag/v0.4.0-preview.7); newer commits on `main` are development source, not a newly published installer.
 
-The baseline source commit is `c4ab75082d1f7ecbeee32270cc01eea457a93276`.
-See [`docs/architecture/BASELINE_CONTRACT.md`](docs/architecture/BASELINE_CONTRACT.md) before changing window-management behavior.
+- Windows WPF/.NET desktop shell with Apps, Rules, Focus, Insights, Settings and About, including runtime-backed management and saved preferences.
+- The proven Trayify **v0.3.3** minimize-to-tray behavior remains the protected compatibility baseline during migration.
+- Per-user preview installer, upgrade migration and updater have been tested. Published previews are unsigned; stable signing and final package-manager distribution are not yet complete.
+
+See the [compatibility baseline](docs/architecture/BASELINE_CONTRACT.md) before changing window-management behavior.
 
 ## Repository layout
 
