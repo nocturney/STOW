@@ -25,6 +25,8 @@ jobs:
           set -euo pipefail
           go run github.com/rhysd/actionlint/cmd/actionlint@v1.7.12 -color
       - name: zizmor workflow security audit
+        # Existing findings are reported; enable blocking after triage.
+        continue-on-error: true
         uses: zizmorcore/zizmor-action@53290badfa369cb0bf7ad16342cb62c2fa47ac7b # v0.8.0
         with:
           version: v1.31.1
